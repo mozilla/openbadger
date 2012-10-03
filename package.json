@@ -1,0 +1,13 @@
+{
+  "name": "clothespin",
+  "description": "Makin' badges",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "express": "3.0.0rc5",
+    "nunjucks": "~0.1.3"
+  }
+}
