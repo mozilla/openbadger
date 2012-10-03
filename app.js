@@ -7,8 +7,9 @@ var nunjucks = require('nunjucks');
 
 var app = express();
 
-var env = new nunjucks.Environment(new nunjucks.FileSystemLoader('views'));
-env.express(app);
+(new nunjucks.Environment(
+  new nunjucks.FileSystemLoader('views')
+)).express(app);
 
 app.configure(function() {
   app.set('port', process.env.PORT || 3000);
