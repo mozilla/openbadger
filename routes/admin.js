@@ -4,5 +4,5 @@
  */
 
 exports.badge = function(req, res){
-  res.render('admin/badge.html', {});
+  res.render('admin/badge.html', {'projectName':'ClopenBadger'});
 };
