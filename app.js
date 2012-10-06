@@ -27,7 +27,11 @@ app.configure(function() {
   app.use(middleware.cookieParser());
   app.use(middleware.session());
   app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(path.join(__dirname, 'static')));
+  app.use(user.middleware.requireAuth({
+    whitelist: ['/login', '/logout'],
+    redirectTo: '/login'
+  }));
 });
 
 app.configure('development', function() {
@@ -37,6 +41,7 @@ app.configure('development', function() {
 app.get('/', routes.index);
 app.get('/login', user.login);
 app.post('/login', user.login);
+app.get('/logout', user.logout);
 
 module.exports = app;
 

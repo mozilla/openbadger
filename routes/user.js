@@ -10,10 +10,30 @@ exports.login = function(req, res){
     if (err)
       return res.send(util.inspect(err));
     if (!userIsAuthorized(email))
-      return res.send('not authorized')
+      return res.send(403, 'not authorized')
     req.session.user = email;
     return res.redirect('/');
   });
+};
+
+exports.logout = function (req, res) {
+  req.session.destroy(function () {
+    return res.redirect('/login');
+  });
+};
+
+var middleware = exports.middleware = {};
+middleware.requireAuth = function requireAuth(options) {
+  var whitelist = options.whitelist || [];
+  return function (req, res, next) {
+    var path = req.path;
+    var user = req.session.user;
+    if (whitelist.indexOf(path) > -1)
+      return next();
+    if (!user || !userIsAuthorized(user))
+      return res.redirect(options.redirectTo);
+    return next();
+  };
 };
 
 function userIsAuthorized(email) {

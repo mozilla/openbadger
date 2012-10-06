@@ -1,7 +1,14 @@
 {% extends "layout.html" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/styles/persona-buttons.css">
+{% endblock %}
+
 {% block content %}
 <h1>
-  <a class="btn btn-primary js-persona-login">Sign in</a>
+  <a href="#" class="persona-button dark js-persona-login">
+    <span>Sign in with your Email</span>
+  </a>
 </h1>
 
 <form method="post" action="/login" class="js-persona-form">
