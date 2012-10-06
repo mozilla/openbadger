@@ -4,8 +4,14 @@ var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 var nunjucks = require('nunjucks');
+var util = require('util');
 
 var app = express();
+var logger = app.logger = require('./lib/logger');
+var env = app.env = require('habitat')('openbadger');
+
+logger.info('Environment');
+logger.info(util.inspect(env.all()));
 
 (new nunjucks.Environment(
   new nunjucks.FileSystemLoader('views')
@@ -28,6 +34,10 @@ app.configure('development', function() {
 app.get('/', routes.index);
 app.get('/users', user.list);
 
-http.createServer(app).listen(app.get('port'), function() {
-  console.log("Express server listening on port " + app.get('port'));
-});
+module.exports = app;
+
+if (!module.parent) {
+  http.createServer(app).listen(app.get('port'), function() {
+    logger.info("Express server listening on port " + app.get('port'));
+  });
+}
