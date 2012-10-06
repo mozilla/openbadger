@@ -1,4 +1,4 @@
 server:
-	@node app.js
+	@node server.js
 
 .PHONY: server

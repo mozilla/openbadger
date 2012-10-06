@@ -44,9 +44,3 @@ app.post('/login', user.login);
 app.get('/logout', user.logout);
 
 module.exports = app;
-
-if (!module.parent) {
-  http.createServer(app).listen(app.get('port'), function() {
-    logger.info("Express server listening on port " + app.get('port'));
-  });
-}
