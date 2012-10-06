@@ -38,7 +38,7 @@ app.get('/', routes.index);
 app.get('/login', user.login);
 app.post('/login', user.login);
 
-module.exports = http.createServer(app);
+module.exports = app;
 
 if (!module.parent) {
   http.createServer(app).listen(app.get('port'), function() {
