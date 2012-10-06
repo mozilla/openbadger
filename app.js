@@ -26,12 +26,12 @@ app.configure(function() {
   app.use(express.methodOverride());
   app.use(middleware.cookieParser());
   app.use(middleware.session());
-  app.use(app.router);
   app.use(express.static(path.join(__dirname, 'static')));
   app.use(user.middleware.requireAuth({
     whitelist: ['/login', '/logout'],
     redirectTo: '/login'
   }));
+  app.use(app.router);
 });
 
 app.configure('development', function() {
