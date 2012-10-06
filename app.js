@@ -7,6 +7,7 @@ var util = require('util');
 var middleware = require('./middleware');
 var routes = require('./routes');
 var user = require('./routes/user');
+var behavior = require('./routes/behavior');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -42,5 +43,15 @@ app.get('/', routes.index);
 app.get('/login', user.login);
 app.post('/login', user.login);
 app.get('/logout', user.logout);
+
+app.get('/behaviors', behavior.readAll);
+app.post('/behavior', behavior.create);
+
+app.all('/behavior/:name', behavior.middleware.findByName);
+app.get('/behavior/:name', behavior.readOne);
+app.put('/behavior/:name', behavior.update);
+app.patch('/behavior/:name', behavior.update);
+app.delete('/behavior/:name', behavior.destroy);
+
 
 module.exports = app;
