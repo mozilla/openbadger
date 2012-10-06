@@ -1,8 +1,15 @@
+var app = require('../app');
+var persona = require('../lib/persona');
+exports.login = function(req, res){
+  if (req.method === 'GET')
+    return res.render("login.html");
 
-/*
- * GET users listing.
- */
+  var assertion = req.body.assertion;
+  persona.verify(assertion, function (err, email) {
+    if (err)
+      return res.send(err);
 
-exports.list = function(req, res){
-  res.send("respond with a resource");
+    req.session.user = email;
+    return res.redirect('/');
+  });
 };
