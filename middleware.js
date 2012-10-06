@@ -11,9 +11,11 @@ exports.cookieParser = function () {
  * Store sessions in redis
  */
 exports.session = function () {
+  var options = env.get('redis');
+  options.db = 1;
   return express.session({
     key: 'openbadger.sid',
-    store: new RedisStore(env.get('redis')),
+    store: new RedisStore(options),
     secret: env.get('secret'),
   });
 };
