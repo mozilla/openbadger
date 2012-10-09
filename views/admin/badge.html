@@ -1,14 +1,45 @@
 {% extends 'admin/admin_base.html' %}
 
+{% block 'extra_head' %}
+<script src="/js/ember.min.js"></script>
+<script src="/js/admin.js"></script>
+{% endblock %}
+
 {% block 'main' %}
+<div class="row">
+  <div class="span8">
+    <h2>New Badge</h2>
+    <form>
+      <legend>Badge Basics</legend>
+      <label>Badge Name</label>
+      <input type="text" placeholder="My Very Fancy Badge"/>
+      <span class="help-block">This is the name for your badge, it should be descriptive, but also awesome.</span>
+      <label>Badge Description</label>
+      <textarea rows="5"></textarea>
+      <span class="help-block">A description of your badge, this will appear in every assertion created from this badge.</span>
+      <button id="create_badge" type="submit" class="btn">Create</button>
+    </form>
+  </div><!--end badge creation span-->
+  <div class="span4">
+    <h3>Triggers</h3>
+    <ul id="triggers">
+    </ul>
+    <p id="no_triggers">None!<p>
+  </div><!--end trigger list span-->
+</div><!--end row 1-->
+
 <form>
-  <legend>Let's make you a badge</legend>
-  <label>Badge Name</label>
-  <input type="text" placeholder="My Very Fancy Badge"/>
-  <span class="help-block">This is the name for your badge, it should be descriptive, but also awesome.</span>
-  <label>Badge Description</label>
-  <textarea rows="5"></textarea>
-  <span class="help-block">A description of your badge, this will appear in every assertion created from this badge.</span>
-  <button type="submit" class="btn">Create</button>
+  <legend>What triggers this badge?</legend>
+  <label>Trigger Description</label>
+  <input type="text" placeholder="The user clicks the red button"/>
+  <span class="help-block">Describe the action the user takes to earn this badge, keep it short!</span>
+  <label>Trigger Tag</label>
+  <input type="text" placeholder="red_button"/>
+  <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
+  <label>Trigger Count</label>
+  <input type="text" placeholder="5"/>
+  <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
+  <button id="create_trigger" type="submit" class="btn">Add this behavior</button>
 </form>
+  
 {% endblock %}

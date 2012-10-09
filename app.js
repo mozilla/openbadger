@@ -8,7 +8,7 @@ var middleware = require('./middleware');
 var routes = require('./routes');
 var user = require('./routes/user');
 var behavior = require('./routes/behavior');
-var routes = require('./routes');
+var admin = require('./routes/admin');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
