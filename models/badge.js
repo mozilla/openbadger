@@ -1,6 +1,7 @@
 var db = require('./');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var util = require('../lib/util');
 
 var maxLength = function (field, length) {
   function lengthValidator() {
@@ -64,8 +65,15 @@ var BadgeSchema = new Schema({
 
 var Badge = db.model('Badge', BadgeSchema);
 
+function setShortnameDefault(next) {
+  if (!this.shortname && this.name)
+    this.shortname = util.slugify(this.name);
+  next();
+}
+BadgeSchema.pre('validate', setShortnameDefault);
+
 Badge.findByBehavior = function findByBehavior(name, callback) {
-  var searchTerms = {behaviors: { '$elemMatch': {name: name }}};
+  var searchTerms = { behaviors: { '$elemMatch': { name: name }}};
   return Badge.find(searchTerms, callback);
 };
 
