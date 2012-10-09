@@ -26,7 +26,7 @@ app.configure(function () {
   app.use(express.methodOverride());
   app.use(middleware.cookieParser());
   app.use(middleware.session());
-  app.use(express.static(path.join(__dirname, 'static')));
+  app.use(express.static(path.join(__dirname, 'public')));
   app.use(user.middleware.requireAuth({
     whitelist: ['/login', '/logout'],
     redirectTo: '/login'
