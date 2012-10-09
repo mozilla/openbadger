@@ -14,7 +14,8 @@
     "habitat": "~0.2.2",
     "winston": "~0.6.2",
     "connect-redis": "~1.4.4",
-    "mongoose": "~3.2.1"
+    "mongoose": "~3.2.1",
+    "async": "~0.1.22"
   },
   "devDependencies": {
     "tap": "~0.3.1"

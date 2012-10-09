@@ -7,4 +7,7 @@ lint:
 test:
 	@tap test/*.test.js
 
+verbose-test:
+	@node test/*.test.js
+
 .PHONY: server test lint
