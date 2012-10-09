@@ -8,6 +8,7 @@ var middleware = require('./middleware');
 var routes = require('./routes');
 var user = require('./routes/user');
 var behavior = require('./routes/behavior');
+var admin = require('./routes/admin');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -38,6 +39,8 @@ app.configure('development', function () {
 });
 
 app.get('/', routes.index);
+app.get('/users', user.list);
+app.get('/admin', admin.badge);
 app.get('/login', user.login);
 app.post('/login', user.login);
 app.get('/logout', user.logout);
