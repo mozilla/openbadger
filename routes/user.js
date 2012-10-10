@@ -38,5 +38,12 @@ middleware.requireAuth = function requireAuth(options) {
 
 function userIsAuthorized(email) {
   var admins = env.get('admins');
-  return admins.indexOf(email) >= -1;
+  var authorized = false;
+  admins.forEach(function (admin) {
+    if (authorized) return;
+    var adminRe = new RegExp(admin.replace('*', '.+?'));
+    if (adminRe.test(email))
+      return authorized = true;
+  });
+  return authorized;
 }
