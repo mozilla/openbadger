@@ -1,17 +1,31 @@
 {% extends "admin/base.html" %}
 
 {% block "main" %}
-  <form method="post" action="?">
+  <form method="post" action="?" enctype="multipart/form-data">
     <legend>New Badge</legend>
     <div>
       <label for="name">Badge Name</label>
       <input id="name" type="text" name="name" placeholder="My Very Fancy Badge">
-      <span class="help-block">This is the name for your badge, it should be descriptive, but also awesome.</span>
+      <span class="help-block">
+        This is the name for your badge, it should be descriptive, but
+        also awesome.
+      </span>
     </div>
     <div>
       <label for="description">Badge Description</label>
       <textarea id="description" rows="5" name="description"></textarea>
-      <span class="help-block">A description of your badge, this will appear in every assertion created from this badge.</span>
+      <span class="help-block">
+        A description of your badge, this will appear in every assertion
+        created from this badge.
+      </span>
+    </div>
+    <div>
+      <label for="image">Image</label>
+      <input type="file" name="image" accept="image/png">
+      <span class="help-block">
+        The image to use for the badge. It should be the greatest image
+        known to man.
+      </span>
     </div>
     <div class="form-actions">
       <button id="create-badge" type="submit" class="btn btn-primary">Create</button>
