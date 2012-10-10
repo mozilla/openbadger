@@ -1,19 +1,29 @@
+var fs = require('fs');
 var Badge = require('../models/badge');
 
 exports.create = function create(req, res) {
   var form = req.body;
   var badge = new Badge(form);
-  badge.save(function (err, result) {
-    if (err) {
-      err.status = 'error';
+
+  // #TODO: the stuff to do with getting the image from the post,
+  // verifying it, reading it and all that should be abstracted, maybe
+  // into Badge#fromTemporary?
+  var tmpImage = req.files.image;
+  if (!tmpImage)
+    return res.send(400, 'need to specify an image');
+  fs.readFile(tmpImage.path, function (err, imageBuf) {
+    if (err)
       return res.send(500, err);
-    }
-    return res.redirect('/admin/badge/' + badge.shortname);
+    badge.image = imageBuf;
+    badge.save(function (err, result) {
+      if (err) {
+        err.status = 'error';
+        return res.send(500, err);
+      }
+      return res.redirect('/admin/badge/' + badge.shortname);
+    });
   });
 };
-exports.read = function read(req, res) {};
-exports.update = function update(req, res) {};
-exports.destroy = function destroy(req, res) {};
 
 exports.addBehavior = function addBehavior(req, res) {
   var form = req.body;

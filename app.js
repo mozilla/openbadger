@@ -40,7 +40,7 @@ app.configure('development', function () {
   app.use(express.errorHandler());
 });
 
-// getting a badge
+// show `create a badge` form
 app.get('/admin/badge', admin.newBadgeForm);
 
 // creating a badge from post
