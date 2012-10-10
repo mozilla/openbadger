@@ -60,7 +60,7 @@ $ heroku login
     Uploading ssh public key /Users/brian/.ssh/id_rsa.pub
 
 $ heroku create
-    Creating sharp-rain-871... done, stack is cedar
+    Creating evening-fjord-7837... done, stack is cedar
     http://evening-fjord-7837.herokuapp.com/ | git@heroku.com:evening-fjord-7837.git
     Git remote heroku added
 
