@@ -13,12 +13,12 @@ var maxLength = function (field, length) {
 }
 
 var BehaviorSchema = new Schema({
-  name: {
+  shortname: {
     type: String,
     trim: true,
     required: true
   },
-  required: {
+  count: {
     type: Number,
     min: 0,
     required: true
@@ -57,6 +57,7 @@ var BadgeSchema = new Schema({
   },
   behaviors: {
     type: [BehaviorSchema],
+    unique: true
   },
   prerequisites: {
     type: [String]
@@ -72,9 +73,19 @@ function setShortnameDefault(next) {
 }
 BadgeSchema.pre('validate', setShortnameDefault);
 
-Badge.findByBehavior = function findByBehavior(name, callback) {
-  var searchTerms = { behaviors: { '$elemMatch': { name: name }}};
+Badge.findByBehavior = function findByBehavior(shortname, callback) {
+  var searchTerms = { behaviors: { '$elemMatch': { shortname: shortname }}};
   return Badge.find(searchTerms, callback);
+};
+
+Badge.prototype.removeBehavior = function removeBehavior(shortname) {
+  var behaviors = this.behaviors.filter(function (behavior) {
+    if (behavior.shortname === shortname)
+      return null;
+    return behavior;
+  });
+  this.behaviors = behaviors;
+  return this;
 };
 
 module.exports = Badge;

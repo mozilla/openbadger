@@ -18,7 +18,7 @@ var fixtures = {
     shortname: 'link-badge-basic',
     description: 'For doing links.',
     behaviors: [
-      { name: 'link', required: 5 }
+      { shortname: 'link', count: 5 }
     ]
   }),
   'link-advanced': new Badge({
@@ -26,7 +26,7 @@ var fixtures = {
     shortname: 'link-badge-advanced',
     description: 'For doing lots of links.',
     behaviors: [
-      { name: 'link', required: 10 }
+      { shortname: 'link', count: 10 }
     ]
   }),
   'comment': new Badge({
@@ -34,7 +34,7 @@ var fixtures = {
     shortname: 'comment-badge',
     description: 'For doing lots of comments.',
     behaviors: [
-      { name: 'comment', required: 5 }
+      { shortname: 'comment', count: 5 }
     ]
   })
 };
@@ -95,6 +95,18 @@ test.applyFixtures(fixtures, function () {
       t.same(expect.id, badge.id, 'should get the right badge');
       t.end();
     });
+  });
+
+  test('Badge#removeBehavior', function (t) {
+    var badge = validBadge();
+    badge.behaviors = [
+      { shortname: 'link', count: 10 },
+      { shortname: 'comment', count: 20 }
+    ];
+    badge.removeBehavior('link');
+    t.same(badge.behaviors.length, 1, 'should have one left');
+    t.same(badge.behaviors[0].shortname, 'comment', 'should be the comment one');
+    t.end();
   });
 
 
