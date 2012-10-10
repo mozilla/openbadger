@@ -32,7 +32,7 @@ exports.requireAuth = function requireAuth(options) {
     var i = whitelist.length;
     while (i--) {
       if (whitelist[i].test(path))
-        return true
+        return true;
     }
     return false;
   }
