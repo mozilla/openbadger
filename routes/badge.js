@@ -33,7 +33,14 @@ exports.addBehavior = function addBehavior(req, res) {
 
 exports.removeBehavior = function removeBehavior(req, res) {
   var shortname = req.body.shortname;
-  res.send('yep, got it');
+  var badge = req.badge;
+  badge.removeBehavior(shortname);
+  badge.save(function (err, result) {
+    // #TODO: send better error
+    if (err)
+      return res.send(500, err);
+    return res.redirect('/admin/badge/' + badge.shortname);
+  });
 };
 
 exports.findByShortname = function (options) {
