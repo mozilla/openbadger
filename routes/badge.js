@@ -53,6 +53,12 @@ exports.removeBehavior = function removeBehavior(req, res) {
   });
 };
 
+exports.image = function image(req, res) {
+  var badge = req.badge;
+  res.type('image/png');
+  res.send(badge.image);
+};
+
 exports.findByShortname = function (options) {
   var required = !!options.required;
 

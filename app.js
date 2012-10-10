@@ -30,7 +30,11 @@ app.configure(function () {
   app.use(middleware.session());
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(user.requireAuth({
-    whitelist: ['/login', '/logout'],
+    whitelist: [
+      '/login',
+      '/logout',
+      '/badge/*'
+    ],
     redirectTo: '/login'
   }));
   app.use(app.router);
@@ -74,6 +78,16 @@ app.get('/admin/behavior', admin.newBehaviorForm);
 
 // create a new behavior
 app.post('/admin/behavior', behavior.create);
+
+// get the badge image
+app.get('/badge/image/:shortname.png', [
+  badge.findByShortname({
+    container: 'param',
+    field: 'shortname',
+    required: true
+  })
+], badge.image);
+
 app.get('/login', user.login);
 app.post('/login', user.login);
 app.get('/logout', user.logout);

@@ -24,11 +24,22 @@ exports.logout = function logout(req, res) {
 };
 
 exports.requireAuth = function requireAuth(options) {
-  var whitelist = options.whitelist || [];
+  var whitelist = (options.whitelist || []).map(function (entry) {
+    entry = entry.replace('*', '.*?');
+    return RegExp('^' + entry + '$');
+  });
+  function isExempt(path) {
+    var i = whitelist.length;
+    while (i--) {
+      if (whitelist[i].test(path))
+        return true
+    }
+    return false;
+  }
   return function (req, res, next) {
     var path = req.path;
     var user = req.session.user;
-    if (whitelist.indexOf(path) > -1)
+    if (isExempt(path))
       return next();
     if (!user || !userIsAuthorized(user))
       return res.redirect(options.redirectTo + '?path=' + path);
