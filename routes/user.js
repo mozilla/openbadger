@@ -12,7 +12,7 @@ exports.login = function(req, res){
     if (!userIsAuthorized(email))
       return res.send(403, 'not authorized')
     req.session.user = email;
-    return res.redirect('/');
+    return res.redirect('/admin');
   });
 };
 

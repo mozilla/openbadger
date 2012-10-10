@@ -3,12 +3,9 @@
 <form method="post" action="?">
   <legend>
     Create a new behavior
-    {% if badge %}
-    for “{{ badge.name }}”
-    {% endif %}
   </legend>
   {% if badge %}
-    <input type="hidden" name="for-badge" value="{{ badge.shortname }}">
+    <input type="hidden" name="for-badge" value="{{ badgeShortname }}">
   {% endif %}
 
   <div>

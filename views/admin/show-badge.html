@@ -5,18 +5,52 @@
 {% endblock %}
 
 {% block 'main' %}
+<h2>{{ badge.name }}</h2>
+<dl>
+  <dt>Shortname</dt>
+  <dd>{{ badge.shortname }}</dd>
+  
+  <dt>Description</dt>
+  <dd>{{ badge.description }}</dd>
+</dl>
+
 <div class="row">
   <div class="span8">
-    <h2>{{ badge.name }}</h2>
-    <dl>
-      <dt>Shortname</dt>
-      <dd>{{ badge.shortname }}</dd>
-    
-      <dt>Description</dt>
-      <dd>{{ badge.description }}</dd>
-    </dl>
-  </div><!--end badge creation span-->
-  
+    <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
+      <legend>
+        What triggers this badge?
+        (<a href="/admin/behavior?for={{ badge.shortname }}">Create a new trigger</a>)
+      </legend>
+
+      {% if behaviors.length %}
+        <div>
+          <label>Trigger
+          <select name="shortname">
+            {% for behavior in behaviors %}
+              <option value="{{ behavior.shortname }}" {% if behavior.shortname == defaultBehavior %}selected{% endif %}>
+                {{ behavior.name }}
+              </option>
+            {% endfor %}
+          </select>
+          </label>
+          <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
+        </div>
+
+        <div>
+          <label>Trigger Count
+          <input type="text" name="count" placeholder="5">
+          </label>
+          <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
+        </div>
+
+        <div class="form-actions">
+          <button id="create-trigger" type="submit" class="btn btn-primary">
+            Add this behavior
+          </button>
+        </div>
+      {% endif %}  
+    </form>
+  </div><!--end trigger list span-->
   
   <div class="span4">
     <h3>Triggers</h3>
@@ -36,43 +70,7 @@
     {% else %}
       <p id="no_triggers">None!<p>
     {% endif %}
-  </div><!--end trigger list span-->
+  </div>
 </div><!--end row 1-->
-
-
-<form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
-  <legend>
-    What triggers this badge?
-    (<a href="/admin/behavior?for={{ badge.shortname }}">Create a new trigger</a>)
-  </legend>
-  
-  {% if behaviors.length %}
-    <div>
-      <label>Trigger
-      <select name="shortname">
-        {% for behavior in behaviors %}
-          <option value="{{ behavior.shortname }}" {% if behavior.shortname == defaultBehavior %}selected{% endif %}>
-            {{ behavior.name }}
-          </option>
-        {% endfor %}
-      </select>
-      </label>
-      <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
-    </div>
-
-    <div>
-      <label>Trigger Count
-      <input type="text" name="count" placeholder="5">
-      </label>
-      <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
-    </div>
-    
-    <div class="form-actions">
-      <button id="create-trigger" type="submit" class="btn btn-primary">
-        Add this behavior
-      </button>
-    </div>
-  {% endif %}  
-</form>
   
 {% endblock %}

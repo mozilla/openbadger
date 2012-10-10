@@ -5,8 +5,6 @@
 {% endblock %}
 
 {% block 'main' %}
-<div class="row">
-  <div class="span8">
     <h2>New Badge</h2>
     <form method="post" action="?">
       <legend>Badge Basics</legend>
@@ -26,41 +24,4 @@
         <button id="create-badge" type="submit" class="btn btn-primary">Create</button>
       </div>
     </form>
-  </div><!--end badge creation span-->
-  
-  
-  <div class="span4">
-    <h3>Triggers</h3>
-    <ul id="triggers">
-    </ul>
-    <p id="no_triggers">None!<p>
-  </div><!--end trigger list span-->
-</div><!--end row 1-->
-
-<form>
-  <legend>What triggers this badge?</legend>
-  <div>
-    <label>Trigger Description
-      <input type="text" placeholder="The user clicks the red button"/>
-    </label>
-    <span class="help-block">Describe the action the user takes to earn this badge, keep it short!</span>
-  </div>
-  
-  <div>
-    <label>Trigger Tag
-    <input type="text" placeholder="red_button"/>
-    </label>
-    <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
-  </div>
-  
-  <div>
-    <label>Trigger Count
-    <input type="text" placeholder="5"/>
-    </label>
-    <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
-  </div>
-  
-  <button id="create-trigger" type="submit" class="btn">Add this behavior</button>
-</form>
-  
 {% endblock %}
