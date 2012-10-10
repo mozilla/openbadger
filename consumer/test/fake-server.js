@@ -40,19 +40,21 @@ define(["jquery"], function($) {
               });
             }
             
-            if (path == "/v1/badges") {
-              return respondWithJSON({
-                status: "ok",
-                badges: availableBadges
-              });
-            } else if (path == "/v1/user") {
-              if (authInfo.prn != originalOptions.data.email)
-                throw new Error("email param != JWT claim set principal");
-              return respondWithJSON({
-                status: "ok",
-                behaviors: {},
-                badges: {}
-              });
+            if (options.type == "GET") {
+              if (path == "/v1/badges") {
+                return respondWithJSON({
+                  status: "ok",
+                  badges: availableBadges
+                });
+              } else if (path == "/v1/user") {
+                if (authInfo.prn != originalOptions.data.email)
+                  throw new Error("email param != JWT claim set principal");
+                return respondWithJSON({
+                  status: "ok",
+                  behaviors: {},
+                  badges: {}
+                });
+              }
             }
             
             return respond(404, "Not Found", {
