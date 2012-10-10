@@ -95,7 +95,10 @@ Badge.prototype.removeBehavior = function removeBehavior(shortname) {
 
 Badge.prototype.imageDataURI = function imageDataURI() {
   // #TODO: don't hardcode PNG maybe
-  var base64 = this.image.toString('base64');
+  var base64 = '';
+  var format = 'data:image/png;base64,%s';
+  if (this.image)
+    base64 = this.image.toString('base64');
   return util.format('data:image/png;base64,%s', base64);
 };
 

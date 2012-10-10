@@ -20,9 +20,10 @@
     <![endif]-->
 
     <script src="/js/jquery.min.js"></script>
+    <link href="/stylesheets/admin.css" rel="stylesheet">
     {% block "header" %}{% endblock %}
   </head>
-  <body>
+  <body class="{% block "page"%}{% endblock %}">
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
