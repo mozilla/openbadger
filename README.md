@@ -43,7 +43,7 @@ $ source config.sh
 
 # Heroku configuration
 
-You should only have to do the 
+You should only have to do the following once:
 
 ```bash
 $ heroku login
@@ -112,5 +112,8 @@ heroku config:add OPENBADGER_MONGO_DB="openbadger"
 heroku config:add OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
 ```
 
-You should now be able to do `heroku open` and have some sort of working
-application.
+# Deploying to Heroku
+
+```bash
+$ make heroku    # deploy if out of date & opens in your browser
+```

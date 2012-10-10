@@ -14,6 +14,6 @@ verbose-test:
 	@node test/*.test.js
 
 heroku:
-	@git push heroku master
+	@git push heroku master && heroku open
 
 .PHONY: server test lint heroku dependencies verbose-test
