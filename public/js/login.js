@@ -6,6 +6,7 @@
   function launchBrowserId(callback) {
     return function() {
       navigator.id.get(callback, { siteName: 'OpenBadger' });
+      return false;
     }
   }
 

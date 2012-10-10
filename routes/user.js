@@ -3,8 +3,9 @@ var persona = require('../lib/persona');
 var util = require('util');
 
 exports.login = function(req, res){
+  var path = req.query['path'] || req.body['path'] || '/admin';
   if (req.method === 'GET')
-    return res.render("login.html");
+    return res.render("login.html", {path: path});
   var assertion = req.body.assertion;
   persona.verify(assertion, function (err, email) {
     if (err)
@@ -12,7 +13,7 @@ exports.login = function(req, res){
     if (!userIsAuthorized(email))
       return res.send(403, 'not authorized')
     req.session.user = email;
-    return res.redirect('/admin');
+    return res.redirect(path);
   });
 };
 
@@ -22,8 +23,7 @@ exports.logout = function (req, res) {
   });
 };
 
-var middleware = exports.middleware = {};
-middleware.requireAuth = function requireAuth(options) {
+exports.requireAuth = function requireAuth(options) {
   var whitelist = options.whitelist || [];
   return function (req, res, next) {
     var path = req.path;
@@ -31,7 +31,7 @@ middleware.requireAuth = function requireAuth(options) {
     if (whitelist.indexOf(path) > -1)
       return next();
     if (!user || !userIsAuthorized(user))
-      return res.redirect(options.redirectTo);
+      return res.redirect(options.redirectTo + '?path=' + path);
     return next();
   };
 };

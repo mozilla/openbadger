@@ -29,7 +29,7 @@ app.configure(function () {
   app.use(middleware.cookieParser());
   app.use(middleware.session());
   app.use(express.static(path.join(__dirname, 'public')));
-  app.use(user.middleware.requireAuth({
+  app.use(user.requireAuth({
     whitelist: ['/login', '/logout'],
     redirectTo: '/login'
   }));
