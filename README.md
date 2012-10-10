@@ -2,22 +2,18 @@
 
 Badging for webmaker.
 
-# Installing dependencies
+# Installing deps & starting the server
 
 ```bash
-$ npm install
-```
-
-# Starting the server
-
-```bash
-$ make server
+$ make     # will do `npm install` and then start server
 ```
 
 # Running the test suite
 
 ```bash
-$ make test
+$ make test         # normally you'd use this
+$ make verbose-test # if you want to see debugging
+$ make lint         # to lint the codebase
 ```
 
 # Local configuration

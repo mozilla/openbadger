@@ -1,5 +1,8 @@
-server:
+server: dependencies
 	@up -t 0 -n 1 -w -p 3000 server.js
+
+dependencies:
+	@npm install
 
 lint:
 	@jshint *.js lib/*.js
@@ -13,4 +16,4 @@ verbose-test:
 heroku:
 	@git push heroku master
 
-.PHONY: server test lint
+.PHONY: server test lint heroku dependencies verbose-test
