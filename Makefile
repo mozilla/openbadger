@@ -10,4 +10,7 @@ test:
 verbose-test:
 	@node test/*.test.js
 
+heroku:
+	@git push heroku master
+
 .PHONY: server test lint
