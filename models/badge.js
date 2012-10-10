@@ -61,6 +61,11 @@ var BadgeSchema = new Schema({
   },
   prerequisites: {
     type: [String]
+  },
+  image: {
+    type: Buffer,
+    required: true,
+    validate: maxLength('image', 256 * 1024)
   }
 });
 

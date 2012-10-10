@@ -1,6 +1,12 @@
 var test = require('./');
 var db = require('../models');
 var Badge = require('../models/badge');
+var fs = require('fs');
+var pathutil = require('path');
+
+function asset(name) {
+  return fs.readFileSync(pathutil.join(__dirname, 'assets', name));
+}
 
 function validBadge() {
   return new Badge({
@@ -9,14 +15,16 @@ function validBadge() {
     description: 'badge description',
     behaviors: [],
     prerequisites: [],
+    image: asset('sample.png')
   });
-};
+}
 
 var fixtures = {
   'link-basic': new Badge({
     name: 'Link Badge, basic',
     shortname: 'link-badge-basic',
     description: 'For doing links.',
+    image: asset('sample.png'),
     behaviors: [
       { shortname: 'link', count: 5 }
     ]
@@ -25,6 +33,7 @@ var fixtures = {
     name : 'Link Badge, advanced',
     shortname: 'link-badge-advanced',
     description: 'For doing lots of links.',
+    image: asset('sample.png'),
     behaviors: [
       { shortname: 'link', count: 10 }
     ]
@@ -33,6 +42,7 @@ var fixtures = {
     name : 'Commenting badge',
     shortname: 'comment-badge',
     description: 'For doing lots of comments.',
+    image: asset('sample.png'),
     behaviors: [
       { shortname: 'comment', count: 5 }
     ]
@@ -40,7 +50,20 @@ var fixtures = {
 };
 
 test.applyFixtures(fixtures, function () {
-  test('Badge: name too long', function (t) {
+  test('Badge#save: saving a valid badge', function (t) {
+    var expect = validBadge();
+    expect.save(function (err) {
+      t.notOk(err, 'should not have an error when saving');
+      Badge.findById(expect.id, function (err, result) {
+        t.notOk(err, 'should not have an error when finding');
+        t.ok(result.image, 'should have an image');
+        t.same(result.image, expect.image);
+        t.end();
+      });
+    });
+  });
+
+  test('Badge#validate: name too long', function (t) {
     var length = 128;
     var badge = validBadge();
     badge.name = test.randomstring(length + 1);
@@ -52,7 +75,7 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  test('Badge: description too long', function (t) {
+  test('Badge#validate: description too long', function (t) {
     var length = 128;
     var badge = validBadge();
     badge.description = test.randomstring(length + 1);
