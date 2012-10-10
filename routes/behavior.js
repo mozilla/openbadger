@@ -1,9 +1,19 @@
+var util = require('util');
 var Behavior = require('../models/behavior');
 
 exports.create = function create(req, res) {
   var form = req.body;
   var behavior = new Behavior(form);
-  behavior.save(genericResponse(res));
+  var badgeShortname = form['for-badge'];
+  return behavior.save(function (err) {
+    if (err)
+      return res.send(500, err);
+    if (!badgeShortname)
+      return res.redirect('/admin/');
+    var tpl = '/admin/badge/%s?behavior=%s';
+    var url = util.format(tpl, badgeShortname, behavior.shortname);
+    return res.redirect(url);
+  });
 };
 
 exports.readAll = function readAll(req, res) {
@@ -29,8 +39,7 @@ exports.destroy = function destroy(req, res) {
   });
 };
 
-exports.middleware = {}
-exports.middleware.findByName = function findByName(req, res, next) {
+exports.findByName = function findByName(req, res, next) {
   var name = req.param('name');
   if (!name )
     return res.send(404, { status: 'not found' });
@@ -40,6 +49,15 @@ exports.middleware.findByName = function findByName(req, res, next) {
     if (!behavior)
       return res.send(404, { status: 'not found' });
     req.behavior = behavior;
+    return next();
+  });
+};
+
+exports.findAll = function findAll(req, res, next) {
+  Behavior.find({}, function (err, behaviors) {
+    if (err)
+      return respondWithError(res, err);
+    req.behaviors = behaviors;
     return next();
   });
 };

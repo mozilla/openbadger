@@ -20,36 +20,59 @@
   
   <div class="span4">
     <h3>Triggers</h3>
+    {% if badge.behaviors %}
     <ul id="triggers">
+      {% for behavior in badge.behaviors %}
+        <li>
+          {{ behavior.shortname }}: {{ behavior.count }}
+          <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
+            <input type="hidden" name="_method" value="delete">
+            <input type="hidden" name="shortname" value="{{ behavior.shortname }}">
+            <input type="submit" class="btn btn-small" value="remove">
+          </form>
+        </li>
+      {% endfor %}
     </ul>
-    <p id="no_triggers">None!<p>
+    {% else %}
+      <p id="no_triggers">None!<p>
+    {% endif %}
   </div><!--end trigger list span-->
 </div><!--end row 1-->
 
-<form>
-  <legend>What triggers this badge?</legend>
-  <div>
-    <label>Trigger Description
-      <input type="text" placeholder="The user clicks the red button"/>
-    </label>
-    <span class="help-block">Describe the action the user takes to earn this badge, keep it short!</span>
-  </div>
+
+<form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
+  <legend>
+    What triggers this badge?
+    (<a href="/admin/behavior?for={{ badge.shortname }}">Create a new trigger</a>)
+  </legend>
   
-  <div>
-    <label>Trigger Tag
-    <input type="text" placeholder="red_button"/>
-    </label>
-    <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
-  </div>
-  
-  <div>
-    <label>Trigger Count
-    <input type="text" placeholder="5"/>
-    </label>
-    <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
-  </div>
-  
-  <button id="create-trigger" type="submit" class="btn">Add this behavior</button>
+  {% if behaviors.length %}
+    <div>
+      <label>Trigger
+      <select name="shortname">
+        {% for behavior in behaviors %}
+          <option value="{{ behavior.shortname }}" {% if behavior.shortname == defaultBehavior %}selected{% endif %}>
+            {{ behavior.name }}
+          </option>
+        {% endfor %}
+      </select>
+      </label>
+      <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
+    </div>
+
+    <div>
+      <label>Trigger Count
+      <input type="text" name="count" placeholder="5">
+      </label>
+      <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
+    </div>
+    
+    <div class="form-actions">
+      <button id="create-trigger" type="submit" class="btn btn-primary">
+        Add this behavior
+      </button>
+    </div>
+  {% endif %}  
 </form>
   
 {% endblock %}

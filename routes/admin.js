@@ -2,13 +2,18 @@
 /*
  * Administrative Pages
  */
-
 exports.index = function (req, res) {
   return res.render('admin/index.html');
 };
 
-exports.badge = function (req, res) {
-  return res.render('admin/badge.html');
+exports.newBadgeForm = function (req, res) {
+  return res.render('admin/new-badge.html');
+};
+
+exports.newBehaviorForm = function (req, res) {
+  return res.render('admin/new-behavior.html', {
+    badge: req.badge
+  });
 };
 
 exports.badgeIndex = function (req, res) {
@@ -19,6 +24,8 @@ exports.badgeIndex = function (req, res) {
 
 exports.show = function (req, res) {
   return res.render('admin/show-badge.html', {
-    badge: req.badge
+    defaultBehavior: req.query['behavior'],
+    badge: req.badge,
+    behaviors: req.behaviors
   });
 };
