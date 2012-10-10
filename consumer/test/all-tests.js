@@ -42,7 +42,10 @@ defineTests([
   });
   
   asyncTest("change:earnedBadges is broadcast", function() {
+    var available = false;
+    badger.on('change:availableBadges', function() { available = true; });
     badger.on('change:earnedBadges', function() {
+      ok(available, "change:availableBadges is always triggered first");
       deepEqual(badger.earnedBadges, {},
                 "badger.earnedBadges matches our expectations");
       start();

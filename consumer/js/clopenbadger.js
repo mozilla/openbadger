@@ -12,18 +12,21 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
     
     BackboneEvents.mixin(self);
 
-    $.getJSON(server + '/v1/badges', function(data) {
+    var availableReq = $.getJSON(server + '/v1/badges', function(data) {
       // TODO: Check for errors.
       self.availableBadges = data.badges;
-      self.trigger("change:availableBadges");
     });
 
-    $.getJSON(server + '/v1/user', {
+    var earnedReq = $.getJSON(server + '/v1/user', {
       auth: token,
       email: email
     }, function(data) {
       // TODO: Check for errors.
       self.earnedBadges = data.badges;
+    });
+    
+    $.when(availableReq, earnedReq).done(function() {
+      self.trigger("change:availableBadges");
       self.trigger("change:earnedBadges");
     });
     
