@@ -34,14 +34,14 @@ exports.destroy = function destroy(req, res) {
   var behavior = req.behavior;
   return behavior.remove(function (err) {
     if (err)
-      return respondWithError(res, err)
+      return respondWithError(res, err);
     return res.send(200, {status: 'ok'});
   });
 };
 
 exports.findByName = function findByName(req, res, next) {
   var name = req.param('name');
-  if (!name )
+  if (!name)
     return res.send(404, { status: 'not found' });
   Behavior.findOne({name: name}, function (err, behavior) {
     if (err)
@@ -68,14 +68,14 @@ function genericResponse(res) {
       return respondWithError(res, err);
     return respondWithSuccess(res, results);
   };
-};
+}
 
 function respondWithError(res, err) {
   return res.send(500, {
     status: 'error',
     message: err.message
   });
-};
+}
 
 function respondWithSuccess(res, result) {
   var status = 200;
@@ -85,4 +85,4 @@ function respondWithSuccess(res, result) {
     status: 'ok',
     result: result
   });
-};
+}

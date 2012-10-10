@@ -1,6 +1,7 @@
 var db = require('./');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var util = require('../lib/util');
 
 var BehaviorSchema = new Schema({
   name: {

@@ -2,7 +2,7 @@ var env = require('../lib/environment');
 var persona = require('../lib/persona');
 var util = require('util');
 
-exports.login = function(req, res){
+exports.login = function login(req, res) {
   var path = req.query['path'] || req.body['path'] || '/admin';
   if (req.method === 'GET')
     return res.render("login.html", {path: path});
@@ -11,13 +11,13 @@ exports.login = function(req, res){
     if (err)
       return res.send(util.inspect(err));
     if (!userIsAuthorized(email))
-      return res.send(403, 'not authorized')
+      return res.send(403, 'not authorized');
     req.session.user = email;
     return res.redirect(path);
   });
 };
 
-exports.logout = function (req, res) {
+exports.logout = function logout(req, res) {
   req.session.destroy(function () {
     return res.redirect('/login');
   });
@@ -43,7 +43,7 @@ function userIsAuthorized(email) {
     if (authorized) return;
     var adminRe = new RegExp(admin.replace('*', '.+?'));
     if (adminRe.test(email))
-      return authorized = true;
+      return (authorized = true);
   });
   return authorized;
 }

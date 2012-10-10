@@ -5,7 +5,7 @@ dependencies:
 	@npm install
 
 lint:
-	@jshint *.js lib/*.js
+	@jshint *.js lib/*.js models/*.js routes/*.js
 
 test:
 	@tap test/*.test.js

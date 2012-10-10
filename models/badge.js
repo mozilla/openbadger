@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var util = require('../lib/util');
 
-var maxLength = function (field, length) {
+function maxLength(field, length) {
   function lengthValidator() {
     if (!this[field]) return true;
     return this[field].length <= length;
