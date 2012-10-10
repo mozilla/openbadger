@@ -12,7 +12,7 @@ module.exports = test;
  */
 
 test.randomstring = function randomstring(length) {
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-=<>?,./{}|[]\\!@#$%^&*()_+ ';
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-=<>?,./{}|[]\\!@#$%^&*()_+';
   var str = '';
   while (length--)
     str += chars[Math.random() * chars.length | 0];
@@ -44,7 +44,6 @@ test.applyFixtures = function applyFixtures(fixtures, carryOn) {
    */
   function flush(Model, callback) {
     function destroyer(thing, callback) {
-      console.log('destroying');
       return thing.remove(callback);
     }
     Model.find({}, function (err, results) {
@@ -70,7 +69,6 @@ test.applyFixtures = function applyFixtures(fixtures, carryOn) {
    */
   function saveAll(callback) {
     function saver(thing, callback) {
-      console.log('saving');
       return thing.save(callback);
     }
     async.map(values(fixtures), saver, function (err, results) {
