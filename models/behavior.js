@@ -23,12 +23,12 @@ var BehaviorSchema = new Schema({
   }
 });
 
-function setShortnameDefault(next) {
+function setShortNameDefault(next) {
   if (!this.shortname && this.name)
     this.shortname = util.slugify(this.name);
   next();
 }
-BehaviorSchema.pre('validate', setShortnameDefault);
+BehaviorSchema.pre('validate', setShortNameDefault);
 
 var Behavior = db.model('Behavior', BehaviorSchema);
 module.exports = Behavior;

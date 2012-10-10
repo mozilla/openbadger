@@ -59,7 +59,7 @@ exports.image = function image(req, res) {
   res.send(badge.image);
 };
 
-exports.findByShortname = function (options) {
+exports.findByShortName = function (options) {
   var required = !!options.required;
 
   function getName(req) {
@@ -68,7 +68,7 @@ exports.findByShortname = function (options) {
     return req[options.container][options.field];
   }
 
-  return function findByShortname(req, res, next) {
+  return function findByShortName(req, res, next) {
     var name = getName(req);
     if (!name && required)
       return res.send(404);

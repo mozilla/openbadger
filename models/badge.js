@@ -71,12 +71,12 @@ var BadgeSchema = new Schema({
 
 var Badge = db.model('Badge', BadgeSchema);
 
-function setShortnameDefault(next) {
+function setShortNameDefault(next) {
   if (!this.shortname && this.name)
     this.shortname = util.slugify(this.name);
   next();
 }
-BadgeSchema.pre('validate', setShortnameDefault);
+BadgeSchema.pre('validate', setShortNameDefault);
 
 Badge.findByBehavior = function findByBehavior(shortname, callback) {
   var searchTerms = { behaviors: { '$elemMatch': { shortname: shortname }}};

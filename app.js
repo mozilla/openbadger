@@ -56,7 +56,7 @@ app.get('/admin', [badge.findAll], admin.badgeIndex);
 app.get('/admin/badges', [badge.findAll], admin.badgeIndex);
 
 // middleware for finding badge by shortname
-app.all('/admin/badge/:shortname*', badge.findByShortname({
+app.all('/admin/badge/:shortname*', badge.findByShortName({
   container: 'param',
   field: 'shortname',
   required: true
@@ -81,7 +81,7 @@ app.post('/admin/behavior', behavior.create);
 
 // get the badge image
 app.get('/badge/image/:shortname.png', [
-  badge.findByShortname({
+  badge.findByShortName({
     container: 'param',
     field: 'shortname',
     required: true

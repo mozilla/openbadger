@@ -4,14 +4,14 @@ var Behavior = require('../models/behavior');
 exports.create = function create(req, res) {
   var form = req.body;
   var behavior = new Behavior(form);
-  var badgeShortname = form['for-badge'];
+  var badgeShortName = form['for-badge'];
   return behavior.save(function (err) {
     if (err)
       return res.send(500, err);
-    if (!badgeShortname)
+    if (!badgeShortName)
       return res.redirect('/admin/');
     var tpl = '/admin/badge/%s?behavior=%s';
-    var url = util.format(tpl, badgeShortname, behavior.shortname);
+    var url = util.format(tpl, badgeShortName, behavior.shortname);
     return res.redirect(url);
   });
 };

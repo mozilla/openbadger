@@ -12,7 +12,7 @@ exports.newBadgeForm = function (req, res) {
 
 exports.newBehaviorForm = function (req, res) {
   return res.render('admin/new-behavior.html', {
-    badgeShortname: req.query['for']
+    badgeShortName: req.query['for']
   });
 };
 
