@@ -12,7 +12,7 @@ module.exports = test;
  */
 
 test.randomstring = function randomstring(length) {
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-=<>?,./{}|[]\\!@#$%^&*()_+ ';
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-=<>?,./{}|[]\\!@#$%^&*()_+';
   var str = '';
   while (length--)
     str += chars[Math.random() * chars.length | 0];
