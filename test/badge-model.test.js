@@ -63,26 +63,44 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge#validate: image too big', function (t) {
+    var errorKeys;
+    var badge = validBadge();
+    var length = 257 * 1024
+    badge.image = Buffer(length);
+    badge.validate(function (err) {
+      t.ok(err, 'should have errors');
+      errorKeys = Object.keys(err.errors);
+      t.same(errorKeys, ['image'], 'should only have one error');
+      t.same(err.errors['image'].type, 'maxLength', 'should be a maxLength error');
+      t.end();
+    });
+  });
+
   test('Badge#validate: name too long', function (t) {
+    var errorKeys;
     var length = 128;
     var badge = validBadge();
     badge.name = test.randomstring(length + 1);
     badge.validate(function (err, results) {
-      var errorKeys = Object.keys(err.errors);
+      t.ok(err, 'should have errors');
+      errorKeys = Object.keys(err.errors);
       t.same(errorKeys, ['name'], 'should only have one error');
-      t.same(err.errors.name.type, 'maxLength', 'should be a maxLength error');
+      t.same(err.errors['name'].type, 'maxLength', 'should be a maxLength error');
       t.end();
     });
   });
 
   test('Badge#validate: description too long', function (t) {
+    var errorKeys;
     var length = 128;
     var badge = validBadge();
     badge.description = test.randomstring(length + 1);
     badge.validate(function (err, results) {
-      var errorKeys = Object.keys(err.errors);
+      t.ok(err, 'should have errors');
+      errorKeys = Object.keys(err.errors);
       t.same(errorKeys, ['description'], 'should only have one error');
-      t.same(err.errors.description.type, 'maxLength', 'should be a maxLength error');
+      t.same(err.errors['description'].type, 'maxLength', 'should be a maxLength error');
       t.end();
     });
   });
