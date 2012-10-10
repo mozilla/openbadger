@@ -1,0 +1,15 @@
+{% extends 'admin/base.html' %}
+{% block 'main' %}
+
+<ul>
+{% for badge in badges %}
+  <li>
+    <a href="/admin/badge/{{ badge.shortname }}">{{ badge.name }}</a>
+    ({{ badge.shortname }})
+  </li>
+{% endfor %}
+</ul>
+
+
+
+{% endblock %}

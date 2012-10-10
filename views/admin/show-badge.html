@@ -7,25 +7,14 @@
 {% block 'main' %}
 <div class="row">
   <div class="span8">
-    <h2>New Badge</h2>
-    <form method="post" action="?">
-      <legend>Badge Basics</legend>
-      <div>
-        <label>Badge Name
-          <input type="text" name="name" placeholder="My Very Fancy Badge">
-        </label>      
-        <span class="help-block">This is the name for your badge, it should be descriptive, but also awesome.</span>
-      </div>
-      <div>
-        <label>Badge Description
-          <textarea rows="5" name="description"></textarea>
-        </label>
-        <span class="help-block">A description of your badge, this will appear in every assertion created from this badge.</span>
-      </div>
-      <div class="form-actions">
-        <button id="create-badge" type="submit" class="btn btn-primary">Create</button>
-      </div>
-    </form>
+    <h2>{{ badge.name }}</h2>
+    <dl>
+      <dt>Shortname</dt>
+      <dd>{{ badge.shortname }}</dd>
+    
+      <dt>Description</dt>
+      <dd>{{ badge.description }}</dd>
+    </dl>
   </div><!--end badge creation span-->
   
   
