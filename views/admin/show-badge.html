@@ -5,17 +5,18 @@
 {% endblock %}
 
 {% block 'main' %}
-<h2>{{ badge.name }}</h2>
-<dl>
-  <dt>Shortname</dt>
-  <dd>{{ badge.shortname }}</dd>
-  
-  <dt>Description</dt>
-  <dd>{{ badge.description }}</dd>
-</dl>
 
 <div class="row">
   <div class="span8">
+    <h2>{{ badge.name }}</h2>
+    <dl>
+      <dt>Shortname</dt>
+      <dd>{{ badge.shortname }}</dd>
+      
+      <dt>Description</dt>
+      <dd>{{ badge.description }}</dd>
+    </dl>
+    
     <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
       <legend>
         What triggers this badge?
@@ -58,11 +59,11 @@
     <ul id="triggers">
       {% for behavior in badge.behaviors %}
         <li>
-          {{ behavior.shortname }}: {{ behavior.count }}
           <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
+            {{ behavior.shortname }}: {{ behavior.count }}
             <input type="hidden" name="_method" value="delete">
             <input type="hidden" name="shortname" value="{{ behavior.shortname }}">
-            <input type="submit" class="btn btn-small" value="remove">
+            <input type="submit" class="btn btn-link" value="remove">
           </form>
         </li>
       {% endfor %}
