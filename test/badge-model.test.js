@@ -50,6 +50,14 @@ var fixtures = {
 };
 
 test.applyFixtures(fixtures, function () {
+  test('Badge#imageDataURI', function (t) {
+    var badge = new Badge({image: asset('sample.png')});
+    var dataURI = badge.imageDataURI();
+    t.ok(dataURI.match(/^data:image\/png;base64,.+$/), 'should match data uri format');
+    t.end();
+  });
+
+
   test('Badge#save: saving a valid badge', function (t) {
     var expect = validBadge();
     expect.save(function (err) {

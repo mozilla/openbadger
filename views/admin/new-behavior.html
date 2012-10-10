@@ -1,5 +1,5 @@
-{% extends 'admin/base.html' %}
-{% block 'main' %}
+{% extends "admin/base.html" %}
+{% block "main" %}
 <form method="post" action="?">
   <legend>
     Create a new behavior
@@ -32,7 +32,6 @@
 </form>
 {% endblock %}
 
-{% block 'footerScripts' %}
+{% block "footer" %}
 <script src="/js/behaviors.js"></script>
-
 {% endblock %}
