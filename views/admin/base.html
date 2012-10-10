@@ -20,12 +20,9 @@
     <![endif]-->
 
     <script src="/js/jquery.min.js"></script>
-    {% block 'extra_head' %} {% endblock %}
-
+    {% block "header" %}{% endblock %}
   </head>
-
   <body>
-
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
@@ -47,14 +44,13 @@
     </div>
 
     <div class="container">
-      {% block 'main' %}
-      {% endblock %}
+      {% block "main" %}{% endblock %}
     </div> <!-- /container -->
 
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/bootstrap.js"></script>
-    {% block 'footerScripts' %} {% endblock %}
+    {% block "footer" %}{% endblock %}
   </body>
 </html>

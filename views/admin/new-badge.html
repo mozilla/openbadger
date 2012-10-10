@@ -1,10 +1,6 @@
-{% extends 'admin/base.html' %}
+{% extends "admin/base.html" %}
 
-{% block 'extra_head' %}
-<script src="/js/admin.js"></script>
-{% endblock %}
-
-{% block 'main' %}
+{% block "main" %}
   <form method="post" action="?">
     <legend>New Badge</legend>
     <div>
@@ -22,3 +18,8 @@
     </div>
   </form>
 {% endblock %}
+
+{% block "footer" %}
+<script src="/js/admin.js"></script>
+{% endblock %}
+
