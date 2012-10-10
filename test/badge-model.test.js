@@ -77,8 +77,29 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge default: shortname', function (t) {
+    var badge = new Badge({
+      name: 'An   awesome badge!',
+      description: 'some sorta badge',
+    })
+    badge.save(function (err, result) {
+      t.same(badge.shortname, 'an-awesome-badge', 'should slugify if shortname is not provided');
+      t.end();
+    });
+  });
+
+  test('Badge: finding one by id', function (t) {
+    var expect = fixtures['link-basic'];
+    Badge.findById(expect.id, function (err, badge) {
+      t.notOk(err, 'should not have an error');
+      t.same(expect.id, badge.id, 'should get the right badge');
+      t.end();
+    });
+  });
+
+
   // necessary to stop the test runner
-  test('shut down', function (t) {
+  test('shutting down #', function (t) {
     db.close();
     t.end();
   });
