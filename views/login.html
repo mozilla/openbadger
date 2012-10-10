@@ -1,10 +1,11 @@
-{% extends "layout.html" %}
+{% extends "admin/base.html" %}
 
-{% block styles %}
-  <link rel="stylesheet" href="/styles/persona-buttons.css">
+{% block "extra_head" %}
+  <script type="text/javascript" src="https://login.persona.org/include.js"></script>
+  <link rel="stylesheet" href="/stylesheets/persona-buttons.css">
 {% endblock %}
 
-{% block content %}
+{% block "main" %}
 <h1>
   <a href="#" class="persona-button dark js-persona-login">
     <span>Sign in with your Email</span>
@@ -14,26 +15,8 @@
 <form method="post" action="/login" class="js-persona-form">
   <input type="hidden" name="assertion" value="" class="js-persona-input">
 </form>
+{% endblock %}
 
-<script type="text/javascript">
-(function loginHandler () {
-  var $form = $('.js-persona-form');
-  var $input = $('.js-persona-input');
-  var $loginLink = $('.js-persona-login');
-  
-  function launchBrowserId(callback) {
-    return function() {
-      navigator.id.get(callback, { siteName: 'OpenBadger' });
-    }
-  }
-  
-  function handleResponse(assertion) {
-    if (!assertion) return false;
-    $input.val(assertion);
-    $form.trigger('submit');
-  }
-  
-  $loginLink.bind('click', launchBrowserId(handleResponse));
-})();
-</script>
+{% block "footerScripts" %}
+  <script src="/js/login.js"></script>
 {% endblock %}

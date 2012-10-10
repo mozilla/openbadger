@@ -9,26 +9,26 @@
   {% endif %}
 
   <div>
-    <label>Behavior Name
-      <input id="name" type="text" name="name" placeholder="Some Behavior">
-    </label>
+    <label for="name">Behavior Name</label>
+    <input id="name" type="text" name="name" placeholder="Some Behavior">
     <span class="help-block">This is the name for your behavior, it should be descriptive, but also awesome.</span>
-    
-    <label>Shortname
-      <input id="shortname" type="text" name="shortname" placeholder="some-behavior">
-    </label>
-    <span class="help-block">The computer-readable name for your behavior.</span>
-    
-    <label>Description
-      <textarea id="description" type="text" name="description" placeholder="Awesome description"></textarea>
-    </label>
-    <span class="help-block">Description for your behavior</span>
-    
-    <div class="form-actions">
-      <button id="create-badge" type="submit" class="btn btn-primary">Create Behavior</button>
-    </div>
   </div>
-
+    
+  <div>
+    <label for="shortname">Shortname</label>
+    <input id="shortname" type="text" name="shortname" placeholder="some-behavior">
+    <span class="help-block">The computer-readable name for your behavior.</span>
+  </div>
+    
+  <div>
+    <label for="description">Description</label>
+    <textarea id="description" type="text" name="description" placeholder="Awesome description"></textarea>
+    <span class="help-block">Description for your behavior</span>
+  </div>
+    
+  <div class="form-actions">
+    <button id="create-badge" type="submit" class="btn btn-primary">Create Behavior</button>
+  </div>
 </form>
 {% endblock %}
 

@@ -8,15 +8,13 @@
   <form method="post" action="?">
     <legend>New Badge</legend>
     <div>
-      <label>Badge Name
-        <input type="text" name="name" placeholder="My Very Fancy Badge">
-      </label>      
+      <label for="name">Badge Name</label>
+      <input id="name" type="text" name="name" placeholder="My Very Fancy Badge">
       <span class="help-block">This is the name for your badge, it should be descriptive, but also awesome.</span>
     </div>
     <div>
-      <label>Badge Description
-        <textarea rows="5" name="description"></textarea>
-      </label>
+      <label for="description">Badge Description</label>
+      <textarea id="description" rows="5" name="description"></textarea>
       <span class="help-block">A description of your badge, this will appear in every assertion created from this badge.</span>
     </div>
     <div class="form-actions">
