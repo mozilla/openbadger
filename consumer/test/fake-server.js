@@ -30,6 +30,8 @@ define(["jquery"], function($) {
   }
   
   var transport = function() {};
+  var queuedResponses = [];
+  var flushResponsesTimeout;
   
   // http://api.jquery.com/extending-ajax/#Transports
   $.ajaxTransport("+*", function(options, originalOptions, jqXHR) {
@@ -40,6 +42,12 @@ define(["jquery"], function($) {
     availableBadges: {},
     earnedBadges: {},
     behaviors: {},
+    flushResponses: function() {
+      var responses = queuedResponses;
+      queuedResponses = [];
+      clearTimeout(flushResponsesTimeout);
+      responses.forEach(function(fn) { fn(); });
+    },
     setup: function setup(options) {
       var urlPrefix = options.urlPrefix;
       var availableBadges = options.availableBadges || {};
@@ -64,9 +72,11 @@ define(["jquery"], function($) {
         return {
           send: logExceptions(function(headers, completeCallback) {
             function respond(status, statusText, responses, headers) {
-              setTimeout(function() {
+              queuedResponses.push(function() {
                 completeCallback(status, statusText, responses, headers);
-              }, 0);
+              });
+              clearTimeout(flushResponsesTimeout);
+              flushResponsesTimeout = setTimeout(self.flushResponses, 0);
             }
             
             function respondWithJSON(obj, status, statusText) {

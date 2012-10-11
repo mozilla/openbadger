@@ -21,6 +21,7 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
             // TODO: Check for errors.
             if (data.status == "awarded") {
               $.extend(self.earnedBadges, data.badges);
+              self.trigger("change:earnedBadges");
               self.trigger("award", Object.keys(data.badges));
             }
           }

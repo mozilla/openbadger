@@ -54,11 +54,19 @@ defineTests([
   });
   
   asyncTest("award is broadcast", function() {
-    badger.on('award', function(badges) {
-      deepEqual(badges, ["FIRST_LOGIN"], "event param has earned badges");
-      equal(Server.behaviors.LOGGED_IN, 1, "LOGGED_IN behavior credited");
+    var earned = false;
+    Server.flushResponses();
+    ok(!("FIRST_LOGIN" in badger.earnedBadges),
+       "badger.earnedBadges does not contain the FIRST_LOGIN badge");
+    badger.on('change:earnedBadges', function() {
       ok("FIRST_LOGIN" in badger.earnedBadges,
          "badger.earnedBadges contains the FIRST_LOGIN badge");
+      earned = true;
+    });
+    badger.on('award', function(badges) {
+      ok(earned, "changed:earnedBadges triggered before award");
+      deepEqual(badges, ["FIRST_LOGIN"], "event param has earned badges");
+      equal(Server.behaviors.LOGGED_IN, 1, "LOGGED_IN behavior credited");
       deepEqual(badger.earnedBadges["FIRST_LOGIN"], {
         issuedOn: 12345,
         assertionUrl: "http://clopenbadger/foo@bar.org/FIRST_LOGIN",
