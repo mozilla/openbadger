@@ -19,6 +19,7 @@
     <script src="../js/require-config.js"></script>
     <script src="../js/require.min.js"></script>
     <script>
+    QUnit.config.testTimeout = 5000;
     defineTests.run(["test/all-tests"]);
     
     if (location.search.match(/externalreporter=1/))
