@@ -33,6 +33,14 @@ defineTests([
       });
     }
   });
+
+  asyncTest("change:unreadBadgeCount is broadcast", function() {
+    badger.on('change:unreadBadgeCount', function() {
+      equal(badger.unreadBadgeCount, 0,
+            "badger.unreadBadgeCount matches our expectations");
+      start();
+    });
+  });
   
   asyncTest("change:availableBadges is broadcast", function() {
     badger.on('change:availableBadges', function() {
@@ -55,10 +63,17 @@ defineTests([
   
   asyncTest("award is broadcast", function() {
     var earned = false;
+    var unread = false;
     Server.flushResponses();
     ok(!("FIRST_LOGIN" in badger.earnedBadges),
        "badger.earnedBadges does not contain the FIRST_LOGIN badge");
+    badger.on('change:unreadBadgeCount', function() {
+      unread = true;
+      equal(badger.unreadBadgeCount, 1, "badger.unreadBadgeCount is 1");
+    });
     badger.on('change:earnedBadges', function() {
+      ok(unread,
+         "change:unreadBadgeCount triggered before changed:earnedBadges");
       ok("FIRST_LOGIN" in badger.earnedBadges,
          "badger.earnedBadges contains the FIRST_LOGIN badge");
       earned = true;

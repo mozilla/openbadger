@@ -1,14 +1,34 @@
 "use strict";
 
 define(["jquery", "backbone-events"], function($, BackboneEvents) {
+  function countUnreadBadges(earned) {
+    var unread = 0;
+    Object.keys(earned).forEach(function(shortname) {
+      if (!earned[shortname].isRead)
+        unread++;
+    });
+    return unread;
+  }
+  
+  function updateunreadBadgeCount(badger) {
+    var unreadBadgeCount = countUnreadBadges(badger.earnedBadges);
+    if (unreadBadgeCount !== badger.unreadBadgeCount) {
+      badger.unreadBadgeCount = unreadBadgeCount;
+      badger.trigger("change:unreadBadgeCount");
+    }
+  }
+  
   return function Clopenbadger(options) {
     var server = options.server;
     var token = options.token;
     var email = options.email;
     var self = {
-      availableBadges: {},
-      earnedBadges: {},
+      availableBadges: undefined,
+      earnedBadges: undefined,
+      unreadBadgeCount: undefined,
       credit: function(shortname) {
+        // TODO: Should we wait for available/earned badges to be registered
+        // before sending this?
         $.ajax({
           type: 'POST',
           url: server + '/v1/user/behavior/' + shortname + '/credit',
@@ -21,6 +41,7 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
             // TODO: Check for errors.
             if (data.status == "awarded") {
               $.extend(self.earnedBadges, data.badges);
+              updateunreadBadgeCount(self);
               self.trigger("change:earnedBadges");
               self.trigger("award", Object.keys(data.badges));
             }
@@ -45,6 +66,7 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
     });
     
     $.when(availableReq, earnedReq).done(function() {
+      updateunreadBadgeCount(self);
       self.trigger("change:availableBadges");
       self.trigger("change:earnedBadges");
     });
