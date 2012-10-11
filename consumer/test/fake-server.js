@@ -12,10 +12,24 @@ define(["jquery"], function($) {
     return transport(options, originalOptions, jqXHR);
   });
   
-  return {
+  var self = {
+    availableBadges: {},
+    earnedBadges: {},
+    behaviors: {},
+    queuedAward: null,
+    queueAward: function(badges) {
+      this.queuedAward = badges;
+    },
     setup: function setup(options) {
       var urlPrefix = options.urlPrefix;
       var availableBadges = options.availableBadges || {};
+      var behaviors = options.behaviors || {};
+      var earnedBadges = options.earnedBadges || {};
+      
+      this.availableBadges = availableBadges;
+      this.behaviors = behaviors;
+      this.earnedBadges = earnedBadges;
+      this.queuedAward = null;
       
       transport = function(options, originalOptions, jqXHR) {
         if (options.url.indexOf(urlPrefix) != 0)
@@ -23,7 +37,8 @@ define(["jquery"], function($) {
 
         var path = originalOptions.url.slice(urlPrefix.length);
         var authInfo = {prn: ""};
-        
+
+        console.log(options.type, options.url);
         if (originalOptions.data && originalOptions.data.auth)
           authInfo = JSON.parse(originalOptions.data.auth);
         return {
@@ -34,8 +49,10 @@ define(["jquery"], function($) {
               }, 0);
             }
             
-            function respondWithJSON(obj) {
-              return respond(200, "OK", {json: copyObject(obj)}, {
+            function respondWithJSON(obj, status, statusText) {
+              status = status || 200;
+              statusText = statusText || "OK";
+              return respond(status, statusText, {json: copyObject(obj)}, {
                 'content-type': 'application/json'
               });
             }
@@ -55,6 +72,26 @@ define(["jquery"], function($) {
                   badges: {}
                 });
               }
+            } else if (options.type == "POST") {
+              var shortnameRegexp = /^\/v1\/user\/behavior\/(.*)\/credit$/;
+              var creditMatch = path.match(shortnameRegexp);
+              if (creditMatch) {
+                var shortname = creditMatch[1];
+                if (!behaviors[shortname])
+                  behaviors[shortname] = 0;
+                behaviors[shortname]++;
+                if (self.queuedAward) {
+                  var awardedBadges = self.queuedAward;
+                  self.queuedAward = null;
+                  return respondWithJSON({
+                    status: "awarded",
+                    badges: awardedBadges
+                  }, 201, "Created");
+                } else
+                  return respondWithJSON({
+                    status: "ok"
+                  });
+              }
             }
             
             return respond(404, "Not Found", {
@@ -70,4 +107,6 @@ define(["jquery"], function($) {
       };
     }
   };
+  
+  return self;
 });

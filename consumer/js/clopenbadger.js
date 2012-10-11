@@ -7,7 +7,21 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
     var email = options.email;
     var self = {
       availableBadges: {},
-      earnedBadges: {}
+      earnedBadges: {},
+      credit: function(shortname) {
+        $.ajax({
+          type: 'POST',
+          url: server + '/v1/user/behavior/' + shortname + '/credit',
+          dataType: 'json',
+          success: function(data) {
+            // TODO: Check for errors.
+            if (data.status == "awarded") {
+              $.extend(self.earnedBadges, data.badges);
+              self.trigger("award", Object.keys(data.badges));
+            }
+          }
+        });
+      }
     };
     
     BackboneEvents.mixin(self);
