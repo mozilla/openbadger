@@ -34,7 +34,7 @@ defineTests([
     }
   });
 
-  asyncTest("change:unreadBadgeCount is broadcast", function() {
+  asyncTest("change:unreadBadgeCount is broadcast on init", function() {
     badger.on('change:unreadBadgeCount', function() {
       equal(badger.unreadBadgeCount, 0,
             "badger.unreadBadgeCount matches our expectations");
@@ -42,7 +42,7 @@ defineTests([
     });
   });
   
-  asyncTest("change:availableBadges is broadcast", function() {
+  asyncTest("change:availableBadges is broadcast on init", function() {
     badger.on('change:availableBadges', function() {
       deepEqual(badger.availableBadges, availableBadges,
                 "badger.availableBadges matches our expectations");
@@ -50,7 +50,7 @@ defineTests([
     });
   });
   
-  asyncTest("change:earnedBadges is broadcast", function() {
+  asyncTest("change:earnedBadges is broadcast on init", function() {
     var available = false;
     badger.on('change:availableBadges', function() { available = true; });
     badger.on('change:earnedBadges', function() {
@@ -59,6 +59,25 @@ defineTests([
                 "badger.earnedBadges matches our expectations");
       start();
     });
+  });
+  
+  asyncTest("markAllBadgesAsRead() changes unreadBadgeCount", function() {
+    var unread = false;
+    Server.flushResponses();
+    badger.on('award', function(badges) {
+      equal(badger.unreadBadgeCount, 1, "unreadBadgeCount is 1");
+      badger.on('change:unreadBadgeCount', function() {
+        unread = true;
+        equal(badger.unreadBadgeCount, 0, "unreadBadgeCount is cleared");
+      });
+      badger.on('change:earnedBadges', function() {
+        ok(unread,
+           "change:unreadBadgeCount triggered before changed:earnedBadges");
+        start();
+      });
+      badger.markAllBadgesAsRead();
+    });
+    badger.credit('LOGGED_IN');
   });
   
   asyncTest("award is broadcast", function() {

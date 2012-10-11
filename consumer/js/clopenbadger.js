@@ -26,6 +26,29 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
       availableBadges: undefined,
       earnedBadges: undefined,
       unreadBadgeCount: undefined,
+      markAllBadgesAsRead: function() {
+        if (self.unreadBadgeCount == 0)
+          return;
+        $.ajax({
+          type: 'POST',
+          url: server + '/v1/user/mark-all-badges-as-read',
+          dataType: 'json',
+          data: {
+            auth: token,
+            email: email
+          },
+          success: function(data) {
+            // TODO: Check for errors.
+            if (data.status == "ok") {
+              Object.keys(self.earnedBadges).forEach(function(shortname) {
+                self.earnedBadges[shortname].isRead = true;
+              });
+              updateunreadBadgeCount(self);
+              self.trigger("change:earnedBadges");
+            }
+          }
+        });
+      },
       credit: function(shortname) {
         // TODO: Should we wait for available/earned badges to be registered
         // before sending this?

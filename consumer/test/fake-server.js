@@ -105,6 +105,14 @@ define(["jquery"], function($) {
             } else if (options.type == "POST") {
               if (authInfo.prn != originalOptions.data.email)
                 throw new Error("email param != JWT claim set principal");
+
+              if (path == "/v1/user/mark-all-badges-as-read") {
+                Object.keys(earnedBadges).forEach(function(shorname) {
+                  earnedBadges[shortname].isRead = true;
+                });
+                return respondWithJSON({status: "ok"});
+              }
+
               var shortnameRegexp = /^\/v1\/user\/behavior\/(.*)\/credit$/;
               var creditMatch = path.match(shortnameRegexp);
               if (creditMatch) {
