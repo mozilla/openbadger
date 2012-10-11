@@ -5,6 +5,30 @@ define(["jquery"], function($) {
     return JSON.parse(JSON.stringify(obj));
   }
   
+  function getBadgesToAward(available, earned, behaviors) {
+    var awards = [];
+    Object.keys(available).forEach(function(badgeName) {
+      var badge = available[badgeName];
+      var behaviorName = badge.behavior;
+      if (badgeName in earned)
+        return;
+      if (behaviors[badge.behavior] >= badge.score)
+        awards.push(badgeName);
+    });
+    return awards;
+  }
+  
+  function logExceptions(fn) {
+    return function() {
+      try {
+        return fn.apply(this, arguments);
+      } catch (e) {
+        console.log(e.toString());
+        throw e;
+      }
+    };
+  }
+  
   var transport = function() {};
   
   // http://api.jquery.com/extending-ajax/#Transports
@@ -16,20 +40,16 @@ define(["jquery"], function($) {
     availableBadges: {},
     earnedBadges: {},
     behaviors: {},
-    queuedAward: null,
-    queueAward: function(badges) {
-      this.queuedAward = badges;
-    },
     setup: function setup(options) {
       var urlPrefix = options.urlPrefix;
       var availableBadges = options.availableBadges || {};
       var behaviors = options.behaviors || {};
       var earnedBadges = options.earnedBadges || {};
       
+      this.time = options.time;
       this.availableBadges = availableBadges;
       this.behaviors = behaviors;
       this.earnedBadges = earnedBadges;
-      this.queuedAward = null;
       
       transport = function(options, originalOptions, jqXHR) {
         if (options.url.indexOf(urlPrefix) != 0)
@@ -42,7 +62,7 @@ define(["jquery"], function($) {
         if (originalOptions.data && originalOptions.data.auth)
           authInfo = JSON.parse(originalOptions.data.auth);
         return {
-          send: function(headers, completeCallback) {
+          send: logExceptions(function(headers, completeCallback) {
             function respond(status, statusText, responses, headers) {
               setTimeout(function() {
                 completeCallback(status, statusText, responses, headers);
@@ -73,6 +93,8 @@ define(["jquery"], function($) {
                 });
               }
             } else if (options.type == "POST") {
+              if (authInfo.prn != originalOptions.data.email)
+                throw new Error("email param != JWT claim set principal");
               var shortnameRegexp = /^\/v1\/user\/behavior\/(.*)\/credit$/;
               var creditMatch = path.match(shortnameRegexp);
               if (creditMatch) {
@@ -80,9 +102,19 @@ define(["jquery"], function($) {
                 if (!behaviors[shortname])
                   behaviors[shortname] = 0;
                 behaviors[shortname]++;
-                if (self.queuedAward) {
-                  var awardedBadges = self.queuedAward;
-                  self.queuedAward = null;
+                var awards = getBadgesToAward(availableBadges, earnedBadges,
+                                              behaviors);
+                if (awards.length) {
+                  var awardedBadges = {};
+                  awards.forEach(function(badgeName) {
+                    awardedBadges[badgeName] = {
+                      issuedOn: self.time,
+                      assertionUrl: urlPrefix + "/" +
+                                    originalOptions.data.email + "/" +
+                                    badgeName,
+                      isRead: false
+                    };
+                  });
                   return respondWithJSON({
                     status: "awarded",
                     badges: awardedBadges
@@ -99,7 +131,7 @@ define(["jquery"], function($) {
             }, {
               'content-type': 'text/plain'
             });
-          },
+          }),
           abort: function() {
             throw new Error("abort() is not implemented!");
           }

@@ -14,7 +14,7 @@ defineTests([
       "criteria": "Can log into a site that uses Persona for auth.",
       "image": "https://wiki.mozilla.org/images/b/bb/Merit-badge.png",
       "behavior": "LOGGED_IN",
-      "score": "1",
+      "score": 1,
       "prerequisites": []
     }
   };
@@ -23,7 +23,8 @@ defineTests([
     setup: function() {
       Server.setup({
         urlPrefix: fakeServerURL,
-        availableBadges: availableBadges
+        availableBadges: availableBadges,
+        time: 12345
       });
       badger = Clopenbadger({
         server: fakeServerURL,
@@ -53,22 +54,16 @@ defineTests([
   });
   
   asyncTest("award is broadcast", function() {
-    var badgesToEarn = {
-      FIRST_LOGIN: {
-        issuedOn: 1344816000,
-        assertionUrl: fakeServerURL + "/eojga",
-        isRead: false
-      }
-    };
-    Server.queueAward(badgesToEarn);
     badger.on('award', function(badges) {
       deepEqual(badges, ["FIRST_LOGIN"], "event param has earned badges");
       equal(Server.behaviors.LOGGED_IN, 1, "LOGGED_IN behavior credited");
       ok("FIRST_LOGIN" in badger.earnedBadges,
          "badger.earnedBadges contains the FIRST_LOGIN badge");
-      deepEqual(badger.earnedBadges["FIRST_LOGIN"],
-                badgesToEarn["FIRST_LOGIN"],
-                "badger.earnedBadges['FIRST_LOGIN'] matches expectations");
+      deepEqual(badger.earnedBadges["FIRST_LOGIN"], {
+        issuedOn: 12345,
+        assertionUrl: "http://clopenbadger/foo@bar.org/FIRST_LOGIN",
+        isRead: false
+      }, "badger.earnedBadges['FIRST_LOGIN'] matches expectations");
       start();
     });
     badger.credit('LOGGED_IN');

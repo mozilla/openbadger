@@ -13,6 +13,10 @@ define(["jquery", "backbone-events"], function($, BackboneEvents) {
           type: 'POST',
           url: server + '/v1/user/behavior/' + shortname + '/credit',
           dataType: 'json',
+          data: {
+            auth: token,
+            email: email
+          },
           success: function(data) {
             // TODO: Check for errors.
             if (data.status == "awarded") {
