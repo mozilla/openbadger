@@ -1,14 +1,20 @@
-{% extends 'admin/base.html' %}
+{% extends "admin/base.html" %}
 
-{% block 'extra_head' %}
+{% block "page" %}
+  show-badge
+{% endblock %}
+
+{% block "header" %}
 <script src="/js/admin.js"></script>
 {% endblock %}
 
-{% block 'main' %}
-
+{% block "main" %}
 <div class="row">
   <div class="span8">
     <h2>{{ badge.name }}</h2>
+    {% if badge.image %}
+      <img class="badge-image" src="{{ badge.imageDataURI() }}">
+    {% endif %}
     <dl>
       <dt>Shortname</dt>
       <dd>{{ badge.shortname }}</dd>
@@ -69,7 +75,7 @@
       {% endfor %}
     </ul>
     {% else %}
-      <p id="no_triggers">None!<p>
+      <p id="no-triggers">None!<p>
     {% endif %}
   </div>
 </div><!--end row 1-->

@@ -5,7 +5,7 @@ var util = require('util');
 exports.login = function login(req, res) {
   var path = req.query['path'] || req.body['path'] || '/admin';
   if (req.method === 'GET')
-    return res.render("login.html", {path: path});
+    return res.render('admin/login.html', {path: path});
   var assertion = req.body.assertion;
   persona.verify(assertion, function (err, email) {
     if (err)
@@ -24,11 +24,22 @@ exports.logout = function logout(req, res) {
 };
 
 exports.requireAuth = function requireAuth(options) {
-  var whitelist = options.whitelist || [];
+  var whitelist = (options.whitelist || []).map(function (entry) {
+    entry = entry.replace('*', '.*?');
+    return RegExp('^' + entry + '$');
+  });
+  function isExempt(path) {
+    var i = whitelist.length;
+    while (i--) {
+      if (whitelist[i].test(path))
+        return true;
+    }
+    return false;
+  }
   return function (req, res, next) {
     var path = req.path;
     var user = req.session.user;
-    if (whitelist.indexOf(path) > -1)
+    if (isExempt(path))
       return next();
     if (!user || !userIsAuthorized(user))
       return res.redirect(options.redirectTo + '?path=' + path);

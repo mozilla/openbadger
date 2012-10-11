@@ -1,5 +1,4 @@
 node_modules
 *~
-/CONFIG.sh
-
-/heroku.sh
+/bin/config.sh
+/bin/heroku.sh

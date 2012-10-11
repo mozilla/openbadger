@@ -30,7 +30,11 @@ app.configure(function () {
   app.use(middleware.session());
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(user.requireAuth({
-    whitelist: ['/login', '/logout'],
+    whitelist: [
+      '/login',
+      '/logout',
+      '/badge/*'
+    ],
     redirectTo: '/login'
   }));
   app.use(app.router);
@@ -40,7 +44,7 @@ app.configure('development', function () {
   app.use(express.errorHandler());
 });
 
-// getting a badge
+// show `create a badge` form
 app.get('/admin/badge', admin.newBadgeForm);
 
 // creating a badge from post
@@ -52,7 +56,7 @@ app.get('/admin', [badge.findAll], admin.badgeIndex);
 app.get('/admin/badges', [badge.findAll], admin.badgeIndex);
 
 // middleware for finding badge by shortname
-app.all('/admin/badge/:shortname*', badge.findByShortname({
+app.all('/admin/badge/:shortname*', badge.findByShortName({
   container: 'param',
   field: 'shortname',
   required: true
@@ -74,6 +78,16 @@ app.get('/admin/behavior', admin.newBehaviorForm);
 
 // create a new behavior
 app.post('/admin/behavior', behavior.create);
+
+// get the badge image
+app.get('/badge/image/:shortname.png', [
+  badge.findByShortName({
+    container: 'param',
+    field: 'shortname',
+    required: true
+  })
+], badge.image);
+
 app.get('/login', user.login);
 app.post('/login', user.login);
 app.get('/logout', user.logout);

@@ -71,12 +71,12 @@ var BadgeSchema = new Schema({
 
 var Badge = db.model('Badge', BadgeSchema);
 
-function setShortnameDefault(next) {
+function setShortNameDefault(next) {
   if (!this.shortname && this.name)
     this.shortname = util.slugify(this.name);
   next();
 }
-BadgeSchema.pre('validate', setShortnameDefault);
+BadgeSchema.pre('validate', setShortNameDefault);
 
 Badge.findByBehavior = function findByBehavior(shortname, callback) {
   var searchTerms = { behaviors: { '$elemMatch': { shortname: shortname }}};
@@ -91,6 +91,15 @@ Badge.prototype.removeBehavior = function removeBehavior(shortname) {
   });
   this.behaviors = behaviors;
   return this;
+};
+
+Badge.prototype.imageDataURI = function imageDataURI() {
+  // #TODO: don't hardcode PNG maybe
+  var base64 = '';
+  var format = 'data:image/png;base64,%s';
+  if (this.image)
+    base64 = this.image.toString('base64');
+  return util.format('data:image/png;base64,%s', base64);
 };
 
 module.exports = Badge;

@@ -1,11 +1,11 @@
-{% extends 'admin/base.html' %}
-{% block 'main' %}
+{% extends "admin/base.html" %}
+{% block "main" %}
 <form method="post" action="?">
   <legend>
     Create a new behavior
   </legend>
-  {% if badgeShortname %}
-    <input type="hidden" name="for-badge" value="{{ badgeShortname }}">
+  {% if badgeShortName %}
+    <input type="hidden" name="for-badge" value="{{ badgeShortName }}">
   {% endif %}
 
   <div>
@@ -32,7 +32,6 @@
 </form>
 {% endblock %}
 
-{% block 'footerScripts' %}
+{% block "footer" %}
 <script src="/js/behaviors.js"></script>
-
 {% endblock %}
