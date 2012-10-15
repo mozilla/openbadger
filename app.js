@@ -1,24 +1,22 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var nunjucks = require('nunjucks');
 var util = require('util');
 
 var middleware = require('./middleware');
-var routes = require('./routes');
+var template = require('./template');
+
 var user = require('./routes/user');
 var behavior = require('./routes/behavior');
 var badge = require('./routes/badge');
 var admin = require('./routes/admin');
-
+var issuer = require('./routes/issuer');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
 var env = app.env = require('./lib/environment');
 
-(new nunjucks.Environment(
-  new nunjucks.FileSystemLoader('views')
-)).express(app);
+template.express(app);
 
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
@@ -28,6 +26,7 @@ app.configure(function () {
   app.use(express.methodOverride());
   app.use(middleware.cookieParser());
   app.use(middleware.session());
+  app.use(middleware.flash());
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(user.requireAuth({
     whitelist: [
@@ -37,12 +36,20 @@ app.configure(function () {
     ],
     redirectTo: '/login'
   }));
+  app.use(issuer.getIssuerConfig());
   app.use(app.router);
 });
 
 app.configure('development', function () {
   app.use(express.errorHandler());
 });
+
+/** Routes */
+// configuration page
+app.get('/admin/config', admin.configure);
+
+// updating issuer from post
+app.post('/admin/config', issuer.update);
 
 // show `create a badge` form
 app.get('/admin/badge', admin.newBadgeForm);
@@ -65,7 +72,7 @@ app.all('/admin/badge/:shortname*', badge.findByShortName({
 // show edit form for single badge
 app.get('/admin/badge/:shortname', [
   behavior.findAll
-], admin.show);
+], admin.showBadge);
 
 // add a behavior to a badge by post
 app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
@@ -88,14 +95,13 @@ app.get('/badge/image/:shortname.png', [
   })
 ], badge.image);
 
-app.get('/login', user.login);
+// show login page
+app.get('/login', admin.login);
+
+// deal with persona response
 app.post('/login', user.login);
+
+// log the user out
 app.get('/logout', user.logout);
-app.get('/behaviors', behavior.readAll);
-app.all('/behavior/:name', behavior.findByName);
-app.get('/behavior/:name', behavior.readOne);
-app.put('/behavior/:name', behavior.update);
-app.patch('/behavior/:name', behavior.update);
-app.delete('/behavior/:name', behavior.destroy);
 
 module.exports = app;
