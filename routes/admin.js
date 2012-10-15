@@ -11,7 +11,8 @@ exports.index = function (req, res) {
 exports.login = function (req, res) {
   var path = req.query['path'] || req.body['path'] || '/admin';
   return res.render('admin/login.html', {
-    issuer: 'exempt', // hackish way to prevent config warning
+    issuer: req.issuer,
+    issuerCheckExempt: true,
     path: path
   });
 }
@@ -36,11 +37,18 @@ exports.badgeIndex = function (req, res) {
   });
 };
 
-exports.show = function (req, res) {
+exports.showBadge = function (req, res) {
   return res.render('admin/show-badge.html', {
     issuer: req.issuer,
     defaultBehavior: req.query['behavior'],
     badge: req.badge,
     behaviors: req.behaviors
+  });
+};
+
+exports.configure = function (req, res) {
+  return res.render('admin/config.html', {
+    issuer: req.issuer,
+    issuerCheckExempt: true
   });
 };

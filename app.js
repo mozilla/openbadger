@@ -45,6 +45,10 @@ app.configure('development', function () {
   app.use(express.errorHandler());
 });
 
+/** Routes */
+// configuration page
+app.get('/admin/config', admin.configure);
+
 // show `create a badge` form
 app.get('/admin/badge', admin.newBadgeForm);
 
@@ -66,7 +70,7 @@ app.all('/admin/badge/:shortname*', badge.findByShortName({
 // show edit form for single badge
 app.get('/admin/badge/:shortname', [
   behavior.findAll
-], admin.show);
+], admin.showBadge);
 
 // add a behavior to a badge by post
 app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
@@ -88,6 +92,7 @@ app.get('/badge/image/:shortname.png', [
     required: true
   })
 ], badge.image);
+
 
 app.get('/login', admin.login);
 app.post('/login', user.login);

@@ -47,12 +47,14 @@
 
     <div class="container">
       {% if not issuer %}
-        <div class="alert alert-error">
-          <button type="button" class="close" data-dismiss="alert">×</button>
-          <strong>Issuer configuration needs setting.</strong>
-          <a href="/admin/config">Head over to the configuration page</a> and
-          set that up. You can't issue badges until it's done.
-        </div>
+        {% if not issuerCheckExempt %}
+          <div class="alert alert-error">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>Issuer configuration needs setting.</strong>
+            <a href="/admin/config">Head over to the configuration page</a> and
+            set that up. You can't issue badges until it's done.
+          </div>
+        {% endif %}
       {% endif %}
       
       {% block "main" %}{% endblock %}
