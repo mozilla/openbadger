@@ -48,6 +48,9 @@ app.configure('development', function () {
 // configuration page
 app.get('/admin/config', admin.configure);
 
+// updating issuer from post
+app.post('/admin/config', issuer.update);
+
 // show `create a badge` form
 app.get('/admin/badge', admin.newBadgeForm);
 
@@ -92,15 +95,13 @@ app.get('/badge/image/:shortname.png', [
   })
 ], badge.image);
 
-
+// show login page
 app.get('/login', admin.login);
+
+// deal with persona response
 app.post('/login', user.login);
+
+// log the user out
 app.get('/logout', user.logout);
-app.get('/behaviors', behavior.readAll);
-app.all('/behavior/:name', behavior.findByName);
-app.get('/behavior/:name', behavior.readOne);
-app.put('/behavior/:name', behavior.update);
-app.patch('/behavior/:name', behavior.update);
-app.delete('/behavior/:name', behavior.destroy);
 
 module.exports = app;
