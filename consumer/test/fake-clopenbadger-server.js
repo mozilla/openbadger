@@ -127,7 +127,7 @@ define(["jquery"], function($) {
                 if (awards.length) {
                   var awardedBadges = {};
                   awards.forEach(function(badgeName) {
-                    awardedBadges[badgeName] = {
+                    earnedBadges[badgeName] = awardedBadges[badgeName] = {
                       issuedOn: self.time,
                       assertionUrl: urlPrefix + "/" +
                                     originalOptions.data.email + "/" +
