@@ -24,6 +24,7 @@ defineTests([
       Server.setup({
         urlPrefix: fakeServerURL,
         availableBadges: availableBadges,
+        parseToken: true,
         time: 12345
       });
       badger = Clopenbadger({

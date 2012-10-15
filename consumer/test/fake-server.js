@@ -53,7 +53,8 @@ define(["jquery"], function($) {
       var availableBadges = options.availableBadges || {};
       var behaviors = options.behaviors || {};
       var earnedBadges = options.earnedBadges || {};
-      
+      var parseToken = options.parseToken || false;
+
       this.time = options.time;
       this.availableBadges = availableBadges;
       this.behaviors = behaviors;
@@ -67,7 +68,8 @@ define(["jquery"], function($) {
         var authInfo = {prn: ""};
 
         console.log(options.type, options.url);
-        if (originalOptions.data && originalOptions.data.auth)
+        if (parseToken && originalOptions.data &&
+            originalOptions.data.auth)
           authInfo = JSON.parse(originalOptions.data.auth);
         return {
           send: logExceptions(function(headers, completeCallback) {
@@ -94,7 +96,7 @@ define(["jquery"], function($) {
                   badges: availableBadges
                 });
               } else if (path == "/v1/user") {
-                if (authInfo.prn != originalOptions.data.email)
+                if (parseToken && authInfo.prn != originalOptions.data.email)
                   throw new Error("email param != JWT claim set principal");
                 return respondWithJSON({
                   status: "ok",
@@ -103,7 +105,7 @@ define(["jquery"], function($) {
                 });
               }
             } else if (options.type == "POST") {
-              if (authInfo.prn != originalOptions.data.email)
+              if (parseToken && authInfo.prn != originalOptions.data.email)
                 throw new Error("email param != JWT claim set principal");
 
               if (path == "/v1/user/mark-all-badges-as-read") {
