@@ -109,7 +109,7 @@ define(["jquery"], function($) {
                 throw new Error("email param != JWT claim set principal");
 
               if (path == "/v1/user/mark-all-badges-as-read") {
-                Object.keys(earnedBadges).forEach(function(shorname) {
+                Object.keys(earnedBadges).forEach(function(shortname) {
                   earnedBadges[shortname].isRead = true;
                 });
                 return respondWithJSON({status: "ok"});
@@ -128,7 +128,7 @@ define(["jquery"], function($) {
                   var awardedBadges = {};
                   awards.forEach(function(badgeName) {
                     earnedBadges[badgeName] = awardedBadges[badgeName] = {
-                      issuedOn: self.time,
+                      issuedOn: self.time || Math.floor(Date.now() / 1000),
                       assertionUrl: urlPrefix + "/" +
                                     originalOptions.data.email + "/" +
                                     badgeName,
