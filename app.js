@@ -5,12 +5,11 @@ var nunjucks = require('nunjucks');
 var util = require('util');
 
 var middleware = require('./middleware');
-var routes = require('./routes');
 var user = require('./routes/user');
 var behavior = require('./routes/behavior');
 var badge = require('./routes/badge');
 var admin = require('./routes/admin');
-
+var issuer = require('./routes/issuer');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -28,6 +27,7 @@ app.configure(function () {
   app.use(express.methodOverride());
   app.use(middleware.cookieParser());
   app.use(middleware.session());
+  app.use(middleware.flash());
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(user.requireAuth({
     whitelist: [
@@ -37,6 +37,7 @@ app.configure(function () {
     ],
     redirectTo: '/login'
   }));
+  app.use(issuer.getIssuerConfig());
   app.use(app.router);
 });
 
@@ -88,7 +89,7 @@ app.get('/badge/image/:shortname.png', [
   })
 ], badge.image);
 
-app.get('/login', user.login);
+app.get('/login', admin.login);
 app.post('/login', user.login);
 app.get('/logout', user.logout);
 app.get('/behaviors', behavior.readAll);

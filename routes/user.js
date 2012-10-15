@@ -4,8 +4,6 @@ var util = require('util');
 
 exports.login = function login(req, res) {
   var path = req.query['path'] || req.body['path'] || '/admin';
-  if (req.method === 'GET')
-    return res.render('admin/login.html', {path: path});
   var assertion = req.body.assertion;
   persona.verify(assertion, function (err, email) {
     if (err)
