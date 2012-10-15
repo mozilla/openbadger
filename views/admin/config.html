@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+{% block "main" %}
+
+<form method="post" id="config-form" action="?">
+  <legend>Issuer Details</legend>
+  <div>
+    <label for="issuer-name">Name</label>
+    <input type="text"
+           name="name"
+           id="issuer-name"
+           placeholder="Widgets, Inc."
+           maxlength="128"
+           value="{{issuer.name | undef}}"
+           required>
+    <span class="help-block">
+      Name of the issuer. This should be the top-level name of your
+      institution, e.g. "Mozilla"
+    </span>
+  </div>
+
+  <div>
+    <label for="issuer-org">Organization (optional)</label>
+    <input type="text"
+           name="org"
+           id="issuer-org"
+           maxlength="128"
+           value="{{issuer.org | undef}}"
+           placeholder="Organization">
+    <span class="help-block">
+      Organization for your issuer. This should be the organization
+      or group with your institution, e.g. "Webmaker"
+    </span>
+ </div>
+
+  <div>
+    <label for="issuer-origin">Origin</label>
+    <input type="text"
+           name="origin"
+           id="issuer-origin"
+           value="{{issuer.origin | undef}}"
+           placeholder="http://example.org"
+           pattern="^(https?):\/\/[^\s\/$.?#].[^\s\/]*\/?$"
+           required>
+    <span class="help-block">
+      Website origin. It should be the protocol, domain (with any
+      subdomains), optional port, and that's it. Something like
+      "http://webmaker.org" is good;
+      "http://webmaker.org/badges/are/great" is not a valid origin.
+    </span>
+  </div>
+
+  <div>
+    <label for="issuer-contact">Contact Email</label>
+    <input type="text"
+           name="contact"
+           id="issuer-contact"
+           value="{{issuer.contact | undef}}"
+           placeholder="badges@example.org"
+           pattern="[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?"
+           required>
+    <span class="help-block">
+      Contact at your organization for any badge-related issues. It's
+      probably best to make this email something that won't change, so
+      don't make it a specific person and use a forwarding email address
+      instead.
+    </span>
+  </div>
+
+  <div class="form-actions">
+    <button id="save-issuer" type="submit" class="btn btn-primary">Save Configuration</button>
+  </div>
+</form>
+
+{% endblock %}

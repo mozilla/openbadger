@@ -1,6 +1,7 @@
 var env = require('./lib/environment');
 var express = require('express');
 var RedisStore = require('connect-redis')(express);
+var flash = require('connect-flash');
 
 exports.cookieParser = function () {
   var secret = env.get('secret');
@@ -19,3 +20,5 @@ exports.session = function () {
     secret: env.get('secret'),
   });
 };
+
+exports.flash = flash;
