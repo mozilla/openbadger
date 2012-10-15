@@ -1,10 +1,11 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
-var nunjucks = require('nunjucks');
 var util = require('util');
 
 var middleware = require('./middleware');
+var template = require('./template');
+
 var user = require('./routes/user');
 var behavior = require('./routes/behavior');
 var badge = require('./routes/badge');
@@ -15,9 +16,7 @@ var app = express();
 var logger = app.logger = require('./lib/logger');
 var env = app.env = require('./lib/environment');
 
-(new nunjucks.Environment(
-  new nunjucks.FileSystemLoader('views')
-)).express(app);
+template.express(app);
 
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
