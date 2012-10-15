@@ -2,7 +2,7 @@
 
 defineTests([
   "jquery",
-  "test/fake-server",
+  "test/fake-clopenbadger-server",
   "clopenbadger"
 ], function($, Server, Clopenbadger) {
   var badger;
