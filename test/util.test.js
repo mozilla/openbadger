@@ -9,12 +9,31 @@ test('util.slugify', function (t) {
   t.end();
 });
 
-
 test('util.sha256', function (t) {
   var crypto = require('crypto');
   var sum = crypto.createHash('sha256')
   var expect = 'sha256$' + sum.update('awesomerad').digest('hex');
   var result = util.sha256('awesome', 'rad');
   t.same(result, expect);
+  t.end();
+});
+
+test('util.randomInt', function (t) {
+  var times = 10000;
+  var max = 10;
+  while (times--) {
+    var integer = util.randomInt(max);
+    if (integer >= max || integer < 0) {
+      t.fail('integer should not be outside bounds');
+      break;
+    }
+  }
+  t.pass('no failures');
+  t.end();
+});
+
+test('util.randomString', function (t) {
+  var string = util.randomString(128);
+  t.same(string.length, 128, 'should have the right length');
   t.end();
 });
