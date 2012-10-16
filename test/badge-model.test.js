@@ -1,6 +1,9 @@
 var test = require('./');
+var env = require('../lib/environment');
 var db = require('../models');
 var Badge = require('../models/badge');
+var Issuer = require('../models/issuer');
+var util = require('../lib/util');
 var fs = require('fs');
 var pathutil = require('path');
 
@@ -20,6 +23,11 @@ function validBadge() {
 }
 
 var fixtures = {
+  'issuer': new Issuer({
+    name: 'Badge Authority',
+    org: 'Some Org',
+    contact: 'brian@example.org'
+  }),
   'link-basic': new Badge({
     name: 'Link Badge, basic',
     shortname: 'link-badge-basic',
@@ -156,6 +164,44 @@ test.applyFixtures(fixtures, function () {
     t.same(badge.behaviors.length, 1, 'should have one left');
     t.same(badge.behaviors[0].shortname, 'comment', 'should be the comment one');
     t.end();
+  });
+
+
+  test('Badge#makeAssertion: makes a good assertion', function (t) {
+    var tempenv = { protocol: 'http', host: 'example.org', port: 80 };
+    env.temp(tempenv, function (resetEnv) {
+      var badge = fixtures['comment'];
+      var issuer = fixtures['issuer'];
+      var recipient = 'brian@example.org';
+      var salt = 'salt';
+      var expect = {
+        recipient: util.sha256(recipient, salt),
+        salt: salt,
+        badge: {
+          version: '0.5.0',
+          criteria: badge.absoluteUrl('criteria'),
+          image: badge.absoluteUrl('image'),
+          description: badge.description,
+          name: badge.name,
+          issuer: {
+            name: issuer.name,
+            org: issuer.org,
+            contact: issuer.contact,
+            origin: env.origin()
+          }
+        }
+      };
+      badge.makeAssertion({
+        recipient: recipient,
+        salt: salt,
+      }, {
+        json: false
+      }, function (err, result) {
+        t.same(result, expect);
+        resetEnv();
+        t.end();
+      });
+    });
   });
 
 
