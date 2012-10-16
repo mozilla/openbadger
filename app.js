@@ -87,6 +87,8 @@ app.get('/admin/behavior', admin.newBehaviorForm);
 app.post('/admin/behavior', behavior.create);
 
 // get the badge image
+// XXX: if you change this url you need to change `makeAssertion` in
+//   models/badge.js
 app.get('/badge/image/:shortname.png', [
   badge.findByShortName({
     container: 'param',
