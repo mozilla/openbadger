@@ -95,6 +95,21 @@ Badge.findByBehavior = function findByBehavior(shortnames, callback) {
   return Badge.find(searchTerms, callback);
 };
 
+/**
+ * Get all badges and key by shortname
+ */
+
+Badge.getAll = function getAll(callback) {
+  Badge.find(function (err, badges) {
+    if (err) return callback(err);
+    var byName = badges.reduce(function (result, badge) {
+      result[badge.shortname] = badge;
+      return result;
+    }, {});
+    callback(null, byName);
+  });
+};
+
 
 /**
  * Check if the credits are enough to earn the badge

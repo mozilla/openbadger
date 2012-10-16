@@ -32,7 +32,7 @@ var fixtures = {
   }),
   'link-basic': new Badge({
     name: 'Link Badge, basic',
-    shortname: 'link-badge-basic',
+    shortname: 'link-basic',
     description: 'For doing links.',
     image: asset('sample.png'),
     behaviors: [
@@ -41,7 +41,7 @@ var fixtures = {
   }),
   'link-advanced': new Badge({
     name : 'Link Badge, advanced',
-    shortname: 'link-badge-advanced',
+    shortname: 'link-advanced',
     description: 'For doing lots of links.',
     image: asset('sample.png'),
     behaviors: [
@@ -234,6 +234,18 @@ test.applyFixtures(fixtures, function () {
       t.end();
     });
   });
+
+  test('Badge.getAll: get all the badges keyed by shortname', function (t) {
+    var name = 'link-basic';
+    var expect = fixtures[name];
+    Badge.getAll(function (err, badges) {
+      t.notOk(err, 'should not have any errors');
+      t.ok(badges, 'should have some badges');
+      t.same(badges[name].id, expect.id);
+      t.end();
+    });
+  });
+
 
   test('Badge#removeBehavior', function (t) {
     var badge = validBadge();
