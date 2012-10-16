@@ -89,8 +89,9 @@ BadgeSchema.pre('validate', setShortNameDefault);
  * @param {String} shortname
  */
 
-Badge.findByBehavior = function findByBehavior(shortname, callback) {
-  var searchTerms = { behaviors: { '$elemMatch': { shortname: shortname }}};
+Badge.findByBehavior = function findByBehavior(shortnames, callback) {
+  shortnames = Array.isArray(shortnames) ? shortnames : [shortnames]
+  var searchTerms = { behaviors: { '$elemMatch': { shortname: {'$in': shortnames }}}};
   return Badge.find(searchTerms, callback);
 };
 

@@ -54,6 +54,16 @@ var fixtures = {
     behaviors: [
       { shortname: 'comment', count: 5 }
     ]
+  }),
+  'link-comment': new Badge({
+    name : 'Linking and commenting badge',
+    shortname: 'linke-comment-badge',
+    description: 'For doing lots of comments and links',
+    image: asset('sample.png'),
+    behaviors: [
+      { shortname: 'comment', count: 5 },
+      { shortname: 'link', count: 5 }
+    ]
   })
 };
 
@@ -126,10 +136,26 @@ test.applyFixtures(fixtures, function () {
     Badge.findByBehavior(behavior, function (err, badges) {
       var expectIds = [
         fixtures['link-basic'].id,
-        fixtures['link-advanced'].id
+        fixtures['link-advanced'].id,
+        fixtures['link-comment'].id
       ].sort();
       var actualIds = badges.map(function (o) { return o.id }).sort();
       t.same(actualIds, expectIds, 'should get just the `link` badges back');
+      t.end();
+    });
+  });
+
+  test('Badge.findByBehavior: finding badges by multiple behaviors', function (t) {
+    var behaviors = ['link', 'comment'];
+    Badge.findByBehavior(behaviors, function (err, badges) {
+      var expectIds = [
+        fixtures['link-basic'].id,
+        fixtures['link-advanced'].id,
+        fixtures['link-comment'].id,
+        fixtures['comment'].id,
+      ].sort();
+      var actualIds = badges.map(function (o) { return o.id }).sort();
+      t.same(actualIds, expectIds, 'should get link and comment badges back');
       t.end();
     });
   });
