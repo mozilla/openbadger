@@ -47,7 +47,6 @@ test.applyFixtures({
     BadgeInstance.userHasBadge(user, badge, function (err, hasBadge) {
       t.notOk(err, 'should not have an error');
       t.same(hasBadge, true, 'user should have badge');
-
       BadgeInstance.userHasBadge(user, 'non-existent', function (err, hasBadge) {
         t.notOk(err, 'should not have an error');
         t.same(hasBadge, false, 'user should have badge');

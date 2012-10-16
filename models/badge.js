@@ -103,7 +103,7 @@ Badge.findByBehavior = function findByBehavior(shortnames, callback) {
  * @return {Boolean} whether or not the badge is earned by the credits
  */
 
-Badge.prototype.hasEnoughCredit = function hasEnoughCredit(user) {
+Badge.prototype.earnableBy = function earnableBy(user) {
   return this.behaviors.map(function (behavior) {
     var name = behavior.shortname;
     var minimum = behavior.count;

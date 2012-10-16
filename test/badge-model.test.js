@@ -160,18 +160,20 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  test('Badge#hasEnoughCredit: should have enough', function (t) {
+  test('Badge#earnableBy: should have enough', function (t) {
     var badge = fixtures['link-comment'];
+    var user = { credit: { link: 10, comment: 10 }};
     var expect = true;
-    var result = badge.hasEnoughCredit({ credit: { link: 10, comment: 10 }});
+    var result = badge.earnableBy(user);
     t.same(expect, result);
     t.end();
   });
 
-  test('Badge#hasEnoughCredit: not enough', function (t) {
+  test('Badge#earnableBy: not enough', function (t) {
     var badge = fixtures['link-comment'];
+    var user = { credit: { link: 10 }}
     var expect = false;
-    var result = badge.hasEnoughCredit({ credit: { link: 10 }});
+    var result = badge.earnableBy(user);
     t.same(expect, result);
     t.end();
   });
