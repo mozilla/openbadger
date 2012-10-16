@@ -6,6 +6,8 @@ var util = require('../lib/util');
 var db = require('../models');
 var Badge = require('../models/badge');
 var Issuer = require('../models/issuer');
+var User = require('../models/user');
+var BadgeInstance = require('../models/badge-instance');
 
 function asset(name) {
   return fs.readFileSync(pathutil.join(__dirname, 'assets', name));
@@ -48,7 +50,7 @@ var fixtures = {
   }),
   'comment': new Badge({
     name : 'Commenting badge',
-    shortname: 'comment-badge',
+    shortname: 'comment',
     description: 'For doing lots of comments.',
     image: asset('sample.png'),
     behaviors: [
@@ -57,13 +59,24 @@ var fixtures = {
   }),
   'link-comment': new Badge({
     name : 'Linking and commenting badge',
-    shortname: 'linke-comment-badge',
+    shortname: 'link-comment',
     description: 'For doing lots of comments and links',
     image: asset('sample.png'),
     behaviors: [
       { shortname: 'comment', count: 5 },
       { shortname: 'link', count: 5 }
     ]
+  }),
+  'user': new User({
+    user: 'brian@example.org',
+    credit: {}
+  }),
+  'instance': new BadgeInstance({
+    user: 'brian@example.org',
+    hash: 'hash',
+    badge: 'link-basic',
+    assertion: '{ "assertion" : "yep" }',
+    seen: true
   })
 };
 
@@ -178,6 +191,16 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
+  test('Badge#awardTo: award a badge to a user', function (t) {
+    var badge = fixtures['link-comment'];
+    var email = fixtures['user'].user;
+    badge.award(email, function (err, instance) {
+      t.notOk(err, 'should not have an error');
+      t.ok(instance, 'should have a badge instance');
+      t.same(instance.user, email, 'should be assigned to the right user');
+      t.end();
+    });
+  });
 
   test('Badge default: shortname', function (t) {
     var badge = new Badge({

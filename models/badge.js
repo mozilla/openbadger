@@ -114,6 +114,26 @@ Badge.prototype.earnableBy = function earnableBy(user) {
 };
 
 /**
+ * Award a badge to a user
+ *
+ * @param {String} email
+ */
+
+Badge.prototype.award = function award(email, callback) {
+  // need to load this late to avoid circular dependency race conditions.
+  var BadgeInstance = require('./badge-instance');
+  var instance = new BadgeInstance({
+    user: email,
+    badge: this.shortname
+  });
+  instance.save(function (err, result) {
+    if (err)
+      return callback(err);
+    return callback(null, instance);
+  });
+};
+
+/**
  * Remove a behavior from the list of required behaviors for the badge
  *
  * @param {String} shortname
