@@ -78,6 +78,19 @@ test.applyFixtures({
     });
   });
 
+  test('User#getCreditsAndBadges', function (t) {
+    var user = fixtures['user'];
+    var email = user.user;
+    User.getCreditsAndBadges(email, function (err, result) {
+      t.notOk(err, 'should not have any errors');
+      t.ok(result, 'should have some results');
+      t.ok(result.behaviors.link, 'should have some link behaviors');
+      t.ok(result.badges.comment, 'should have the comment badge');
+      t.end();
+    });
+  });
+
+
   // necessary to stop the test runner
   test('shutting down #', function (t) {
     db.close(); t.end();

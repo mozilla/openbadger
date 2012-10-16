@@ -81,4 +81,37 @@ User.credit = function credit(userEmail, behaviors, callback) {
   });
 };
 
+/**
+ * Get all user's credits and badges by email address.
+ *
+ * @param {String} email
+ */
+
+User.getCreditsAndBadges = function getCreditsAndBadges(email, callback) {
+  var BadgeInstance = require('./badge-instance');
+  var query = { user: email };
+  var exclude = { '__v': 0 };
+  function getUserCredits(callback) {
+    User.findOne(query, exclude, callback);
+  }
+  function getUserBadges(callback) {
+    BadgeInstance.find(query, exclude, callback);
+  }
+  async.parallel({
+    credit: getUserCredits,
+    badges: getUserBadges
+  }, function (err, results) {
+    if (err)
+      return callback(err);
+    var retval = {
+      behaviors: results.credit.credit,
+      badges: results.badges.reduce(function (obj, instance) {
+        obj[instance.badge] = instance;
+        return obj;
+      }, {})
+    };
+    return callback(null, retval);
+  });
+};
+
 module.exports = User;
