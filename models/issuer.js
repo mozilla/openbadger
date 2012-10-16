@@ -12,7 +12,6 @@ function maxLength(field, length) {
 }
 
 var regex = {
-  origin: /^(https?):\/\/[^\s\/$.?#].[^\s\/]*\/?$/,
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
 }
 
@@ -28,12 +27,6 @@ var IssuerSchema = new Schema({
     trim: true,
     required: false,
     validate: maxLength('org', 128)
-  },
-  origin: {
-    type: String,
-    trim: true,
-    required: true,
-    match: regex.origin
   },
   contact: {
     type: String,

@@ -33,23 +33,6 @@
  </div>
 
   <div>
-    <label for="issuer-origin">Origin</label>
-    <input type="text"
-           name="origin"
-           id="issuer-origin"
-           value="{{issuer.origin | undef}}"
-           placeholder="http://example.org"
-           pattern="^(https?):\/\/[^\s\/$.?#].[^\s\/]*\/?$"
-           required>
-    <span class="help-block">
-      Website origin. It should be the protocol, domain (with any
-      subdomains), optional port, and that's it. Something like
-      "http://webmaker.org" is good;
-      "http://webmaker.org/badges/are/great" is not a valid origin.
-    </span>
-  </div>
-
-  <div>
     <label for="issuer-contact">Contact Email</label>
     <input type="text"
            name="contact"
