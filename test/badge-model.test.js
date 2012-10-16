@@ -166,7 +166,6 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
-
   test('Badge#makeAssertion: makes a good assertion', function (t) {
     var tempenv = { protocol: 'http', host: 'example.org', port: 80 };
     env.temp(tempenv, function (resetEnv) {
@@ -203,7 +202,6 @@ test.applyFixtures(fixtures, function () {
       });
     });
   });
-
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {
