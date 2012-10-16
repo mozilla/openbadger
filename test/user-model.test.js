@@ -78,7 +78,17 @@ test.applyFixtures({
     });
   });
 
-  test('User#getCreditsAndBadges', function (t) {
+  test('User#credit: crediting a new user entirely', function (t) {
+    var email = 'new-user@example.org';
+    User.credit(email, ['link', 'comment'], function (err, user, awarded, inProgress) {
+      t.same(user.credit.link, 1);
+      t.same(user.credit.comment, 1);
+      t.same(awarded[0].badge, 'comment');
+      t.end();
+    });
+  });
+
+  test('User#getCreditsAndBadges: valid, existing user', function (t) {
     var user = fixtures['user'];
     var email = user.user;
     User.getCreditsAndBadges(email, function (err, result) {
@@ -90,6 +100,13 @@ test.applyFixtures({
     });
   });
 
+  test('User#getCreditsAndBadges: non-existing user', function (t) {
+    User.getCreditsAndBadges('random-jabroni@example.org', function (err, result) {
+      t.notOk(err, 'should not have any errors');
+      t.ok(result, 'should have some results');
+      t.end();
+    });
+  });
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {

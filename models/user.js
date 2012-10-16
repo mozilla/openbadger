@@ -28,7 +28,7 @@ var UserSchema = new Schema({
 var User = db.model('User', UserSchema);
 
 /**
- * Apply credits to a user's account.
+ * Apply credits to a user's account. Will create an entry if necessary.
  *
  * @param {String} userEmail
  * @param {Array} behaviors
@@ -37,11 +37,12 @@ var User = db.model('User', UserSchema);
 User.credit = function credit(userEmail, behaviors, callback) {
   function updateUserCredit(callback) {
     var query = { user: userEmail };
+    var options = { upsert: true };
     var update = behaviors.reduce(function (obj, credit) {
       obj['$inc']['credit.' + credit] = 1;
       return obj;
     }, {'$inc': {} });
-    User.findOneAndUpdate(query, update, callback);
+    User.findOneAndUpdate(query, update, options, callback);
   }
 
   function findPotentialBadges(callback) {
@@ -98,13 +99,13 @@ User.getCreditsAndBadges = function getCreditsAndBadges(email, callback) {
     BadgeInstance.find(query, exclude, callback);
   }
   async.parallel({
-    credit: getUserCredits,
+    user: getUserCredits,
     badges: getUserBadges
   }, function (err, results) {
     if (err)
       return callback(err);
     var retval = {
-      behaviors: results.credit.credit,
+      behaviors: results.user ? results.user.credit : {},
       badges: results.badges.reduce(function (obj, instance) {
         obj[instance.badge] = instance;
         return obj;
