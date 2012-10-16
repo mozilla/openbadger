@@ -37,3 +37,11 @@ test('util.randomString', function (t) {
   t.same(string.length, 128, 'should have the right length');
   t.end();
 });
+
+test('util.toMap', function (t) {
+  var array = [{name: 'ya', value: true}, {name: 'nope', value: false}];
+  var obj = util.toMap(array, 'name');
+  t.same(obj.ya.value, true);
+  t.same(obj.nope.value, false);
+  t.end();
+});
