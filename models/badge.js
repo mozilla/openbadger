@@ -100,7 +100,9 @@ Badge.findByBehavior = function findByBehavior(shortnames, callback) {
  */
 
 Badge.getAll = function getAll(callback) {
-  Badge.find(function (err, badges) {
+  var query = {};
+  var exclude = { '__v': 0, image: 0 };
+  Badge.find(query, exclude, function (err, badges) {
     if (err) return callback(err);
     var byName = badges.reduce(function (result, badge) {
       result[badge.shortname] = badge;
