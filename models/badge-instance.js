@@ -111,5 +111,6 @@ BadgeInstance.markAllAsSeen = function markAllAsSeen(email, callback) {
   var options = { multi: true };
   BadgeInstance.update(query, update, options, callback);
 };
+BadgeInstance.markAllAsRead = BadgeInstance.markAllAsSeen;
 
 module.exports = BadgeInstance;
