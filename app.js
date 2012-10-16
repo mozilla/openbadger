@@ -11,6 +11,7 @@ var behavior = require('./routes/behavior');
 var badge = require('./routes/badge');
 var admin = require('./routes/admin');
 var issuer = require('./routes/issuer');
+var api = require('./routes/api');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -32,7 +33,8 @@ app.configure(function () {
     whitelist: [
       '/login',
       '/logout',
-      '/badge/*'
+      '/badge/*',
+      /\/v\d+\/badges/
     ],
     redirectTo: '/login'
   }));
@@ -105,5 +107,8 @@ app.post('/login', user.login);
 
 // log the user out
 app.get('/logout', user.logout);
+
+// api for getting all defined badges
+app.get('/v:apiVersion/badges', api.badges)
 
 module.exports = app;
