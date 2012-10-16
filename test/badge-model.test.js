@@ -191,7 +191,7 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
-  test('Badge#awardTo: award a badge to a user', function (t) {
+  test('Badge#award: award a badge to a user', function (t) {
     var badge = fixtures['link-comment'];
     var email = fixtures['user'].user;
     badge.award(email, function (err, instance) {
@@ -204,6 +204,15 @@ test.applyFixtures(fixtures, function () {
         t.end();
       });
     });
+  });
+
+  test('Badge#creditsUntilAward: see how many credits remain until user gets badge', function (t) {
+    var badge = fixtures['link-comment'];
+    var user = { credit: { link: 26 }}
+    var expect = { comment: 5 };
+    var result = badge.creditsUntilAward(user);
+    t.same(result, expect);
+    t.end();
   });
 
   test('Badge default: shortname', function (t) {

@@ -142,6 +142,24 @@ Badge.prototype.award = function award(email, callback) {
 };
 
 /**
+ * Get how many credits a user has to earn before the badge is earnable.
+ *
+ * @param {User} user A user-like object, containing `credits` property
+ * @return {Object}
+ */
+
+Badge.prototype.creditsUntilAward = function creditsUntilAward(user) {
+  return this.behaviors.reduce(function (result, behavior) {
+    var name = behavior.shortname;
+    var userCredits = user.credit[name] || 0;
+    if (userCredits < behavior.count)
+      result[name] = behavior.count - userCredits;
+    return result;
+  }, {})
+};
+
+
+/**
  * Remove a behavior from the list of required behaviors for the badge
  *
  * @param {String} shortname
