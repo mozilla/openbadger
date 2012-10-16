@@ -100,8 +100,8 @@ define(["jquery"], function($) {
                   throw new Error("email param != JWT claim set principal");
                 return respondWithJSON({
                   status: "ok",
-                  behaviors: {},
-                  badges: {}
+                  behaviors: behaviors,
+                  badges: earnedBadges
                 });
               }
             } else if (options.type == "POST") {
