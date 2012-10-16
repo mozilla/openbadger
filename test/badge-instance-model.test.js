@@ -19,13 +19,13 @@ test.applyFixtures({
     behaviors: [{ shortname: 'link', count: 5 }]
   }),
   'dummy-instance': new BadgeInstance({
-    user: 'dummy@example.org',
+    user: 'brian@example.org',
     hash: 'hash',
-    badge: 'link-basic',
+    badge: 'link-advanced',
     assertion: '{ "assertion" : "yep" }',
     seen: true
   }),
-}, function () {
+}, function (fixtures) {
   test('BadgeInstance#save: test defaults', function (t) {
     var instance = new BadgeInstance({
       user: 'brian@example.org',
@@ -38,6 +38,22 @@ test.applyFixtures({
       t.same(instance.hash, util.hash(instance.assertion), 'hash should be the hash of the assertion');
       t.end();
     })
+  });
+
+  test('BadgeInstance#userHasBadge', function (t) {
+    var instance = fixtures['dummy-instance'];
+    var user = instance.user;
+    var badge = instance.badge;
+    BadgeInstance.userHasBadge(user, badge, function (err, hasBadge) {
+      t.notOk(err, 'should not have an error');
+      t.same(hasBadge, true, 'user should have badge');
+
+      BadgeInstance.userHasBadge(user, 'non-existent', function (err, hasBadge) {
+        t.notOk(err, 'should not have an error');
+        t.same(hasBadge, false, 'user should have badge');
+        t.end();
+      });
+    });
   });
 
   // necessary to stop the test runner

@@ -13,7 +13,6 @@ var BadgeInstanceSchema = new Schema({
     type: String,
     required: true,
     trim: true,
-    unique: true,
     match: regex.email
   },
   badge: {
@@ -34,7 +33,12 @@ var BadgeInstanceSchema = new Schema({
   hash: {
     type: String,
     required: true,
-  }
+  },
+  userBadgeKey: {
+    type: String,
+    required: true,
+    unique: true
+  },
 });
 var BadgeInstance = db.model('BadgeInstance', BadgeInstanceSchema);
 
@@ -70,4 +74,28 @@ BadgeInstanceSchema.pre('validate', function hashDefault(next) {
   next();
 });
 
+/**
+ * Set the `userBadgeKey` field to be the concatenation of the `user`
+ * and `badge` fields.
+ */
+BadgeInstanceSchema.pre('validate', function userBadgeKeyDefault(next) {
+  if (this.userBadgeKey) return next();
+  this.userBadgeKey = this.user + '.' + this.badge;
+  next();
+});
+
+/**
+ * Check whether a user has a badge.
+ *
+ * @param {String} user Email address for user
+ * @param {String} shortname The badge shortname
+ */
+
+BadgeInstance.userHasBadge = function userHasBadge(user, shortname, callback) {
+  var query = { userBadgeKey: user + '.' + shortname };
+  BadgeInstance.findOne(query, { user: 1 }, function (err, instance) {
+    if (err) return callback(err);
+    return callback(null, !!instance);
+  });
+};
 module.exports = BadgeInstance;
