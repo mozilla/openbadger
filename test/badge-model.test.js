@@ -1,11 +1,11 @@
+var fs = require('fs');
+var pathutil = require('path');
 var test = require('./');
 var env = require('../lib/environment');
+var util = require('../lib/util');
 var db = require('../models');
 var Badge = require('../models/badge');
 var Issuer = require('../models/issuer');
-var util = require('../lib/util');
-var fs = require('fs');
-var pathutil = require('path');
 
 function asset(name) {
   return fs.readFileSync(pathutil.join(__dirname, 'assets', name));
