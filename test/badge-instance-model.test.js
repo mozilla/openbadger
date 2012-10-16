@@ -18,12 +18,19 @@ test.applyFixtures({
     image: Buffer(128),
     behaviors: [{ shortname: 'link', count: 5 }]
   }),
-  'dummy-instance': new BadgeInstance({
+  'instance': new BadgeInstance({
     user: 'brian@example.org',
     hash: 'hash',
     badge: 'link-advanced',
     assertion: '{ "assertion" : "yep" }',
-    seen: true
+    seen: false
+  }),
+  'other-instance': new BadgeInstance({
+    user: 'brian@example.org',
+    hash: 'hash',
+    badge: 'link-hyper-advanced',
+    assertion: '{ "assertion" : "yep" }',
+    seen: false
   }),
 }, function (fixtures) {
   test('BadgeInstance#save: test defaults', function (t) {
@@ -41,7 +48,7 @@ test.applyFixtures({
   });
 
   test('BadgeInstance#userHasBadge', function (t) {
-    var instance = fixtures['dummy-instance'];
+    var instance = fixtures['instance'];
     var user = instance.user;
     var badge = instance.badge;
     BadgeInstance.userHasBadge(user, badge, function (err, hasBadge) {
@@ -54,6 +61,23 @@ test.applyFixtures({
       });
     });
   });
+
+  test('BadgeInstance.markAllAsSeen', function (t) {
+    var instance = fixtures['instance'];
+    var instance2 = fixtures['other-instance'];
+    var email = instance.user
+    t.same(instance.seen, false, 'should start off false');
+    t.same(instance2.seen, false, 'should start off false');
+    BadgeInstance.markAllAsSeen(email, function (err) {
+      t.notOk(err, 'should not have any errors');
+      BadgeInstance.find({ user: email }, function (err, results) {
+        t.same(results[0].seen, true, 'should become true');
+        t.same(results[1].seen, true, 'should become true');
+        t.end();
+      });
+    });
+  });
+
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {

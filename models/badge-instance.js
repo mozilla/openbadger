@@ -98,4 +98,18 @@ BadgeInstance.userHasBadge = function userHasBadge(user, shortname, callback) {
     return callback(null, !!instance);
   });
 };
+
+/**
+ * Mark all badges for the user as seen
+ *
+ * @param {String} email
+ */
+
+BadgeInstance.markAllAsSeen = function markAllAsSeen(email, callback) {
+  var query = { user: email };
+  var update = { seen: true };
+  var options = { multi: true };
+  BadgeInstance.update(query, update, options, callback);
+};
+
 module.exports = BadgeInstance;
