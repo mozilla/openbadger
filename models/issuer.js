@@ -1,5 +1,6 @@
 var db = require('./');
 var mongoose = require('mongoose');
+var env = require('../lib/environment');
 var Schema = mongoose.Schema;
 
 function maxLength(field, length) {
@@ -36,4 +37,21 @@ var IssuerSchema = new Schema({
   }
 });
 var Issuer = db.model('Issuer', IssuerSchema);
+
+Issuer.getAssertionObject = function getAssertionObject(callback) {
+  Issuer.findOne(function (err, issuer) {
+    if (err)
+      return callback(err);
+    if (!issuer)
+      return callback(new Error('no issuer in database'));
+    var result = {};
+    result.name = issuer.name;
+    result.contact = issuer.contact;
+    if (issuer.org)
+      result.org = issuer.org;
+    result.origin = env.origin();
+    return callback(null, result);
+  });
+};
+
 module.exports = Issuer;
