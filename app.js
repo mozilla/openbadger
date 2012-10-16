@@ -34,7 +34,7 @@ app.configure(function () {
       '/login',
       '/logout',
       '/badge/*',
-      /\/v\d+\/(badges|user)/
+      '/v*'
     ],
     redirectTo: '/login'
   }));
@@ -113,5 +113,8 @@ app.get('/v:apiVersion/badges', api.badges)
 
 // api for getting all user info
 app.get('/v:apiVersion/user', api.user)
+
+// api for crediting behavior
+app.post('/v:apiVersion/user/behavior/:behavior/credit', api.credit);
 
 module.exports = app;
