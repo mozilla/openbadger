@@ -95,6 +95,24 @@ Badge.findByBehavior = function findByBehavior(shortnames, callback) {
   return Badge.find(searchTerms, callback);
 };
 
+
+/**
+ * Check if the credits are enough to earn the badge
+ *
+ * @param {User} user An object resembling a User object.
+ * @return {Boolean} whether or not the badge is earned by the credits
+ */
+
+Badge.prototype.hasEnoughCredit = function hasEnoughCredit(user) {
+  return this.behaviors.map(function (behavior) {
+    var name = behavior.shortname;
+    var minimum = behavior.count;
+    return user.credit[name] >= minimum;
+  }).reduce(function (result, value) {
+    return result && value;
+  }, true);
+};
+
 /**
  * Remove a behavior from the list of required behaviors for the badge
  *

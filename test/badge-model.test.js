@@ -160,6 +160,23 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge#hasEnoughCredit: should have enough', function (t) {
+    var badge = fixtures['link-comment'];
+    var expect = true;
+    var result = badge.hasEnoughCredit({ credit: { link: 10, comment: 10 }});
+    t.same(expect, result);
+    t.end();
+  });
+
+  test('Badge#hasEnoughCredit: not enough', function (t) {
+    var badge = fixtures['link-comment'];
+    var expect = false;
+    var result = badge.hasEnoughCredit({ credit: { link: 10 }});
+    t.same(expect, result);
+    t.end();
+  });
+
+
   test('Badge default: shortname', function (t) {
     var badge = new Badge({
       name: 'An   awesome badge!',
