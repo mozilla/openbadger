@@ -34,7 +34,7 @@ app.configure(function () {
       '/login',
       '/logout',
       '/badge/*',
-      /\/v\d+\/badges/
+      /\/v\d+\/(badges|user)/
     ],
     redirectTo: '/login'
   }));
@@ -110,5 +110,8 @@ app.get('/logout', user.logout);
 
 // api for getting all defined badges
 app.get('/v:apiVersion/badges', api.badges)
+
+// api for getting all user info
+app.get('/v:apiVersion/user', api.user)
 
 module.exports = app;
