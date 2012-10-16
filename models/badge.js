@@ -121,14 +121,22 @@ Badge.prototype.earnableBy = function earnableBy(user) {
 
 Badge.prototype.award = function award(email, callback) {
   // need to load this late to avoid circular dependency race conditions.
+  var DUP_KEY_ERROR_CODE = 11000;
   var BadgeInstance = require('./badge-instance');
   var instance = new BadgeInstance({
     user: email,
     badge: this.shortname
   });
+
+  // We don't want to fail with an error if the user already has the
+  // badge, so if we get back a duplicate key error we just return
+  // nothing to indicate that the user already has the badge.
   instance.save(function (err, result) {
-    if (err)
+    if (err) {
+      if (err.code === DUP_KEY_ERROR_CODE)
+        return callback();
       return callback(err);
+    }
     return callback(null, instance);
   });
 };

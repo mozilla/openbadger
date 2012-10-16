@@ -198,7 +198,11 @@ test.applyFixtures(fixtures, function () {
       t.notOk(err, 'should not have an error');
       t.ok(instance, 'should have a badge instance');
       t.same(instance.user, email, 'should be assigned to the right user');
-      t.end();
+      badge.award(email, function (err, instance) {
+        t.notOk(err, 'should not have an error');
+        t.notOk(instance, 'should not have an instance');
+        t.end();
+      });
     });
   });
 
