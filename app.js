@@ -11,6 +11,7 @@ var behavior = require('./routes/behavior');
 var badge = require('./routes/badge');
 var admin = require('./routes/admin');
 var issuer = require('./routes/issuer');
+var api = require('./routes/api');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -32,7 +33,8 @@ app.configure(function () {
     whitelist: [
       '/login',
       '/logout',
-      '/badge/*'
+      '/badge/*',
+      '/v*'
     ],
     redirectTo: '/login'
   }));
@@ -87,6 +89,8 @@ app.get('/admin/behavior', admin.newBehaviorForm);
 app.post('/admin/behavior', behavior.create);
 
 // get the badge image
+// XXX: if you change this url you need to change `makeAssertion` in
+//   models/badge.js
 app.get('/badge/image/:shortname.png', [
   badge.findByShortName({
     container: 'param',
@@ -103,5 +107,17 @@ app.post('/login', user.login);
 
 // log the user out
 app.get('/logout', user.logout);
+
+// api for getting all defined badges
+app.get('/v:apiVersion/badges', api.badges)
+
+// api for getting all user info
+app.get('/v:apiVersion/user', api.user)
+
+// api for crediting behavior
+app.post('/v:apiVersion/user/behavior/:behavior/credit', api.credit);
+
+// api for crediting behavior
+app.post('/v:apiVersion/user/mark-all-as-read', api.markAllAsRead);
 
 module.exports = app;

@@ -1,8 +1,13 @@
-var test = require('./');
-var db = require('../models');
-var Badge = require('../models/badge');
 var fs = require('fs');
 var pathutil = require('path');
+var test = require('./');
+var env = require('../lib/environment');
+var util = require('../lib/util');
+var db = require('../models');
+var Badge = require('../models/badge');
+var Issuer = require('../models/issuer');
+var User = require('../models/user');
+var BadgeInstance = require('../models/badge-instance');
 
 function asset(name) {
   return fs.readFileSync(pathutil.join(__dirname, 'assets', name));
@@ -20,9 +25,14 @@ function validBadge() {
 }
 
 var fixtures = {
+  'issuer': new Issuer({
+    name: 'Badge Authority',
+    org: 'Some Org',
+    contact: 'brian@example.org'
+  }),
   'link-basic': new Badge({
     name: 'Link Badge, basic',
-    shortname: 'link-badge-basic',
+    shortname: 'link-basic',
     description: 'For doing links.',
     image: asset('sample.png'),
     behaviors: [
@@ -31,7 +41,7 @@ var fixtures = {
   }),
   'link-advanced': new Badge({
     name : 'Link Badge, advanced',
-    shortname: 'link-badge-advanced',
+    shortname: 'link-advanced',
     description: 'For doing lots of links.',
     image: asset('sample.png'),
     behaviors: [
@@ -40,12 +50,33 @@ var fixtures = {
   }),
   'comment': new Badge({
     name : 'Commenting badge',
-    shortname: 'comment-badge',
+    shortname: 'comment',
     description: 'For doing lots of comments.',
     image: asset('sample.png'),
     behaviors: [
       { shortname: 'comment', count: 5 }
     ]
+  }),
+  'link-comment': new Badge({
+    name : 'Linking and commenting badge',
+    shortname: 'link-comment',
+    description: 'For doing lots of comments and links',
+    image: asset('sample.png'),
+    behaviors: [
+      { shortname: 'comment', count: 5 },
+      { shortname: 'link', count: 5 }
+    ]
+  }),
+  'user': new User({
+    user: 'brian@example.org',
+    credit: {}
+  }),
+  'instance': new BadgeInstance({
+    user: 'brian@example.org',
+    hash: 'hash',
+    badge: 'link-basic',
+    assertion: '{ "assertion" : "yep" }',
+    seen: true
   })
 };
 
@@ -118,12 +149,70 @@ test.applyFixtures(fixtures, function () {
     Badge.findByBehavior(behavior, function (err, badges) {
       var expectIds = [
         fixtures['link-basic'].id,
-        fixtures['link-advanced'].id
+        fixtures['link-advanced'].id,
+        fixtures['link-comment'].id
       ].sort();
       var actualIds = badges.map(function (o) { return o.id }).sort();
       t.same(actualIds, expectIds, 'should get just the `link` badges back');
       t.end();
     });
+  });
+
+  test('Badge.findByBehavior: finding badges by multiple behaviors', function (t) {
+    var behaviors = ['link', 'comment'];
+    Badge.findByBehavior(behaviors, function (err, badges) {
+      var expectIds = [
+        fixtures['link-basic'].id,
+        fixtures['link-advanced'].id,
+        fixtures['link-comment'].id,
+        fixtures['comment'].id,
+      ].sort();
+      var actualIds = badges.map(function (o) { return o.id }).sort();
+      t.same(actualIds, expectIds, 'should get link and comment badges back');
+      t.end();
+    });
+  });
+
+  test('Badge#earnableBy: should have enough', function (t) {
+    var badge = fixtures['link-comment'];
+    var user = { credit: { link: 10, comment: 10 }};
+    var expect = true;
+    var result = badge.earnableBy(user);
+    t.same(expect, result);
+    t.end();
+  });
+
+  test('Badge#earnableBy: not enough', function (t) {
+    var badge = fixtures['link-comment'];
+    var user = { credit: { link: 10 }}
+    var expect = false;
+    var result = badge.earnableBy(user);
+    t.same(expect, result);
+    t.end();
+  });
+
+  test('Badge#award: award a badge to a user', function (t) {
+    var badge = fixtures['link-comment'];
+    var email = fixtures['user'].user;
+    badge.award(email, function (err, instance) {
+      t.notOk(err, 'should not have an error');
+      t.ok(instance, 'should have a badge instance');
+      t.same(instance.user, email, 'should be assigned to the right user');
+      badge.award(email, function (err, instance) {
+        t.notOk(err, 'should not have an error');
+        t.notOk(instance, 'should not have an instance');
+        t.end();
+      });
+    });
+  });
+
+  test('Badge#creditsUntilAward: see how many credits remain until user gets badge', function (t) {
+    var badge = fixtures['link-comment'];
+    var user = { credit: { link: 26 }}
+    var expect = { comment: 5 };
+    var result = badge.creditsUntilAward(user);
+    t.same(result, expect);
+    t.end();
   });
 
   test('Badge default: shortname', function (t) {
@@ -146,6 +235,18 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge.getAll: get all the badges keyed by shortname', function (t) {
+    var name = 'link-basic';
+    var expect = fixtures[name];
+    Badge.getAll(function (err, badges) {
+      t.notOk(err, 'should not have any errors');
+      t.ok(badges, 'should have some badges');
+      t.same(badges[name].id, expect.id);
+      t.end();
+    });
+  });
+
+
   test('Badge#removeBehavior', function (t) {
     var badge = validBadge();
     badge.behaviors = [
@@ -158,6 +259,42 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
+  test('Badge#makeAssertion: makes a good assertion', function (t) {
+    var tempenv = { protocol: 'http', host: 'example.org', port: 80 };
+    env.temp(tempenv, function (resetEnv) {
+      var badge = fixtures['comment'];
+      var issuer = fixtures['issuer'];
+      var recipient = 'brian@example.org';
+      var salt = 'salt';
+      var expect = {
+        recipient: util.sha256(recipient, salt),
+        salt: salt,
+        badge: {
+          version: '0.5.0',
+          criteria: badge.absoluteUrl('criteria'),
+          image: badge.absoluteUrl('image'),
+          description: badge.description,
+          name: badge.name,
+          issuer: {
+            name: issuer.name,
+            org: issuer.org,
+            contact: issuer.contact,
+            origin: env.origin()
+          }
+        }
+      };
+      badge.makeAssertion({
+        recipient: recipient,
+        salt: salt,
+      }, {
+        json: false
+      }, function (err, result) {
+        t.same(result, expect);
+        resetEnv();
+        t.end();
+      });
+    });
+  });
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {

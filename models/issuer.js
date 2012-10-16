@@ -1,5 +1,6 @@
 var db = require('./');
 var mongoose = require('mongoose');
+var env = require('../lib/environment');
 var Schema = mongoose.Schema;
 
 function maxLength(field, length) {
@@ -12,7 +13,6 @@ function maxLength(field, length) {
 }
 
 var regex = {
-  origin: /^(https?):\/\/[^\s\/$.?#].[^\s\/]*\/?$/,
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
 }
 
@@ -29,12 +29,6 @@ var IssuerSchema = new Schema({
     required: false,
     validate: maxLength('org', 128)
   },
-  origin: {
-    type: String,
-    trim: true,
-    required: true,
-    match: regex.origin
-  },
   contact: {
     type: String,
     trim: true,
@@ -43,4 +37,21 @@ var IssuerSchema = new Schema({
   }
 });
 var Issuer = db.model('Issuer', IssuerSchema);
+
+Issuer.getAssertionObject = function getAssertionObject(callback) {
+  Issuer.findOne(function (err, issuer) {
+    if (err)
+      return callback(err);
+    if (!issuer)
+      return callback(new Error('no issuer in database'));
+    var result = {};
+    result.name = issuer.name;
+    result.contact = issuer.contact;
+    if (issuer.org)
+      result.org = issuer.org;
+    result.origin = env.origin();
+    return callback(null, result);
+  });
+};
+
 module.exports = Issuer;

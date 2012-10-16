@@ -23,8 +23,11 @@ exports.logout = function logout(req, res) {
 
 exports.requireAuth = function requireAuth(options) {
   var whitelist = (options.whitelist || []).map(function (entry) {
-    entry = entry.replace('*', '.*?');
-    return RegExp('^' + entry + '$');
+    if (typeof entry === 'string') {
+      entry = entry.replace('*', '.*?');
+      return RegExp('^' + entry + '$');
+    }
+    return entry;
   });
   function isExempt(path) {
     var i = whitelist.length;

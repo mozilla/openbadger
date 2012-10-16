@@ -1,4 +1,5 @@
 var test = require('./');
+var env = require('../lib/environment');
 var db = require('../models');
 var Issuer = require('../models/issuer');
 
@@ -15,7 +16,6 @@ test.applyFixtures({
   'testIssuer': new Issuer({
     name: 'Mozilla',
     org: 'Webmaker',
-    origin: 'https://webmaker.org',
     contact: 'brian@mozillafoundation.org'
   })
 }, function (fixtures) {
@@ -40,19 +40,6 @@ test.applyFixtures({
     });
   });
 
-  test('Issuer#validate: bad origin', function (t) {
-    var issuer = validIssuer();
-    issuer.origin = 'http://notgood.org/something'
-    issuer.validate(function (err) {
-      var error;
-      t.ok(err, 'should have errors');
-      error = err.errors.origin;
-      t.ok(error, 'should have an origin error');
-      t.same(error.type, 'regexp', 'should be a regexp error');
-      t.end();
-    });
-  });
-
   test('Issuer.findOne: works as expected', function (t) {
     var expect = fixtures['testIssuer'];
     Issuer.findOne(function (err, result) {
@@ -60,6 +47,22 @@ test.applyFixtures({
       t.end();
     });
   });
+
+  test('Issuer.getAssertionObject', function (t) {
+    env.temp({ protocol: 'http', host: 'example.org', port: 80 }, function (resetEnv) {
+      var expect = {
+        name: 'Mozilla',
+        org: 'Webmaker',
+        contact: 'brian@mozillafoundation.org', origin: 'http://example.org:80'
+      };
+      Issuer.getAssertionObject(function (err, result) {
+        t.same(result, expect);
+        resetEnv();
+        t.end();
+      })
+    });
+  });
+
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {
