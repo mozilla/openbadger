@@ -1,5 +1,6 @@
 var Badge = require('../models/badge');
 var User = require('../models/user');
+var BadgeInstance = require('../models/badge-instance');
 var util = require('../lib/util');
 
 /**
@@ -81,7 +82,29 @@ exports.credit = function credit(req, res) {
       };
       return obj;
     }, {});
-    
+
     res.send(statusCode, result);
+  });
+};
+
+
+/**
+ * Mark all user badges as read.
+ */
+
+exports.markAllAsRead = function markAllAsRead(req, res) {
+  var form = req.body;
+
+  if (!form.email)
+    return res.send(400, {
+      status: 'missing-parameter',
+      parameter: 'email',
+      message: 'You need to pass in a valid email address'
+    });
+
+  BadgeInstance.markAllAsRead(form.email, function (err) {
+    if (err)
+      return res.send(500, { status: 'error', error: err });
+    return res.send(200, { status: 'ok' });
   });
 };

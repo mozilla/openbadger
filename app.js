@@ -117,4 +117,7 @@ app.get('/v:apiVersion/user', api.user)
 // api for crediting behavior
 app.post('/v:apiVersion/user/behavior/:behavior/credit', api.credit);
 
+// api for crediting behavior
+app.post('/v:apiVersion/user/mark-all-as-read', api.markAllAsRead);
+
 module.exports = app;
