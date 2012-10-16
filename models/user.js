@@ -35,6 +35,7 @@ var User = db.model('User', UserSchema);
  */
 
 User.credit = function credit(userEmail, behaviors, callback) {
+  behaviors = Array.isArray(behaviors) ? behaviors : [behaviors];
   function updateUserCredit(callback) {
     var query = { user: userEmail };
     var options = { upsert: true };
