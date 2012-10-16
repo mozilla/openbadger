@@ -1,5 +1,6 @@
 var fs = require('fs');
 var Badge = require('../models/badge');
+var BadgeInstance = require('../models/badge-instance');
 
 exports.create = function create(req, res) {
   var form = req.body;
@@ -59,6 +60,18 @@ exports.image = function image(req, res) {
   res.send(badge.image);
 };
 
+exports.assertion = function assertion(req, res) {
+  var assertionHash = req.param('hash');
+  BadgeInstance.findOne({ hash: assertionHash }, function (err, instance) {
+    if (err)
+      return res.send(500, err);
+    if (!instance)
+      return res.send(404)
+    res.type('json');
+    return res.send(200, instance.assertion);
+  });
+};
+
 exports.findByShortName = function (options) {
   var required = !!options.required;
 
@@ -84,6 +97,7 @@ exports.findByShortName = function (options) {
     });
   };
 };
+
 exports.findAll = function findAll(req, res, next) {
   Badge.find({}, function (err, badges) {
     // #TODO: don't show the error directly

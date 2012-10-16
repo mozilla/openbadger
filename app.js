@@ -99,6 +99,10 @@ app.get('/badge/image/:shortname.png', [
   })
 ], badge.image);
 
+
+// get a badge assertion
+app.get('/badge/assertion/:hash', badge.assertion);
+
 // show login page
 app.get('/login', admin.login);
 
@@ -119,5 +123,7 @@ app.post('/v:apiVersion/user/behavior/:behavior/credit', api.credit);
 
 // api for crediting behavior
 app.post('/v:apiVersion/user/mark-all-as-read', api.markAllAsRead);
+
+
 
 module.exports = app;
