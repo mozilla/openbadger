@@ -130,6 +130,14 @@ BadgeInstance.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
 };
 
+/**
+ * Get `issuedOn` in seconds since Unix epoch
+ */
+BadgeInstance.prototype.issuedOnUnix = function issuedOnUnix() {
+  if (!this.issuedOn)
+    return 0;
+  return (this.issuedOn / 1000) | 0;
+};
 
 /**
  * Mark all badges for the user as seen
