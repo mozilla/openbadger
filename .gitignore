@@ -4,3 +4,4 @@ node_modules
 /bin/heroku.sh
 db
 /bin/test-config.sh
+/wiki/
