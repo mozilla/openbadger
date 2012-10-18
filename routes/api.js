@@ -42,10 +42,18 @@ exports.user = function user(req, res) {
       message: 'You need to pass in a valid email address'
     });
 
-  User.getCreditsAndBadges(email, function (err, result) {
+  var result = { status: 'ok', behaviors: {}, badges: {} };
+  User.getCreditsAndBadges(email, function (err, user) {
     if (err)
       return res.send(500, { status: 'error', error: err });
-    result.status = 'ok';
+    result.behaviors = user.behaviors;
+    user.badges.forEach(function (instance) {
+      result.badges[instance.badge] = {
+        assertionUrl: instance.absoluteUrl('assertion'),
+        isRead: instance.seen,
+        issuedOn: instance.issuedOnUnix(),
+      };
+    });
     return res.send(200, result);
   });
 };
