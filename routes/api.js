@@ -8,10 +8,21 @@ var util = require('../lib/util');
  */
 
 exports.badges = function badges(req, res) {
-  Badge.getAll(function (err, badges) {
+  var result = { status: 'ok', badges : {} };
+  Badge.find(function (err, badges) {
     if (err)
       return res.send(500, { status: 'error', error: err });
-    var result = { status: 'ok', badges: badges };
+    badges.forEach(function (badge) {
+      result.badges[badge.shortname] = {
+        name: badge.name,
+        description: badge.description,
+        prerequisites: badge.prerequisites,
+        image: badge.absoluteUrl('image'),
+        behaviors: badge.behaviors.map(function (behavior) {
+          return { name: behavior.shortname, score: behavior.count }
+        })
+      };
+    });
     res.send(200, result);
   });
 };
