@@ -82,7 +82,14 @@ exports.credit = function credit(req, res) {
     if (awarded.length) {
       statusCode = 201;
       result.status = 'awarded';
-      result.badges = util.toMap(awarded, 'badge');
+      result.badges = awarded.reduce(function (obj, instance) {
+        obj[instance.badge] = {
+          assertionUrl: instance.absoluteUrl('assertion'),
+          isRead: instance.seen,
+          issuedOn: instance.issuedOnUnix(),
+        };
+        return obj;
+      }, {});
     }
 
     // `inProgress` is an array of objects representing all the badges
@@ -97,6 +104,7 @@ exports.credit = function credit(req, res) {
       obj[badge.shortname] = {
         name: badge.name,
         description: badge.description,
+        image: badge.absoluteUrl('image'),
         remaining: remaining
       };
       return obj;
