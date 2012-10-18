@@ -34,15 +34,16 @@ test.applyFixtures({
   }),
 }, function (fixtures) {
   test('BadgeInstance#save: test defaults', function (t) {
+    var currentish = Date.now() - 1;
     var instance = new BadgeInstance({
       user: 'brian@example.org',
       badge: 'link-basic'
     });
     instance.save(function (err, result) {
-      console.dir(err);
       t.notOk(err, 'should not have any errors');
       t.ok(instance.assertion, 'should have an assertion string');
       t.same(instance.hash, util.hash(instance.assertion), 'hash should be the hash of the assertion');
+      t.ok(instance.issuedOn > currentish, 'there is some date for issued on');
       t.end();
     })
   });

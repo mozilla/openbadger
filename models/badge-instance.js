@@ -1,4 +1,5 @@
 var db = require('./');
+var env = require('../lib/environment');
 var mongoose = require('mongoose');
 var Badge = require('./badge');
 var Schema = mongoose.Schema;
@@ -24,6 +25,12 @@ var BadgeInstanceSchema = new Schema({
     type: String,
     trim: true,
     required: true
+  },
+  issuedOn: {
+    type: Date,
+    trim: true,
+    required: true,
+    default: Date.now
   },
   seen: {
     type: Boolean,
@@ -98,6 +105,31 @@ BadgeInstance.userHasBadge = function userHasBadge(user, shortname, callback) {
     return callback(null, !!instance);
   });
 };
+
+/**
+ * Get relative URL for a field
+ *
+ * @param {String} field Should be either `criteria` or `image`
+ * @return {String} relative url
+ */
+BadgeInstance.prototype.relativeUrl = function relativeUrl(field) {
+  var formats = {
+    assertion: '/badge/assertion/%s',
+  };
+  return util.format(formats[field], this.hash);
+};
+
+
+/**
+ * Get absolute URL for a field
+ *
+ * @param {String} field Should be either `criteria` or `image`
+ * @return {String} absolute url
+ */
+BadgeInstance.prototype.absoluteUrl = function absoluteUrl(field) {
+  return env.qualifyUrl(this.relativeUrl(field));
+};
+
 
 /**
  * Mark all badges for the user as seen
