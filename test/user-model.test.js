@@ -95,7 +95,7 @@ test.applyFixtures({
       t.notOk(err, 'should not have any errors');
       t.ok(result, 'should have some results');
       t.ok(result.behaviors.link, 'should have some link behaviors');
-      t.ok(result.badges.comment, 'should have the comment badge');
+      t.ok(result.badges.length, 'should have some badges');
       t.end();
     });
   });

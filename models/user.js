@@ -107,10 +107,7 @@ User.getCreditsAndBadges = function getCreditsAndBadges(email, callback) {
       return callback(err);
     var retval = {
       behaviors: results.user ? results.user.credit : {},
-      badges: results.badges.reduce(function (obj, instance) {
-        obj[instance.badge] = instance;
-        return obj;
-      }, {})
+      badges: results.badges
     };
     return callback(null, retval);
   });
