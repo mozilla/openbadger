@@ -1,6 +1,7 @@
 var db = require('./');
 var mongoose = require('mongoose');
 var env = require('../lib/environment');
+var util = require('../lib/util');
 var Schema = mongoose.Schema;
 
 function maxLength(field, length) {
@@ -34,7 +35,13 @@ var IssuerSchema = new Schema({
     trim: true,
     required: true,
     match: regex.email
-  }
+  },
+  jwtSecret: {
+    type: String,
+    trim: true,
+    required: true,
+    default: util.strongRandomString.bind(util, 128)
+  },
 });
 var Issuer = db.model('Issuer', IssuerSchema);
 
