@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block "main" %}
 
-<form method="post" id="config-form" action="?">
+<form method="post" class="config-form" id="config-form" action="?">
   <legend>Issuer Details</legend>
   <div>
     <label for="issuer-name">Name</label>
@@ -46,6 +46,19 @@
       probably best to make this email something that won't change, so
       don't make it a specific person and use a forwarding email address
       instead.
+    </span>
+  </div>
+
+  <div>
+    <label for="issuer-secret">Token Secret</label>
+    <input type="text"
+           name="secret"
+           id="issuer-secret"
+           value="{{issuer.jwtSecret | undef}}"
+           placeholder="shhh secret">
+    <span class="help-block">
+      The secret used to sign tokens. Leave this blank to auto-generate
+      a 64 character random secret.
     </span>
   </div>
 
