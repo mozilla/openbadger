@@ -119,7 +119,7 @@ exports.credit = function credit(req, res) {
  * Mark all user badges as read.
  */
 
-exports.markAllAsRead = function markAllAsRead(req, res) {
+exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
   var form = req.body;
 
   if (!form.email)
