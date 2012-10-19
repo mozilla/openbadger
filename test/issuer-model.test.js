@@ -43,7 +43,7 @@ test.applyFixtures({
     var expect = fixtures['testIssuer'];
     Issuer.findOne(function (err, result) {
       t.same(expect.id, result.id, 'should be the expected issuer');
-      t.same(expect.jwtSecret.length, 128, 'should generate a random 128 character secret');
+      t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
       t.end();
     });
   });
