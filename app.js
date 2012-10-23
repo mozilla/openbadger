@@ -33,8 +33,8 @@ app.configure(function () {
     whitelist: [
       '/login',
       '/logout',
-      '/badge/*',
-      '/v*'
+      '/badge/*', // public badge resources
+      '/v1/*'     // api endpoints
     ],
     redirectTo: '/login'
   }));
@@ -47,50 +47,43 @@ app.configure('development', function () {
 });
 
 /** Routes */
-// configuration page
-app.get('/admin/config', admin.configure);
-
-// updating issuer from post
-app.post('/admin/config', issuer.update);
-
-// show `create a badge` form
-app.get('/admin/badge', admin.newBadgeForm);
-
-// creating a badge from post
-app.post('/admin/badge', badge.create);
-
-// show the badge index
-app.get('/', [badge.findAll], admin.badgeIndex);
-app.get('/admin', [badge.findAll], admin.badgeIndex);
-app.get('/admin/badges', [badge.findAll], admin.badgeIndex);
-
-// middleware for finding badge by shortname
+// Route middleware
+// ----------------
 app.all('/admin/badge/:shortname*', badge.findByShortName({
   container: 'param',
   field: 'shortname',
   required: true
 }));
 
-// show edit form for single badge
-app.get('/admin/badge/:shortname', [
-  behavior.findAll
-], admin.showBadge);
+// Issuer configuration
+// --------------------
+app.get('/admin/config', admin.configure);
+app.post('/admin/config', issuer.update);
 
-// add a behavior to a badge by post
+// Badge listing
+// -------------
+app.get('/',             [badge.findAll], admin.badgeIndex);
+app.get('/admin',        [badge.findAll], admin.badgeIndex);
+app.get('/admin/badges', [badge.findAll], admin.badgeIndex);
+
+// Creating and editing a badge
+// ----------------------------
+app.get('/admin/badge', admin.newBadgeForm);
+app.post('/admin/badge', badge.create);
+app.get('/admin/badge/:shortname', [behavior.findAll], admin.showBadge);
 app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
-
-// remove a behavior from a badge by delete
 app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
 
-// show new behavior form
+// Creating new behaviors
+// ----------------------
 app.get('/admin/behavior', admin.newBehaviorForm);
-
-// create a new behavior
 app.post('/admin/behavior', behavior.create);
 
-// get the badge image
-// XXX: if you change this url you need to change `makeAssertion` in
-//   models/badge.js
+// Public, non-admin endpoints
+// ---------------------------
+// XXX: these are to `relativeUrl` in models/badge.js and
+// models/badge-instance.js. If you change these routes, change those
+// methods.
 app.get('/badge/image/:shortname.png', [
   badge.findByShortName({
     container: 'param',
@@ -98,29 +91,22 @@ app.get('/badge/image/:shortname.png', [
     required: true
   })
 ], badge.image);
-
-// get a badge assertion
 app.get('/badge/assertion/:hash', badge.assertion);
 
-// show login page
+// User login/logout
+// -------------------
 app.get('/login', admin.login);
-
-// deal with persona response
 app.post('/login', user.login);
-
-// log the user out
 app.get('/logout', user.logout);
 
-// api for getting all defined badges
-app.get('/v:apiVersion/badges', api.badges)
 
-// api for getting all user info
-app.get('/v:apiVersion/user', api.user)
-
-// api for crediting behavior
-app.post('/v:apiVersion/user/behavior/:behavior/credit', api.credit);
-
-// api for crediting behavior
-app.post('/v:apiVersion/user/mark-all-badges-as-read', api.markAllBadgesAsRead);
+// API endpoints
+// -------------
+app.get('/v1/badges', api.badges)
+app.get('/v1/user', [api.auth], api.user)
+app.post('/v1/user/behavior/:behavior/credit', [api.auth], api.credit);
+app.post('/v1/user/mark-all-badges-as-read',
+         [api.auth],
+         api.markAllBadgesAsRead);
 
 module.exports = app;

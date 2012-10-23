@@ -3,11 +3,10 @@ var Issuer = require('../models/issuer');
 exports.update = function update(req, res) {
   var form = req.body;
   var issuer = req.issuer || new Issuer();
-
-  Object.keys(form).forEach(function (key) {
-    issuer[key] = form[key];
-  });
-
+  issuer.name = form.name;
+  issuer.org = form.org;
+  issuer.contact = form.contact;
+  issuer.jwtSecret = form.secret;
   issuer.save(function (err, result) {
     if (err)
       return res.send(err);
@@ -21,7 +20,7 @@ exports.update = function update(req, res) {
  * (Middleware) Get issuer configuration.
  */
 
-exports.getIssuerConfig = function () {
+exports.getIssuerConfig = function getIssuerConfig() {
   return function (req, res, next) {
     Issuer.findOne(function (err, issuer) {
       // #TODO: log/report this better.

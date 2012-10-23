@@ -1,7 +1,10 @@
+var jwt = require('jwt-simple');
+var urlutil = require('url');
+var env = require('../lib/environment');
+var util = require('../lib/util');
 var Badge = require('../models/badge');
 var User = require('../models/user');
 var BadgeInstance = require('../models/badge-instance');
-var util = require('../lib/util');
 
 /**
  * Get listing of all badges
@@ -135,3 +138,41 @@ exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
     return res.send(200, { status: 'ok' });
   });
 };
+
+/**
+ * (Middleware) Confirm that a request is authenticated by decoding the
+ * JWT param and confirming audience and issuer.
+ */
+
+exports.auth = function auth(req, res, next) {
+  var param = req.method === "POST" ? req.body : req.query;
+  var token = param.auth;
+  var email = param.email
+  var issuer = req.issuer;
+  var secret = issuer.jwtSecret;
+  var origin = env.origin();
+  var isXHR = req.headers['x-requested-with'] === 'XMLHttpRequest';
+  var auth, msg;
+  if (!token)
+    return respondWithError(res, 'missing mandatory `auth` param');
+  if (!secret)
+    return respondWithError(res, 'issuer has not configured jwt secret');
+  try {
+    auth = jwt.decode(token, secret);
+  } catch(err) {
+    return respondWithError(res, 'error decoding JWT: ' + err.message);
+  }
+  if (auth.aud !== origin) {
+    msg = '`aud` mismatch: given %s, expected %s';
+    return respondWithError(res, util.format(msg, auth.aud, origin));
+  }
+  if (auth.prn !== email) {
+    msg = '`prn` mismatch: given %s, expected %s';
+    return respondWithError(res, util.format(msg, auth.prn, email));
+  }
+  return next();
+};
+
+function respondWithError(res, reason) {
+  return res.send(403, { status: 'forbidden', reason: reason });
+}

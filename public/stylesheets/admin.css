@@ -4,3 +4,7 @@
   float: left;
   margin-right: 14px;
 }
+
+.config-form input[name="secret"] {
+  width: 600px;
+}

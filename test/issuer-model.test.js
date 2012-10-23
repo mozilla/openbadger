@@ -7,7 +7,6 @@ function validIssuer() {
   return new Issuer({
     name: 'Some Issuer',
     org: 'Some Organization',
-    origin: 'http://example.org/',
     contact: 'badges@example.org'
   });
 }
@@ -40,10 +39,11 @@ test.applyFixtures({
     });
   });
 
-  test('Issuer.findOne: works as expected', function (t) {
+  test('Issuer.findOne: works as expected, has default jwtSecret', function (t) {
     var expect = fixtures['testIssuer'];
     Issuer.findOne(function (err, result) {
       t.same(expect.id, result.id, 'should be the expected issuer');
+      t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
       t.end();
     });
   });
@@ -62,7 +62,6 @@ test.applyFixtures({
       })
     });
   });
-
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {

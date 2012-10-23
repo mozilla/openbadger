@@ -38,6 +38,12 @@ test('util.randomString', function (t) {
   t.end();
 });
 
+test('util.strongRandomString', function (t) {
+  var string = util.strongRandomString(128);
+  t.same(string.length, 128, 'should have the right length');
+  t.end();
+});
+
 test('util.toMap', function (t) {
   var array = [{name: 'ya', value: true}, {name: 'nope', value: false}];
   var obj = util.toMap(array, 'name');
