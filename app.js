@@ -29,6 +29,9 @@ app.configure(function () {
   app.use(middleware.session());
   app.use(middleware.flash());
   app.use(express.static(path.join(__dirname, 'public')));
+  app.use(middleware.cors({
+    whitelist: ['/v1/*']
+  }));
   app.use(user.requireAuth({
     whitelist: [
       '/login',

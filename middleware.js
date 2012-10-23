@@ -21,4 +21,24 @@ exports.session = function () {
   });
 };
 
+exports.cors = function cors(options) {
+  options = options || {};
+  var list = options.whitelist || [];
+  if (typeof list === 'string') list = [list];
+  return function (req, res, next) {
+    if (!whitelisted(list, req.url)) return next();
+    res.header("Access-Control-Allow-Origin", "*");
+    return next();
+  };
+};
+
+function whitelisted(list, input) {
+  var pattern;
+  for (var i = list.length; i--;) {
+    pattern = list[i];
+    if (RegExp('^' + list[i] + '$').test(input)) return true;
+  }
+  return false;
+}
+
 exports.flash = flash;
