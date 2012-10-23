@@ -20,7 +20,7 @@ exports.update = function update(req, res) {
  * (Middleware) Get issuer configuration.
  */
 
-exports.getIssuerConfig = function () {
+exports.getIssuerConfig = function getIssuerConfig() {
   return function (req, res, next) {
     Issuer.findOne(function (err, issuer) {
       // #TODO: log/report this better.
