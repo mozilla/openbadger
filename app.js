@@ -12,6 +12,7 @@ var badge = require('./routes/badge');
 var admin = require('./routes/admin');
 var issuer = require('./routes/issuer');
 var api = require('./routes/api');
+var debug = require('./routes/debug');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -111,5 +112,12 @@ app.post('/v1/user/behavior/:behavior/credit', [api.auth], api.credit);
 app.post('/v1/user/mark-all-badges-as-read',
          [api.auth],
          api.markAllBadgesAsRead);
+
+// Debug endpoints
+// ---------------
+app.configure('development', function () {
+  app.get('/debug/flush', debug.showFlushDbForm);
+  app.post('/debug/flush', debug.flushDb);
+});
 
 module.exports = app;
