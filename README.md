@@ -2,23 +2,15 @@
 
 Badging for webmaker.
 
-# Installing deps & starting the server
+# Prerequisites
 
-```bash
-$ make     # will do `npm install` and then start server
-```
-
-# Running the test suite
-
-```bash
-$ make test         # normally you'd use this
-$ make verbose-test # if you want to see debugging
-$ make lint         # to lint the codebase
-```
+Make sure you have [redis](http://redis.io) and [mongo](http://mongodb.org/)
+installed or hosted somewhere. You'll also need node.
 
 # Local configuration
-Here is an example configuration. This assumes you are running
-[redis](http://redis.io) and [mongo](http://mongodb.org/) locally.
+
+Here is an example configuration. This assumes you are running redis
+and mongo locally.
 
 ```bash
 export OPENBADGER_HOST="localhost"
@@ -39,6 +31,20 @@ that in a file and `source` it. For example, if you save a version of this at `c
 
 ```bash
 $ source config.sh
+```
+
+# Installing deps & starting the server
+
+```bash
+$ make     # will do `npm install` and then start server
+```
+
+# Running the test suite
+
+```bash
+$ make test         # normally you'd use this
+$ make verbose-test # if you want to see debugging
+$ make lint         # to lint the codebase
 ```
 
 # Heroku configuration
