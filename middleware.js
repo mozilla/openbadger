@@ -23,22 +23,26 @@ exports.session = function () {
 
 exports.cors = function cors(options) {
   options = options || {};
-  var list = options.whitelist || [];
-  if (typeof list === 'string') list = [list];
+  var whitelist = (options.whitelist || []).map(function (entry) {
+    if (typeof entry === 'string') {
+      entry = entry.replace('*', '.*?');
+      return RegExp('^' + entry + '$');
+    }
+    return entry;
+  });
+  function isExempt(path) {
+    var i = whitelist.length;
+    while (i--) {
+      if (whitelist[i].test(path))
+        return true;
+    }
+    return false;
+  }
   return function (req, res, next) {
-    if (!whitelisted(list, req.url)) return next();
-    res.header("Access-Control-Allow-Origin", "*");
+    if (isExempt(req.url))
+      res.header("Access-Control-Allow-Origin", "*");
     return next();
   };
 };
-
-function whitelisted(list, input) {
-  var pattern;
-  for (var i = list.length; i--;) {
-    pattern = list[i];
-    if (RegExp('^' + list[i] + '$').test(input)) return true;
-  }
-  return false;
-}
 
 exports.flash = flash;
