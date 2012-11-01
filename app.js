@@ -100,7 +100,7 @@ app.get('/badge/assertion/:hash', badge.assertion);
 // -------------------
 app.get('/login', admin.login);
 app.post('/login', user.login);
-app.get('/logout', user.logout);
+app.post('/logout', user.logout);
 
 
 // API endpoints

@@ -5,4 +5,9 @@ var env = (new nunjucks.Environment(
 env.addFilter('undef', function (thing) {
   return thing || '';
 });
+env.addFilter('activize', function (actual, expect) {
+  if (expect === actual)
+    return 'class="active"';
+  return '';
+});
 module.exports = env;

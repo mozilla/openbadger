@@ -8,3 +8,7 @@
 .config-form input[name="secret"] {
   width: 600px;
 }
+
+.logout-form {
+  display: none;
+}
