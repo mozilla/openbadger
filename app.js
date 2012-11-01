@@ -128,4 +128,11 @@ app.configure('development', function () {
   app.post('/debug/flush', debug.flushDb);
 });
 
-module.exports = app;
+var server = module.exports = http.createServer(app);
+
+console.log('Environment: \n' + util.inspect(app.env.all()));
+if (!module.parent) {
+  server.listen(app.env.get('port'), function () {
+    app.logger.info("Express server listening on port " + app.env.get('port'));
+  });
+}
