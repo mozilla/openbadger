@@ -47,6 +47,55 @@ $ make verbose-test # if you want to see debugging
 $ make lint         # to lint the codebase
 ```
 
+# CloudFoundry configuration
+
+```bash
+
+$ vmc login
+
+$ vmc push clopenbadger --runtime node08 --mem 128M --no-start
+    Would you like to deploy from the current directory? [Yn]:
+    Application Deployed URL [clopenbadger.vcap.mozillalabs.com]:
+    Detected a Node.js Application, is this correct? [Yn]:
+    Creating Application: OK
+    Would you like to bind any services to 'clopenbadger'? [yN]:
+    Uploading Application:
+      Checking for available resources: OK
+      Processing resources: OK
+      Packing application: OK
+      Uploading (93K): OK
+    Push Status: OK
+
+$ vmc create-service redis redis-clopenbadger
+    Creating Service: OK
+
+$ vmc create-service mongodb mongodb-clopenbadger
+    Creating Service: OK
+
+$ vmc bind-service redis-clopenbadger clopenbadger
+    Binding Service [redis-clopenbadger]: OK
+
+$ vmc bind-service mongodb-clopenbadger clopenbadger
+    Binding Service [mongodb-clopenbadger]: OK
+
+$ vmc env-add clopenbadger OPENBADGER_PROTOCOL=https
+    Adding Environment Variable [OPENBADGER_PROTOCOL=https]: OK
+
+$ vmc env-add clopenbadger OPENBADGER_SECRET="badgerbadgerbadgerbadger"
+    Adding Environment Variable [OPENBADGER_SECRET=badgerbadgerbadgerbadger]: OK
+
+$ vmc env-add clopenbadger OPENBADGER_ADMINS='[\"swex@mozilla.com\", \"*@mozillafoundation.org\"]'
+    Adding Environment Variable [OPENBADGER_ADMINS=[\"swex@mozilla.com\", \"*@mozillafoundation.org\"]]: OK
+
+$ vmc env-add clopenbadger OPENBADGER_PERSONA_AUDIENCE=https://clopenbadger.vcap.mozillalabs.com
+    Adding Environment Variable [OPENBADGER_PERSONA_AUDIENCE=https://clopenbadger.vcap.mozillalabs.com]: OK
+
+And finally:
+
+$ vmc restart clopenbadger
+    Staging Application: OK
+    Starting Application: OK
+
 # Heroku configuration
 
 You should only have to do the following once:
