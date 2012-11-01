@@ -1,4 +1,5 @@
 var env = require('./lib/environment');
+var util = require('./lib/util');
 var express = require('express');
 var RedisStore = require('connect-redis')(express);
 var flash = require('connect-flash');
@@ -23,26 +24,33 @@ exports.session = function () {
 
 exports.cors = function cors(options) {
   options = options || {};
-  var whitelist = (options.whitelist || []).map(function (entry) {
+  var whitelist = parseWhitelist(options.whitelist);
+  return function (req, res, next) {
+    if (isExempt(whitelist, req.url))
+      res.header("Access-Control-Allow-Origin", "*");
+    return next();
+  };
+};
+
+function isExempt(whitelist, path) {
+  var i = whitelist.length;
+  while (i--) {
+    if (whitelist[i].test(path))
+      return true;
+  }
+  return false;
+}
+
+function parseWhitelist(array) {
+  if (!array)
+    return [];
+  return array.map(function (entry) {
     if (typeof entry === 'string') {
       entry = entry.replace('*', '.*?');
       return RegExp('^' + entry + '$');
     }
     return entry;
   });
-  function isExempt(path) {
-    var i = whitelist.length;
-    while (i--) {
-      if (whitelist[i].test(path))
-        return true;
-    }
-    return false;
-  }
-  return function (req, res, next) {
-    if (isExempt(req.url))
-      res.header("Access-Control-Allow-Origin", "*");
-    return next();
-  };
-};
+}
 
 exports.flash = flash;
