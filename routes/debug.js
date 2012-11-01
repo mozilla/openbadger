@@ -2,12 +2,6 @@ var async = require('async');
 var User = require('../models/user');
 var BadgeInstance = require('../models/badge-instance');
 
-exports.showFlushDbForm = function (req, res) {
-  return res.render('admin/flush-user-info.html', {
-    issuer: req.issuer,
-  });
-};
-
 function removeItem(item, callback) {
   return item.remove(callback);
 }

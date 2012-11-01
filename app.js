@@ -30,9 +30,8 @@ app.configure(function () {
   app.use(middleware.session());
   app.use(middleware.flash());
   app.use(express.static(path.join(__dirname, 'public')));
-  app.use(middleware.cors({
-    whitelist: ['/v1/*']
-  }));
+  app.use(middleware.csrf({whitelist: ['/v1/*']}));
+  app.use(middleware.cors({whitelist: ['/v1/*']}));
   app.use(user.requireAuth({
     whitelist: [
       '/login',
@@ -116,7 +115,7 @@ app.post('/v1/user/mark-all-badges-as-read',
 // Debug endpoints
 // ---------------
 app.configure('development', function () {
-  app.get('/debug/flush', debug.showFlushDbForm);
+  app.get('/debug/flush', admin.showFlushDbForm);
   app.post('/debug/flush', debug.flushDb);
 });
 

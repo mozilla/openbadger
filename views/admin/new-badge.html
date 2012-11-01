@@ -2,6 +2,8 @@
 
 {% block "main" %}
   <form method="post" action="?" enctype="multipart/form-data">
+    <input id="name" type="hidden" name="csrf" value="{{ csrf }}">
+    
     <legend>New Badge</legend>
     <div>
       <label for="name">Badge Name</label>

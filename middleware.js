@@ -1,5 +1,6 @@
 var env = require('./lib/environment');
 var util = require('./lib/util');
+var logger = require('./lib/logger');
 var express = require('express');
 var RedisStore = require('connect-redis')(express);
 var flash = require('connect-flash');
@@ -30,6 +31,44 @@ exports.cors = function cors(options) {
       res.header("Access-Control-Allow-Origin", "*");
     return next();
   };
+};
+
+/** Adapted from connect/lib/middleware/csrf.js */
+exports.csrf = function csrf(options) {
+  options = options || {}
+  var whitelist = parseWhitelist(options.whitelist);
+
+  function getToken(req) {
+    return (req.body && req.body.csrf)
+      || (req.query && req.query.csrf)
+      || (req.headers['x-csrf-token']);
+  }
+
+  return function(req, res, next){
+    var token, val, err;
+    if (isExempt(whitelist, req.url))
+      return next();
+
+    // generate CSRF token
+    token = req.session._csrf || (req.session._csrf = util.uid(24));
+
+    // ignore these methods
+    if ('GET' === req.method ||
+        'HEAD' === req.method ||
+        'OPTIONS' === req.method)
+      return next();
+
+    // determine value
+    val = getToken(req);
+
+    // check
+    if (val !== token) {
+      logger.warn(util.format('CSRF failure at %s', req.url));
+      return res.send(403);
+    }
+
+    return next();
+  }
 };
 
 function isExempt(whitelist, path) {

@@ -2,16 +2,13 @@
 /*
  * Administrative Pages
  */
-exports.index = function (req, res) {
-  return res.render('admin/index.html', {
-    issuer: req.issuer
-  });
-};
-
 exports.login = function (req, res) {
   var path = req.query['path'] || req.body['path'] || '/admin';
   return res.render('admin/login.html', {
+    page: 'login',
     issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
     issuerCheckExempt: true,
     path: path
   });
@@ -19,27 +16,39 @@ exports.login = function (req, res) {
 
 exports.newBadgeForm = function (req, res) {
   return res.render('admin/new-badge.html', {
-    issuer: req.issuer
+    page: 'new-badge',
+    issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
   });
 };
 
 exports.newBehaviorForm = function (req, res) {
   return res.render('admin/new-behavior.html', {
+    page: 'new-behavior',
     issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
     badgeShortName: req.query['for']
   });
 };
 
 exports.badgeIndex = function (req, res) {
   return res.render('admin/badge-index.html', {
+    page: 'home',
     issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
     badges: req.badges
   });
 };
 
 exports.showBadge = function (req, res) {
   return res.render('admin/show-badge.html', {
+    page: 'edit-badge',
     issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
     defaultBehavior: req.query['behavior'],
     badge: req.badge,
     behaviors: req.behaviors
@@ -48,7 +57,19 @@ exports.showBadge = function (req, res) {
 
 exports.configure = function (req, res) {
   return res.render('admin/config.html', {
+    page: 'configure',
     issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
     issuerCheckExempt: true
+  });
+};
+
+exports.showFlushDbForm = function (req, res) {
+  return res.render('admin/flush-user-info.html', {
+    page: 'flush',
+    issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf
   });
 };
