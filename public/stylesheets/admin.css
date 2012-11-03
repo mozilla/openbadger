@@ -15,3 +15,8 @@
 .remove-form input[type="submit"] {
   display: none;
 }
+
+.badge-name, .behavior-name {
+  font-weight: bold;
+  font-size: 18px;
+}

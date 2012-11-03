@@ -7,7 +7,8 @@
     <form method="post" action="/admin/badge/{{ badge.shortname }}" class="remove-form js-remove-badge">
       <input type="hidden" name="_method" value="delete">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <a href="/admin/badge/{{ badge.shortname }}">{{ badge.name }}</a> (<code>{{ badge.shortname }}</code>)
+      <a class="badge-name" href="/admin/badge/{{ badge.shortname }}">{{ badge.name }}</a>
+      (<code>{{ badge.shortname }}</code>)
       <br>{{ badge.description | stupidSafe }}
       
       <br><a href="" class="js-show-remove">remove?</a>
@@ -25,7 +26,7 @@
     <form method="post" action="/admin/behavior/{{ behavior.shortname }}" class="remove-form js-remove-behavior">
       <input type="hidden" name="_method" value="delete">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <strong>{{ behavior.name }}</strong> (<code>{{ behavior.shortname }}</code>)
+      <strong class="behavior-name">{{ behavior.name }}</strong> (<code>{{ behavior.shortname }}</code>)
       <br>{{ behavior.description | stupidSafe }}
       
       <br><a href="" class="js-show-remove">remove?</a>
