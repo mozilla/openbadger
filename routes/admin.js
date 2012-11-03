@@ -39,7 +39,8 @@ exports.badgeIndex = function (req, res) {
     issuer: req.issuer,
     user: req.session.user,
     csrf: req.session._csrf,
-    badges: req.badges
+    badges: req.badges,
+    behaviors: req.behaviors
   });
 };
 

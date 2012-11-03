@@ -65,9 +65,10 @@ app.post('/admin/config', issuer.update);
 
 // Badge listing
 // -------------
-app.get('/',             [badge.findAll], admin.badgeIndex);
-app.get('/admin',        [badge.findAll], admin.badgeIndex);
-app.get('/admin/badges', [badge.findAll], admin.badgeIndex);
+var indexMiddleware = [badge.findAll, behavior.findAll];
+app.get('/', indexMiddleware, admin.badgeIndex);
+app.get('/admin', indexMiddleware, admin.badgeIndex);
+app.get('/admin/badges', indexMiddleware, admin.badgeIndex);
 
 // Creating and editing a badge
 // ----------------------------
