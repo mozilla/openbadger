@@ -26,6 +26,15 @@ exports.create = function create(req, res) {
   });
 };
 
+exports.destroy = function destroy(req, res) {
+  var badge = req.badge;
+  return badge.remove(function (err) {
+    if (err)
+      return res.send(500, err);
+    return res.redirect('/');
+  });
+};
+
 exports.addBehavior = function addBehavior(req, res) {
   var form = req.body;
   var behavior = {

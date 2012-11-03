@@ -72,8 +72,17 @@ app.get('/admin/badges', indexMiddleware, admin.badgeIndex);
 
 // Creating and editing a badge
 // ----------------------------
+var findBadgeByParamShortname = badge.findByShortName({
+  container: 'param',
+  field: 'shortname',
+  required: true
+});
+
 app.get('/admin/badge', admin.newBadgeForm);
 app.post('/admin/badge', badge.create);
+app.delete('/admin/badge/:shortname', [
+  findBadgeByParamShortname
+], badge.destroy);
 app.get('/admin/badge/:shortname', [behavior.findAll], admin.showBadge);
 app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
 app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
@@ -92,11 +101,7 @@ app.delete('/admin/behavior/:shortname', [
 // models/badge-instance.js. If you change these routes, change those
 // methods.
 app.get('/badge/image/:shortname.png', [
-  badge.findByShortName({
-    container: 'param',
-    field: 'shortname',
-    required: true
-  })
+  findBadgeByParamShortname
 ], badge.image);
 app.get('/badge/assertion/:hash', badge.assertion);
 

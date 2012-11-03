@@ -1,6 +1,6 @@
 (function ($) {
   console.log('loaded');
-  var $forms = $('.js-remove-behavior');
+  var $forms = $('.js-remove-behavior, .js-remove-badge');
   var $links = $forms.find('.js-show-remove');
 
   $links.on('click', function (e) {
