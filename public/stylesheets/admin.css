@@ -12,7 +12,16 @@
   display: none;
 }
 
-.remove-form input[type="submit"] {
+.remove-form input[type="submit"],
+.remove-form button {
+  display: none;
+}
+
+.remove-form.show-actions input[type="submit"],
+.remove-form.show-actions button {
+  display: inline;
+}
+.remove-form.show-actions a.remove-link {
   display: none;
 }
 

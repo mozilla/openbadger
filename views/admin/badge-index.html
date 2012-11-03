@@ -11,7 +11,8 @@
       (<code>{{ badge.shortname }}</code>)
       <br>{{ badge.description | stupidSafe }}
       
-      <br><a href="" class="js-show-remove">remove?</a>
+      <br><a href="" class="remove-link js-show-remove">remove?</a>
+      <button class="btn js-cancel-button">Nevermind</button>
       <input type="submit" value="Remove badge" class="btn btn-danger js-remove-button"> 
     </form>
   </li>
@@ -29,7 +30,8 @@
       <strong class="behavior-name">{{ behavior.name }}</strong> (<code>{{ behavior.shortname }}</code>)
       <br>{{ behavior.description | stupidSafe }}
       
-      <br><a href="" class="js-show-remove">remove?</a>
+      <br><a href="" class="remove-link js-show-remove">remove?</a>
+      <button class="btn js-cancel-button">Nevermind</button>
       <input type="submit" value="Remove behavior" class="btn btn-danger js-remove-button"> 
    </form>
   </li>
