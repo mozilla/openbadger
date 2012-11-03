@@ -15,7 +15,7 @@
     <form method="post" action="/admin/behavior/{{ behavior.shortname }}" class="remove-behavior js-remove-behavior">
       <input type="hidden" name="_method" value="delete">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <strong>{{ behavior.name }}</strong> (<em>{{ behavior.shortname }}</em>)
+      <strong>{{ behavior.name }}</strong> (<code>{{ behavior.shortname }}</code>)
       <br>{{ behavior.description }}
       <br><a href="" class="js-show-remove">remove?</a>
       <input type="submit" value="Remove behavior" class="btn btn-danger js-remove-button"> 
