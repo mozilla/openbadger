@@ -5,7 +5,7 @@
 {% for badge in badges %}
   <li>
     <a href="/admin/badge/{{ badge.shortname }}">{{ badge.name }}</a>
-    ({{ badge.shortname }})
+    (<code>{{ badge.shortname }}</code>)
   </li>
 {% endfor %}
 
