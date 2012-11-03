@@ -12,11 +12,19 @@
 <h1>Behaviors (<a href="/admin/behavior">Create a new behavior</a>)</h1>
 {% for behavior in behaviors %}
   <li>
-    {{ behavior.name }}
-    ({{ behavior.shortname }})
-    <p> {{ behavior.description }} </p>
+    <form method="post" action="/admin/behavior/{{ behavior.shortname }}" class="remove-behavior js-remove-behavior">
+      <input type="hidden" name="_method" value="delete">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <strong>{{ behavior.name }}</strong> (<em>{{ behavior.shortname }}</em>)
+      <br>{{ behavior.description }}
+      <br><a href="" class="js-show-remove">remove?</a>
+      <input type="submit" value="Remove behavior" class="btn btn-danger js-remove-button"> 
+   </form>
   </li>
 {% endfor %}
 </ul>
+{% endblock %}
 
+{% block "footer" %}
+<script src="/js/badge-index.js"></script>
 {% endblock %}

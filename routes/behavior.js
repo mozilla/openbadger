@@ -35,15 +35,15 @@ exports.destroy = function destroy(req, res) {
   return behavior.remove(function (err) {
     if (err)
       return respondWithError(res, err);
-    return res.send(200, {status: 'ok'});
+    return res.redirect('/');
   });
 };
 
-exports.findByName = function findByName(req, res, next) {
-  var name = req.param('name');
-  if (!name)
+exports.findByShortName = function findByShortName(req, res, next) {
+  var shortname = req.param('shortname');
+  if (!shortname)
     return res.send(404, { status: 'not found' });
-  Behavior.findOne({name: name}, function (err, behavior) {
+  Behavior.findOne({shortname: shortname}, function (err, behavior) {
     if (err)
       return respondWithError(res, err);
     if (!behavior)

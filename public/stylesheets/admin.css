@@ -11,3 +11,7 @@
 .logout-form {
   display: none;
 }
+
+.remove-behavior input[type="submit"] {
+  display: none;
+}

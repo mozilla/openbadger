@@ -82,6 +82,9 @@ app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
 // ----------------------
 app.get('/admin/behavior', admin.newBehaviorForm);
 app.post('/admin/behavior', behavior.create);
+app.delete('/admin/behavior/:shortname', [
+  behavior.findByShortName
+], behavior.destroy);
 
 // Public, non-admin endpoints
 // ---------------------------
