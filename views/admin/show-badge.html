@@ -20,7 +20,7 @@
       <dd>{{ badge.shortname }}</dd>
       
       <dt>Description</dt>
-      <dd>{{ badge.description }}</dd>
+      <dd>{{ badge.description | stupidSafe }}</dd>
     </dl>
     
     <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">

@@ -10,4 +10,11 @@ env.addFilter('activize', function (actual, expect) {
     return 'class="active"';
   return '';
 });
+env.addFilter('stupidSafe', function (html) {
+  return (
+    html
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  );
+});
 module.exports = env;
