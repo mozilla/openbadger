@@ -49,11 +49,12 @@ test.applyFixtures({
   });
 
   test('Issuer.getAssertionObject', function (t) {
-    env.temp({ protocol: 'http', host: 'example.org', port: 80 }, function (resetEnv) {
+    env.temp({ origin: 'http://example.org' }, function (resetEnv) {
       var expect = {
         name: 'Mozilla',
         org: 'Webmaker',
-        contact: 'brian@mozillafoundation.org', origin: 'http://example.org:80'
+        contact: 'brian@mozillafoundation.org',
+        origin: 'http://example.org',
       };
       Issuer.getAssertionObject(function (err, result) {
         t.same(result, expect);

@@ -2,9 +2,7 @@ var test = require('./');
 var env = require('../lib/environment');
 
 env.temp({
-  protocol: 'https',
-  host: 'example.org',
-  port: '443',
+  origin: 'https://example.org:443'
 }, function (reset) {
 
   test('env.qualifyUrl', function (t) {
