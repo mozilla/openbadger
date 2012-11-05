@@ -1,7 +1,8 @@
 {% extends "admin/base.html" %}
-{% block "main" %}
+{% block main %}
 
 <form method="post" class="config-form" id="config-form" action="?">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
   <legend>Issuer Details</legend>
   <div>
     <label for="issuer-name">Name</label>

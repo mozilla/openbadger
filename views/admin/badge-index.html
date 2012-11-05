@@ -1,5 +1,5 @@
 {% extends "admin/base.html" %}
-{% block "main" %}
+{% block main %}
 <h1>Badges (<a href="/admin/badge">Create a new badge</a>)</h1>
 <ul>
 {% for badge in badges %}
@@ -39,6 +39,6 @@
 </ul>
 {% endblock %}
 
-{% block "footer" %}
+{% block footer %}
 <script src="/js/badge-index.js"></script>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends "admin/base.html" %}
-{% block "main" %}
+{% block main %}
 <form method="post" action="?">
   <input id="name" type="hidden" name="csrf" value="{{ csrf }}">
   <legend>
@@ -33,6 +33,6 @@
 </form>
 {% endblock %}
 
-{% block "footer" %}
+{% block footer %}
 <script src="/js/behaviors.js"></script>
 {% endblock %}
