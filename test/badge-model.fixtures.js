@@ -55,10 +55,21 @@ module.exports = {
     shortname: 'offline-badge',
     description: 'For doing stuff offline',
     image: IMAGE,
-    offline: [
-      { code: 'happy-sandwich' },
-      { code: 'greasy-avocado' },
-      { code: 'lethargic-hummingbird' }
+    claimCodes: [
+      { code: 'already-claimed', claimedBy: 'brian@example.org' },
+      { code: 'never-claim' },
+      { code: 'will-claim' }
+    ]
+  }),
+  'other-offline-badge': new Badge({
+    name: 'Other Offline badge',
+    shortname: 'other-offline-badge',
+    description: 'For doing more offline stuff',
+    image: IMAGE,
+    claimCodes: [
+      { code: 'slothstronaut' },
+      { code: 'bearstronaut' },
+      { code: 'catstronaut' }
     ]
   }),
   'user': new User({

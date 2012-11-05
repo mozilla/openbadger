@@ -4,6 +4,7 @@ var env = require('../lib/environment');
 var util = require('../lib/util');
 var Issuer = require('./issuer');
 var Schema = mongoose.Schema;
+var Set = require('../lib/set');
 
 function maxLength(field, length) {
   function lengthValidator() {
@@ -24,6 +25,19 @@ var BehaviorSchema = new Schema({
     type: Number,
     min: 0,
     required: true
+  }
+});
+
+var ClaimCodeSchema = new Schema({
+  code: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  claimedBy: {
+    type: String,
+    required: false,
+    trim: true,
   }
 });
 
@@ -61,6 +75,9 @@ var BadgeSchema = new Schema({
     type: [BehaviorSchema],
     unique: true
   },
+  claimCodes: {
+    type: [ClaimCodeSchema],
+  },
   prerequisites: {
     type: [String]
   },
@@ -72,6 +89,9 @@ var BadgeSchema = new Schema({
 });
 var Badge = db.model('Badge', BadgeSchema);
 
+// Validators & Defaulters
+// -----------------------
+
 /**
  * Middleware for setting default shortname when one is not provided.
  */
@@ -82,6 +102,9 @@ function setShortNameDefault(next) {
   next();
 }
 BadgeSchema.pre('validate', setShortNameDefault);
+
+// Model methods
+// -------------
 
 /**
  * Find a badge by the shortname of a behavior associated with the badge.
@@ -110,6 +133,154 @@ Badge.getAll = function getAll(callback) {
     }, {});
     callback(null, byName);
   });
+};
+
+/**
+ * Find a badge by one of its claim codes
+ *
+ * @asynchronous
+ * @param {String} code
+ * @param {Function} callback
+ * @return {async: Badge|Null}
+ */
+
+Badge.findByClaimCode = function findByClaimCode(code, callback) {
+  const query = { claimCodes: { '$elemMatch' : { code: code }}};
+  Badge.findOne(query, callback);
+};
+
+/**
+ * Get an array of all the claim codes across all badges
+ *
+ * @asynchronous
+ * @return {async: Array}
+ */
+
+Badge.getAllClaimCodes = function getAllClaimCodes(callback) {
+  Badge.find(function (err, badges) {
+    if (err)
+      return callback(err);
+    const codes = badges.reduce(function (codes, badge) {
+      badge.claimCodes.forEach(function (claim) {
+        codes.push(claim.code);
+      });
+      return codes;
+    }, []);
+    callback(null, codes);
+  });
+};
+
+// Instance methods
+// ----------------
+
+/**
+ * Tests whether the badge has an claim code
+ *
+ * @param {String} code
+ * @return {Boolean}
+ * @see Badge#getClaimCode
+ */
+
+Badge.prototype.hasClaimCode = function hasClaimCode(code) {
+  return !!this.getClaimCode(code);
+};
+
+/**
+ * Add a bunch of claim codes and saves the badge. Will make sure the
+ * codes are universally unique before adding them.
+ *
+ * @asynchronous
+ * @param {Array} codes Array of claim codes to add
+ * @param {Function} callback
+ *   Expects `function (err, accepted, rejected)`
+ * @return {[async]}
+ *   - `accepted`: Array of accepted codes
+ *   - `rejected`: Array of rejected codes
+ */
+Badge.prototype.addClaimCodes = function addClaimCodes(codes, callback) {
+  // remove duplicates
+  codes = (new Set(codes)).values();
+
+  var accepted = [];
+  var rejected = [];
+  Badge.getAllClaimCodes(function (err, existingCodes) {
+    if (err) return callback(err);
+
+    codes.forEach(function (code) {
+      if (inArray(existingCodes, code))
+        return rejected.push(code);
+      return accepted.push(code);
+    }.bind(this));
+
+    if (!accepted.length)
+      return callback(err, accepted, rejected);
+
+    accepted.forEach(function(code){
+      this.claimCodes.push({ code: code });
+    }.bind(this));
+
+    this.save(function (err, result) {
+      if (err) return callback(err);
+      return callback(null, accepted, rejected);
+    });
+  }.bind(this));
+};
+
+function inArray(array, thing) {
+  return array.indexOf(thing) > -1;
+}
+
+/**
+ * Find an claim code by name
+ *
+ * @param {String} code
+ * @return {Object|Null}
+ */
+
+Badge.prototype.getClaimCode = function getClaimCode(code) {
+  const codes = this.claimCodes;
+  var idx = codes.length;
+  while (idx--) {
+    if (codes[idx].code === code)
+      return codes[idx];
+  }
+  return null;
+};
+
+/**
+ * Whether or not an claim code is claimed
+ *
+ * @param {String} code
+ * @return {Boolean|Null}
+ *   true if claimed, false if not, null if not found
+ * @see Badge#getClaimCode
+ */
+
+Badge.prototype.claimCodeIsClaimed = function claimCodeIsClaimed(code) {
+  const claim = this.getClaimCode(code);
+  if (!claim)
+    return null;
+  return !!(claim.claimedBy);
+};
+
+/**
+ * Claim an claim code for a user if it hasn't already been claimed
+ *
+ * @param {String} code
+ * @param {String} email
+ * @return {Boolean|Null}
+ *   true on success, false if already claimed, null if code not found
+ * @see Badge#getClaimCode
+ */
+
+Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
+  const claim = this.getClaimCode(code);
+  if (!claim)
+    return null;
+  if (claim.claimedBy)
+    return false;
+  claim.claimedBy = email;
+  return true;
 };
 
 
