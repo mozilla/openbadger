@@ -18,7 +18,8 @@
     "async": "0.1.22",
     "up": "0.2.2",
     "connect-flash": "0.1.0",
-    "jwt-simple": "0.1.0"
+    "jwt-simple": "0.1.0",
+    "sandwich": "~0.1.1"
   },
   "devDependencies": {
     "tap": "~0.3.1"
