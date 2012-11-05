@@ -5,3 +5,4 @@ node_modules
 db
 /bin/test-config.sh
 /wiki/
+/dump.rdb
