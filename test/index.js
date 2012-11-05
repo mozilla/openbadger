@@ -1,6 +1,8 @@
-var async = require('async');
-var env = require('../lib/environment');
-var test = require('tap').test;
+const fs = require('fs');
+const pathutil = require('path');
+const async = require('async');
+const env = require('../lib/environment');
+const test = require('tap').test;
 
 if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'travis') {
   console.log("you must set NODE_ENV to 'test' before running tests")
@@ -23,6 +25,11 @@ test.randomstring = function randomstring(length) {
     str += chars[Math.random() * chars.length | 0];
   return str;
 };
+
+test.asset = function asset(name) {
+  return fs.readFileSync(pathutil.join(__dirname, 'assets', name));
+}
+
 
 test.applyFixtures = function applyFixtures(fixtures, carryOn) {
   /**

@@ -1,17 +1,8 @@
-var fs = require('fs');
-var pathutil = require('path');
-var test = require('./');
-var env = require('../lib/environment');
-var util = require('../lib/util');
-var db = require('../models');
-var Badge = require('../models/badge');
-var Issuer = require('../models/issuer');
-var User = require('../models/user');
-var BadgeInstance = require('../models/badge-instance');
-
-function asset(name) {
-  return fs.readFileSync(pathutil.join(__dirname, 'assets', name));
-}
+const test = require('./');
+const env = require('../lib/environment');
+const util = require('../lib/util');
+const db = require('../models');
+const Badge = require('../models/badge');
 
 function validBadge() {
   return new Badge({
@@ -20,74 +11,18 @@ function validBadge() {
     description: 'badge description',
     behaviors: [],
     prerequisites: [],
-    image: asset('sample.png')
+    image: test.asset('sample.png')
   });
 }
 
-var fixtures = {
-  'issuer': new Issuer({
-    name: 'Badge Authority',
-    org: 'Some Org',
-    contact: 'brian@example.org'
-  }),
-  'link-basic': new Badge({
-    name: 'Link Badge, basic',
-    shortname: 'link-basic',
-    description: 'For doing links.',
-    image: asset('sample.png'),
-    behaviors: [
-      { shortname: 'link', count: 5 }
-    ]
-  }),
-  'link-advanced': new Badge({
-    name : 'Link Badge, advanced',
-    shortname: 'link-advanced',
-    description: 'For doing lots of links.',
-    image: asset('sample.png'),
-    behaviors: [
-      { shortname: 'link', count: 10 }
-    ]
-  }),
-  'comment': new Badge({
-    name : 'Commenting badge',
-    shortname: 'comment',
-    description: 'For doing lots of comments.',
-    image: asset('sample.png'),
-    behaviors: [
-      { shortname: 'comment', count: 5 }
-    ]
-  }),
-  'link-comment': new Badge({
-    name : 'Linking and commenting badge',
-    shortname: 'link-comment',
-    description: 'For doing lots of comments and links',
-    image: asset('sample.png'),
-    behaviors: [
-      { shortname: 'comment', count: 5 },
-      { shortname: 'link', count: 5 }
-    ]
-  }),
-  'user': new User({
-    user: 'brian@example.org',
-    credit: {}
-  }),
-  'instance': new BadgeInstance({
-    user: 'brian@example.org',
-    hash: 'hash',
-    badge: 'link-basic',
-    assertion: '{ "assertion" : "yep" }',
-    seen: true
-  })
-};
-
+var fixtures = require('./badge-model.fixtures.js');
 test.applyFixtures(fixtures, function () {
   test('Badge#imageDataURI', function (t) {
-    var badge = new Badge({image: asset('sample.png')});
+    var badge = new Badge({image: test.asset('sample.png')});
     var dataURI = badge.imageDataURI();
     t.ok(dataURI.match(/^data:image\/png;base64,.+$/), 'should match data uri format');
     t.end();
   });
-
 
   test('Badge#save: saving a valid badge', function (t) {
     var expect = validBadge();
@@ -294,6 +229,13 @@ test.applyFixtures(fixtures, function () {
         t.end();
       });
     });
+  });
+
+  test('Badge#addOfflineCode', function (t) {
+    const badge = fixtures['offline-badge'];
+    badge.addOfflineCodes(['tremendous-turtle']);
+    console.dir(badge);
+    t.end();
   });
 
   // necessary to stop the test runner
