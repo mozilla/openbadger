@@ -16,6 +16,7 @@ and mongo locally.
 export OPENBADGER_HOST="localhost"
 export OPENBADGER_PROTOCOL="http"
 export OPENBADGER_PORT=3000
+export OPENBADGER_PERSONA_AUDIENCE="http://localhost:3000"
 export OPENBADGER_LOGDIR='.'
 export OPENBADGER_SECRET="badgerbadgerbadgerbadger"
 export OPENBADGER_REDIS_HOST="localhost"
@@ -158,6 +159,7 @@ heroku config:add OPENBADGER_HOST="evening-fjord-7837.herokuapp.com"
 heroku config:add OPENBADGER_PROTOCOL="http"
 heroku config:add OPENBADGER_PORT=80
 heroku config:add OPENBADGER_LOGDIR='.'
+heroku config:add OPENBADGER_PERSONA_AUDIENCE="http://evening-fjord-7837.herokuapp.com"
 heroku config:add OPENBADGER_SECRET="19ofOKiFSr8aCyRpH2ohmfh5O7dOpReCHa9vkeoWJCWP72oVb"
 heroku config:add OPENBADGER_REDIS_HOST="your-redis-host.org"
 heroku config:add OPENBADGER_REDIS_PORT=6379

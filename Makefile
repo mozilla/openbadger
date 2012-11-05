@@ -1,5 +1,5 @@
 server: dependencies
-	node_modules/.bin/up -t 0 -n 1 -w -p ${OPENBADGER_PORT} server.js
+	node_modules/.bin/up -t 0 -n 1 -w -p ${OPENBADGER_PORT} app.js
 
 dependencies:
 	@npm install
