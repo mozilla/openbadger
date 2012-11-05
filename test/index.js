@@ -2,6 +2,11 @@ var async = require('async');
 var env = require('../lib/environment');
 var test = require('tap').test;
 
+if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'travis') {
+  console.log("you must set NODE_ENV to 'test' before running tests")
+  console.log("make sure to also change any database names so you don't destroy data");
+  process.exit(1);
+}
 module.exports = test;
 
 /**
