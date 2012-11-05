@@ -190,16 +190,22 @@ Badge.prototype.hasClaimCode = function hasClaimCode(code) {
  * codes are universally unique before adding them.
  *
  * @asynchronous
- * @param {Array} codes Array of claim codes to add
+ * @param {Object} options
+ *   - `codes`: Array of claim codes to add
+ *   - `limit`: Maximum number of codes to add. [default: Infinity]
  * @param {Function} callback
  *   Expects `function (err, accepted, rejected)`
  * @return {[async]}
  *   - `accepted`: Array of accepted codes
  *   - `rejected`: Array of rejected codes
  */
-Badge.prototype.addClaimCodes = function addClaimCodes(codes, callback) {
+Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
+  if (Array.isArray(options))
+    options = { codes: options };
+
   // remove duplicates
-  codes = (new Set(codes)).values();
+  const codes = (new Set(options.codes)).values();
+  const limit = options.limit || Infinity;
 
   var accepted = [];
   var rejected = [];
@@ -207,7 +213,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(codes, callback) {
     if (err) return callback(err);
 
     codes.forEach(function (code) {
-      if (inArray(existingCodes, code))
+      if (inArray(existingCodes, code) || accepted.length >= limit)
         return rejected.push(code);
       return accepted.push(code);
     }.bind(this));

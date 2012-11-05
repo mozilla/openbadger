@@ -241,7 +241,6 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#addClaimCodes', function (t) {
     const badge = fixtures['offline-badge'];
-    const original = badge.claimCodes.length;
     const codes = ['lethargic-hummingbird', 'woeful-turtle'];
     badge.addClaimCodes(codes, function (err, accepted, rejected) {
       t.notOk(err, 'should not have any errors');
@@ -259,12 +258,25 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#addClaimCodes, filter incoming dups', function (t) {
     const badge = fixtures['offline-badge'];
-    const original = badge.claimCodes.length;
     const codes = ['duplicate', 'duplicate', 'duplicate', 'duplicate', 'harrison-ford'];
     badge.addClaimCodes(codes, function (err, accepted, rejected) {
       t.notOk(err, 'should not have any errors');
       t.notOk(rejected.length, 'should not have rejected any');
       t.same(accepted, ['duplicate', 'harrison-ford']);
+      t.end();
+    });
+  });
+
+  test('Badge#addClaimCodes, with limit option', function (t) {
+    const badge = fixtures['offline-badge'];
+    const original = badge.claimCodes.length;
+    const codes = ['already-claimed', 'one', 'will-claim', 'two', 'never-claim', 'three', 'four', 'five'];
+    const limit = 3;
+    const options = {codes: codes, limit: limit };
+    badge.addClaimCodes(options, function (err, accepted, rejected) {
+      t.notOk(err, 'should not have any errors');
+      t.same(accepted, ['one', 'two', 'three']);
+      t.same(rejected, ['already-claimed', 'will-claim', 'never-claim', 'four', 'five']);
       t.end();
     });
   });
