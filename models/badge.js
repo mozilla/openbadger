@@ -341,7 +341,7 @@ Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   const claim = this.getClaimCode(code);
   if (!claim)
     return null;
-  if (claim.claimedBy)
+  if (claim.claimedBy && claim.claimedBy != email)
     return false;
   claim.claimedBy = email;
   return true;
@@ -358,6 +358,19 @@ Badge.prototype.removeClaimCode = function removeClaimCode(code) {
     return claim.code !== code;
   });
 };
+
+/**
+ * Release a claim code back into the wild (remove `claimedBy`)
+ *
+ * @param {String} code
+ */
+
+Badge.prototype.releaseClaimCode = function releaseClaimCode(code) {
+  const claim = this.getClaimCode(code);
+  claim.claimedBy = null;
+  return true;
+};
+
 
 /**
  * Check if the credits are enough to earn the badge

@@ -40,7 +40,8 @@ app.configure(function () {
       '/login',
       '/logout',
       '/badge/*', // public badge resources
-      '/v1/*'     // api endpoints
+      '/v1/*',     // api endpoints
+      '/claim*'
     ],
     redirectTo: '/login'
   }));
@@ -96,6 +97,7 @@ app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
 app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
 app.post('/admin/badge/:shortname/claims', badge.addClaimCodes);
 app.delete('/admin/badge/:shortname/claims/:code', badge.removeClaimCode);
+app.patch('/admin/badge/:shortname/claims/:code', badge.releaseClaimCode);
 
 // Creating new behaviors
 // ----------------------
@@ -117,6 +119,16 @@ app.get('/badge/assertion/:hash', badge.assertion);
 app.get('/badge/criteria/:shortname', [
    findBadgeByParamShortname
 ], admin.criteria);
+
+app.get('/claim', admin.claim);
+
+app.post('/claim',[
+  badge.findByClaimCode()
+], admin.confirmClaim);
+
+app.post('/claim/confirm',[
+  badge.findByClaimCode()
+], badge.awardToUser);
 
 // User login/logout
 // -------------------

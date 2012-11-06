@@ -76,6 +76,22 @@ exports.criteria = function criteria(req, res) {
   });
 }
 
+exports.claim = function claim(req, res) {
+  return res.render('public/claim.html', {
+    csrf: req.session._csrf,
+    code: req.query.code,
+    missing: req.query.missing,
+  });
+};
+
+exports.confirmClaim = function confirmClaim(req, res) {
+  return res.render('public/confirm-claim.html', {
+    csrf: req.session._csrf,
+    code: req.body.code,
+    badge: req.badge,
+  });
+};
+
 exports.manageClaimCodes = function (req, res) {
   return res.render('admin/manage-claim-codes.html', {
     page: 'edit-badge',

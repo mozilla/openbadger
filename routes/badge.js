@@ -131,9 +131,51 @@ exports.removeClaimCode = function removeClaimCode(req, res, next) {
   var badge = req.badge;
   badge.removeClaimCode(code);
   badge.save(function (err) {
-    if (err) next(err);
-    res.redirect('back');
+    if (err) return next(err);
+    return res.redirect('back');
   });
+};
+
+exports.releaseClaimCode = function releaseClaimCode(req, res, next) {
+  var code = req.param('code');
+  var badge = req.badge;
+  badge.releaseClaimCode(code);
+  badge.save(function (err) {
+    if (err) return next(err);
+    return res.redirect('back');
+  })
+};
+
+
+exports.awardToUser = function awardToUser(req, res, next) {
+  var email = req.body.email;
+  var code = req.body.code;
+  var badge = req.badge;
+  if (!badge.redeemClaimCode(code, email))
+    return res.send({ status: 'already-claimed' })
+  badge.awardOrFind(email, function (err, instance) {
+    if (err) return res.send({ status: 'error', error: err });
+    badge.save(function (err) {
+      if (err) return res.send({ status: 'error', error: err });
+      return res.send({
+        status: 'ok',
+        assertionUrl: instance.absoluteUrl('assertion')
+      });
+    })
+  });
+};
+
+exports.findByClaimCode = function findByClaimCode(options) {
+  return function (req, res, next) {
+    var code = req.body.code;
+    Badge.findByClaimCode(code, function (err, badge) {
+      if (err) return next(err);
+      if (!badge)
+        return res.redirect('/claim?code=' + code + '&missing=true');
+      req.badge = badge;
+      return next();
+    });
+  }
 };
 
 exports.findByShortName = function (options) {

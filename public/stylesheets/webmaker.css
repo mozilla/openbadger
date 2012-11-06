@@ -735,7 +735,7 @@ body {
   border-top: none;
 }
 .bg-stone {
-  background: #f9f9f9 url(/media/img/bg-stone.png) 0 70px repeat-x;
+  background: #f9f9f9 url(/img/bg-stone.png) 0 70px repeat-x;
 }
 header {
   -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
