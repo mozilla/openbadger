@@ -40,7 +40,7 @@
   margin: 0;
   padding: 0;
 }
-.badge-list li {
+.badge-list > li {
   margin: 25px 0;
 }
 .behavior-list li{
