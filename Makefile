@@ -8,10 +8,10 @@ lint:
 	@jshint *.js lib/*.js models/*.js routes/*.js
 
 test:
-	@node test && node_modules/.bin/tap tests/*.test.js
+	@node tests && node_modules/.bin/tap tests/*.test.js
 
 verbose-test:
-	@node test/*.test.js
+	@node tests/*.test.js
 
 heroku:
 	@git push heroku master && heroku open

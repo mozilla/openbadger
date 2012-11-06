@@ -19,7 +19,9 @@
     "up": "0.2.2",
     "connect-flash": "0.1.0",
     "jwt-simple": "0.1.0",
-    "sandwich": "~0.1.1"
+    "sandwich": "~0.1.1",
+    "optimist": "~0.3.5",
+    "iterator-stream": "~0.4.0"
   },
   "devDependencies": {
     "tap": "~0.3.1"
