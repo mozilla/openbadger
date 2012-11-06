@@ -162,10 +162,6 @@ exports.auth = function auth(req, res, next) {
   } catch(err) {
     return respondWithError(res, 'error decoding JWT: ' + err.message);
   }
-  if (auth.aud !== origin) {
-    msg = '`aud` mismatch: given %s, expected %s';
-    return respondWithError(res, util.format(msg, auth.aud, origin));
-  }
   if (auth.prn !== email) {
     msg = '`prn` mismatch: given %s, expected %s';
     return respondWithError(res, util.format(msg, auth.prn, email));
