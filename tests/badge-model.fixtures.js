@@ -58,7 +58,8 @@ module.exports = {
     claimCodes: [
       { code: 'already-claimed', claimedBy: 'brian@example.org' },
       { code: 'never-claim' },
-      { code: 'will-claim' }
+      { code: 'will-claim' },
+      { code: 'remove-claim' }
     ]
   }),
   'other-offline-badge': new Badge({
