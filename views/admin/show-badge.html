@@ -35,20 +35,27 @@
           <label>Trigger
           <select name="shortname">
             {% for behavior in behaviors %}
-              <option value="{{ behavior.shortname }}" {% if behavior.shortname == defaultBehavior %}selected{% endif %}>
+              <option value="{{ behavior.shortname }}"
+                      {% if behavior.shortname == defaultBehavior %}selected{% endif %}>
                 {{ behavior.name }}
               </option>
             {% endfor %}
           </select>
           </label>
-          <span class="help-block">The tag the js library passes to Clopenbadger, no spaces or special characters please!</span>
+          <span class="help-block">
+            The tag the js library passes to Clopenbadger, no spaces or
+            special characters please!
+          </span>
         </div>
 
         <div>
           <label>Trigger Count
           <input type="text" name="count" placeholder="5">
           </label>
-          <span class="help-block">The number of times the user needs to activate this trigger before the badge is awarded</span>
+          <span class="help-block">
+            The number of times the user needs to activate this trigger
+            before the badge is awarded
+          </span>
         </div>
 
         <div class="form-actions">

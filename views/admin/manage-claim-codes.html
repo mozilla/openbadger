@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% block main %}
+<h1>{{ badge.name }}</h1>
+<form method="post" action="?">
+  <legend>Add new codes</legend>
+  <textarea rows="5" width="100" placeholder="{{ exampleCode }}" name="codes"></textarea>
+  <span class="help-block">One code per line, please</span>
+  <div class="form-actions">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="submit" value="Add codes" class="btn btn-primary">
+  </div>
+</form>
+
+{% if codes.length %}
+<h2>Existing Codes</h2>
+  <table class="table table-hover table-bordered">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Claimed By</th>
+        <th>Actions</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for claim in codes %}
+      <tr>
+        <td>{{ claim.code }}</td>
+        <td>{{ claim.claimedBy | default('<em>open</em>') }}</td>
+        <td>
+          <form method="post" action="{{ claim.code }}" class="claim-action js-claim-action">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <input type="hidden" name="_method" value="" class="js-claim-action-method">
+            
+            <button class="btn btn-link btn-small" data-method="delete">delete</button>
+            {% if claim.claimedBy %}
+            |
+            <button class="btn btn-link btn-small" data-method="patch">release</button>
+          {% endif %}
+          </form>
+        </td>
+      <tr>
+      {%  endfor %}
+    </tbody>
+  </table>
+</form>
+
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<script src="/js/claims.js"></script>
+{% endblock %}

@@ -81,6 +81,38 @@ exports.assertion = function assertion(req, res) {
   });
 };
 
+function identity(x) { return x };
+function instance(method) {
+  return function (o) {
+    var args = [].slice.call(arguments);
+    return o[method].apply(o, args);
+  };
+}
+exports.addClaimCodes = function addClaimCodes(req, res, next) {
+  var badge = req.badge;
+  var rawCodes = req.body.codes;
+  var codes = (rawCodes
+    .split('\n')
+    .map(instance('trim'))
+    .filter(identity));
+
+  badge.addClaimCodes(codes, function(err) {
+    if (err) return next(err);
+    return res.redirect('back');
+  });
+};
+
+exports.removeClaimCode = function removeClaimCode(req, res, next) {
+  var code = req.param('code');
+  var badge = req.badge;
+  badge.removeClaimCode(code);
+  badge.save(function (err) {
+    if (err) next(err);
+    res.redirect('back');
+  });
+};
+
+
 exports.findByShortName = function (options) {
   var required = !!options.required;
 

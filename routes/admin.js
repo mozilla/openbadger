@@ -1,3 +1,4 @@
+var phrases = require('../lib/phrases');
 
 /*
  * Administrative Pages
@@ -53,6 +54,18 @@ exports.showBadge = function (req, res) {
     defaultBehavior: req.query['behavior'],
     badge: req.badge,
     behaviors: req.behaviors
+  });
+};
+
+exports.manageClaimCodes = function (req, res) {
+  return res.render('admin/manage-claim-codes.html', {
+    page: 'edit-badge',
+    issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
+    badge: req.badge,
+    codes: req.badge.claimCodes,
+    exampleCode: phrases(1)
   });
 };
 
