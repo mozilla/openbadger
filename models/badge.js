@@ -4,7 +4,6 @@ var env = require('../lib/environment');
 var util = require('../lib/util');
 var Issuer = require('./issuer');
 var Schema = mongoose.Schema;
-var Set = require('../lib/set');
 
 function maxLength(field, length) {
   function lengthValidator() {
@@ -185,6 +184,23 @@ Badge.prototype.hasClaimCode = function hasClaimCode(code) {
   return !!this.getClaimCode(code);
 };
 
+function inArray(array, thing) {
+  return array.indexOf(thing) > -1;
+}
+
+function dedupe(array) {
+  const matches = {}
+  const results = []
+  var idx = array.length;
+  var word;
+  while (idx--) {
+    word = array[idx];
+    if (!matches[word])
+      matches[word] = results.unshift(word);
+  }
+  return results;
+}
+
 /**
  * Add a bunch of claim codes and saves the badge. Will make sure the
  * codes are universally unique before adding them.
@@ -204,7 +220,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
     options = { codes: options };
 
   // remove duplicates
-  const codes = (new Set(options.codes)).values();
+  const codes = dedupe(options.codes);
   const limit = options.limit || Infinity;
 
   var accepted = [];
