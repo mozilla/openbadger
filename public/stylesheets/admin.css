@@ -21,7 +21,8 @@
 .remove-form.show-actions button {
   display: inline;
 }
-.remove-form.show-actions a.remove-link {
+
+.remove-form.show-actions .remove-link {
   display: none;
 }
 
@@ -31,3 +32,26 @@
 }
 
 .claim-action { display: inline }
+
+.badge-list, .behavior-list {
+  list-style: none;
+}
+.badge-list, .behavior-list {
+  margin: 0;
+  padding: 0;
+}
+.badge-list li {
+  margin: 25px 0;
+}
+.behavior-list li{
+  margin: 15px 0;
+}
+.behavior-list {
+  margin-left: 3px;
+}
+
+.badge-list .badge-image {
+  margin: -4px 0 0 -6px;
+  width: 80px;
+  float: left;
+}
