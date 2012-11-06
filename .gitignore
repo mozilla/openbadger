@@ -6,3 +6,4 @@ db
 /bin/test-config.sh
 /wiki/
 /dump.rdb
+generated-codes
