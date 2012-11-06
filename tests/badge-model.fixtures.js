@@ -72,6 +72,13 @@ module.exports = {
       { code: 'catstronaut' }
     ]
   }),
+  'random-badge': new Badge({
+    name: 'Random code badge',
+    shortname: 'random-badge',
+    description: 'For doing random stuff',
+    image: IMAGE,
+    claimCodes: []
+  }),
   'user': new User({
     user: 'brian@example.org',
     credit: {}
