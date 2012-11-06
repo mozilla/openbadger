@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="" dir="">
+<head>
+  <meta charset="utf-8">
+  <title>Mozilla Webmaker Badges</title>
+  <link rel="stylesheet" href="/stylesheets/opensans/stylesheet.css">
+  <link rel="stylesheet" href="/stylesheets/webmaker.css">
+  <link href="//www.mozilla.org/tabzilla/media/css/tabzilla.css" rel="stylesheet">
+  <!--[if lt IE 9]>
+    <script src="/js/html5shiv.js"></script>
+  <![endif]-->
+  {% block head %}{% endblock %} 
+</head>
+<body>
+  <div class="wrapper bg-stone">
+    <header>
+      <div class="container">
+        <div class="logo">
+          <a href="#">
+            <img src="/img/header_logo.png" alt="Mozilla Webmaker Logo">
+          </a>
+        </div>
+        <a href="http://www.mozilla.org/" id="tabzilla">Mozilla</a>
+        <nav role="navigation">
+          <ul>
+            <li  class="active"  >
+              <a href="#">Badges</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <section>
+      <div class="container">
+      {% block body %}{% endblock %}
+      </div>
+    </section>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="span2">
+            <h2><img src="/img/footer-logo.png" alt="Webmaker Logo"></h2>
+          </div>
+          <nav class="span2">
+            <h3>About</h3>
+            <ul>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact Us</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Legal Notices</a></li>
+            </ul>
+          </nav>
+          <nav class="span2">
+            <h3>Connect with us</h3>
+            <ul>
+                <li><a href="#">Twitter</a></li>
+                <li><a href="#">Facebook</a></li>
+            </ul>
+          </nav>
+          <nav class="span2">
+            <h3>Make something</h3>
+            <ul>
+                <li><a href="#">Projects</a></li>
+                <li><a href="#">Tools</a></li>
+                <li><a href="#">Events</a></li>
+            </ul>
+          </nav>
+          <nav class="span2">
+            <h3>Support our work</h3>
+            <ul>
+                <li><a href="#">Donate</a></li>
+                <li><a href="#">Contribute</a></li>
+                <li><a href="#">Buy a t-shirt</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script src="//www.mozilla.org/media/js/libs/jquery-1.7.1.min.js"></script>
+  <script src="//www.mozilla.org/tabzilla/media/js/tabzilla.js"></script> 
+  {% block scripts %}{% endblock %} 
+</body>
+</html>
