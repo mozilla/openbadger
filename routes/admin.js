@@ -1,3 +1,4 @@
+var Badge = require('../models/badge');
 var phrases = require('../lib/phrases');
 
 /*
@@ -16,8 +17,9 @@ exports.login = function (req, res) {
 }
 
 exports.newBadgeForm = function (req, res) {
-  return res.render('admin/new-badge.html', {
+  return res.render('admin/create-or-edit-badge.html', {
     page: 'new-badge',
+    badge: new Badge,
     issuer: req.issuer,
     user: req.session.user,
     csrf: req.session._csrf,
@@ -25,8 +27,9 @@ exports.newBadgeForm = function (req, res) {
 };
 
 exports.editBadgeForm = function (req, res) {
-  return res.render('admin/edit-badge.html', {
+  return res.render('admin/create-or-edit-badge.html', {
     page: 'edit-badge',
+    editing: true,
     badge: req.badge,
     issuer: req.issuer,
     user: req.session.user,
