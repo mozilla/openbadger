@@ -345,6 +345,16 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
+  test('Badge#awardOrFind: award badge to a user', function (t) {
+    var badge = fixtures['link-comment'];
+    var email = fixtures['user'].user;
+    badge.awardOrFind(email, function (err, instance) {
+      t.notOk(err, 'should not have an error');
+      t.ok(instance, 'should have a badge instance');
+      t.same(instance.user, email, 'should be assigned to the right user');
+      t.end();
+    });
+  });
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {

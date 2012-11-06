@@ -405,6 +405,23 @@ Badge.prototype.award = function award(email, callback) {
 };
 
 /**
+ * Award a badge or find the awarded badge
+ */
+
+Badge.prototype.awardOrFind = function awardOrFind(email, callback) {
+  var BadgeInstance = require('./badge-instance');
+  var query = { userBadgeKey: [email, this.shortname].join('.') };
+  this.award(email, function (err, instance) {
+    if (!instance) {
+      BadgeInstance.findOne(query, function (err, instance) {
+        if (err) return callback(err);
+        return callback(null, instance);
+      });
+    }
+  });
+};
+
+/**
  * Get how many credits a user has to earn before the badge is earnable.
  *
  * @param {User} user A user-like object, containing `credits` property
