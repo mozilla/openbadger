@@ -324,6 +324,16 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  // test('Badge#generateClaimCodes', function (t) {
+  //   const badge = fixtures['offline-badge'];
+  //   badge.generateClaimCodes(4000, function (err, codes) {
+  //     console.dir(err);
+  //     console.dir(codes);
+  //     t.end();
+  //   });
+  // });
+
+
   // necessary to stop the test runner
   test('shutting down #', function (t) {
     db.close();

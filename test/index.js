@@ -11,6 +11,22 @@ if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'travis') {
 }
 module.exports = test;
 
+test.clock = {
+  start: function (name) {
+    this.name = name;
+    console.log('---------------------------------')
+    console.log('starting ' + name);
+    console.log('---------------------------------')
+    this.startTime = Date.now();
+  },
+  stop: function () {
+    console.log('---------------------------------')
+    console.log(this.name + ': '+ (Date.now() - this.startTime));
+    console.log('---------------------------------')
+  }
+}
+
+
 /**
  * Generate a random string of specified length.
  *
