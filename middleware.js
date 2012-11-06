@@ -33,6 +33,16 @@ exports.cors = function cors(options) {
   };
 };
 
+exports.noCache = function noCache(options) {
+  options = options || {};
+  var whitelist = parseWhitelist(options.whitelist);
+  return function (req, res, next) {
+    if (!isExempt(whitelist, req.url))
+      res.header("Cache-Control", "no-cache");
+    return next();
+  };
+};
+
 /** Adapted from connect/lib/middleware/csrf.js */
 exports.csrf = function csrf(options) {
   options = options || {}

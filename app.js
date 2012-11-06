@@ -32,6 +32,9 @@ app.configure(function () {
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(middleware.csrf({whitelist: ['/v1/*']}));
   app.use(middleware.cors({whitelist: ['/v1/*']}));
+  app.use(middleware.noCache({
+    whitelist: ['/badge/assertion/*']
+  }));
   app.use(user.requireAuth({
     whitelist: [
       '/login',
