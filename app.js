@@ -76,17 +76,22 @@ var findBadgeByParamShortname = badge.findByShortName({
   required: true
 });
 
-app.get('/admin/badge', admin.newBadgeForm);
-app.post('/admin/badge', badge.create);
 
 // section middleware
 app.all('/admin/badge/:shortname*', findBadgeByParamShortname);
 
-app.delete('/admin/badge/:shortname', badge.destroy);
+app.get('/admin/badge', admin.newBadgeForm);
 app.get('/admin/badge/:shortname', [behavior.findAll], admin.showBadge);
+app.get('/admin/badge/:shortname/edit', admin.editBadgeForm);
+app.get('/admin/badge/:shortname/claims/', admin.manageClaimCodes);
+
+app.post('/admin/badge', badge.create);
+app.post('/admin/badge/:shortname/edit',[
+  badge.getUploadedImage()
+], badge.update);
+app.delete('/admin/badge/:shortname', badge.destroy);
 app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
 app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
-app.get('/admin/badge/:shortname/claims/', admin.manageClaimCodes);
 app.post('/admin/badge/:shortname/claims', badge.addClaimCodes);
 app.delete('/admin/badge/:shortname/claims/:code', badge.removeClaimCode);
 

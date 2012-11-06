@@ -24,6 +24,16 @@ exports.newBadgeForm = function (req, res) {
   });
 };
 
+exports.editBadgeForm = function (req, res) {
+  return res.render('admin/edit-badge.html', {
+    page: 'edit-badge',
+    badge: req.badge,
+    issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
+  });
+};
+
 exports.newBehaviorForm = function (req, res) {
   return res.render('admin/new-behavior.html', {
     page: 'new-behavior',

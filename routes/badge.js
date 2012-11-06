@@ -26,6 +26,24 @@ exports.create = function create(req, res) {
   });
 };
 
+exports.getUploadedImage = function getUploadedImage(options) {
+  var required = (options||{}).required;
+  return function (req, res, next) {
+    var tmpImage = req.files.image;
+    if (!tmpImage.size) {
+      if (required)
+        return res.send(400, 'need to specify an image');
+      return next();
+    }
+    fs.readFile(tmpImage.path, function (err, imageBuffer) {
+      if (err) return next(err);
+      req.imageBuffer = imageBuffer;
+      return next();
+    });
+  }
+};
+
+
 exports.destroy = function destroy(req, res) {
   var badge = req.badge;
   return badge.remove(function (err) {
@@ -34,6 +52,22 @@ exports.destroy = function destroy(req, res) {
     return res.redirect('/');
   });
 };
+
+exports.update = function update(req, res, next) {
+  var form = req.body;
+  var badge = req.badge;
+  var imageBuffer = req.imageBuffer;
+  var redirectTo = '/admin/badge/' + badge.shortname;
+  badge.name = form.name;
+  badge.description = form.description;
+  if (imageBuffer)
+    badge.image = imageBuffer;
+  badge.save(function (err) {
+    if (err) return next(err);
+    return res.redirect(redirectTo);
+  });
+};
+
 
 exports.addBehavior = function addBehavior(req, res) {
   var form = req.body;
