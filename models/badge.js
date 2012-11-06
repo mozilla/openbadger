@@ -347,6 +347,17 @@ Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   return true;
 };
 
+/**
+ * Remove a claim code from the list.
+ *
+ * @param {String} code
+ */
+
+Badge.prototype.removeClaimCode = function removeClaimCode(code) {
+  this.claimCodes = this.claimCodes.filter(function (claim) {
+    return claim.code !== code;
+  });
+};
 
 /**
  * Check if the credits are enough to earn the badge

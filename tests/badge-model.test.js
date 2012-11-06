@@ -231,102 +231,102 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  // test('Badge.hasClaimCode', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const code = 'will-claim';
-  //   t.same(badge.hasClaimCode(code), true);
-  //   t.same(badge.hasClaimCode('nopeniopenope'), false);
-  //   t.end();
-  // });
+  test('Badge.hasClaimCode', function (t) {
+    const badge = fixtures['offline-badge'];
+    const code = 'will-claim';
+    t.same(badge.hasClaimCode(code), true);
+    t.same(badge.hasClaimCode('nopeniopenope'), false);
+    t.end();
+  });
 
-  // test('Badge#addClaimCodes', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const codes = ['lethargic-hummingbird', 'woeful-turtle'];
-  //   badge.addClaimCodes(codes, function (err, accepted, rejected) {
-  //     t.notOk(err, 'should not have any errors');
-  //     t.notOk(rejected.length, 'should not have rejected any');
-  //     t.same(accepted, codes);
+  test('Badge#addClaimCodes', function (t) {
+    const badge = fixtures['offline-badge'];
+    const codes = ['lethargic-hummingbird', 'woeful-turtle'];
+    badge.addClaimCodes(codes, function (err, accepted, rejected) {
+      t.notOk(err, 'should not have any errors');
+      t.notOk(rejected.length, 'should not have rejected any');
+      t.same(accepted, codes);
 
-  //     badge.addClaimCodes(codes, function (err, accepted, rejected) {
-  //       t.notOk(err, 'should not have any errors');
-  //       t.notOk(accepted.length, 'should not have accepted any');
-  //       t.same(rejected, codes);
-  //       t.end();
-  //     });
-  //   });
-  // });
+      badge.addClaimCodes(codes, function (err, accepted, rejected) {
+        t.notOk(err, 'should not have any errors');
+        t.notOk(accepted.length, 'should not have accepted any');
+        t.same(rejected, codes);
+        t.end();
+      });
+    });
+  });
 
-  // test('Badge#addClaimCodes, filter incoming dups', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const codes = ['duplicate', 'duplicate', 'duplicate', 'duplicate', 'harrison-ford'];
-  //   badge.addClaimCodes(codes, function (err, accepted, rejected) {
-  //     t.notOk(err, 'should not have any errors');
-  //     t.notOk(rejected.length, 'should not have rejected any');
-  //     t.same(accepted, ['duplicate', 'harrison-ford']);
-  //     t.end();
-  //   });
-  // });
+  test('Badge#addClaimCodes, filter incoming dups', function (t) {
+    const badge = fixtures['offline-badge'];
+    const codes = ['duplicate', 'duplicate', 'duplicate', 'duplicate', 'harrison-ford'];
+    badge.addClaimCodes(codes, function (err, accepted, rejected) {
+      t.notOk(err, 'should not have any errors');
+      t.notOk(rejected.length, 'should not have rejected any');
+      t.same(accepted, ['duplicate', 'harrison-ford']);
+      t.end();
+    });
+  });
 
-  // test('Badge#addClaimCodes, with limit option', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const original = badge.claimCodes.length;
-  //   const codes = ['already-claimed', 'one', 'will-claim', 'two', 'never-claim', 'three', 'four', 'five'];
-  //   const limit = 3;
-  //   const options = {codes: codes, limit: limit };
-  //   badge.addClaimCodes(options, function (err, accepted, rejected) {
-  //     t.notOk(err, 'should not have any errors');
-  //     t.same(accepted, ['one', 'two', 'three']);
-  //     t.same(rejected, ['already-claimed', 'will-claim', 'never-claim', 'four', 'five']);
-  //     t.end();
-  //   });
-  // });
+  test('Badge#addClaimCodes, with limit option', function (t) {
+    const badge = fixtures['offline-badge'];
+    const original = badge.claimCodes.length;
+    const codes = ['already-claimed', 'one', 'will-claim', 'two', 'never-claim', 'three', 'four', 'five'];
+    const limit = 3;
+    const options = {codes: codes, limit: limit };
+    badge.addClaimCodes(options, function (err, accepted, rejected) {
+      t.notOk(err, 'should not have any errors');
+      t.same(accepted, ['one', 'two', 'three']);
+      t.same(rejected, ['already-claimed', 'will-claim', 'never-claim', 'four', 'five']);
+      t.end();
+    });
+  });
 
-  // test('Badge#claimClaimCode', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const code ='will-claim';
-  //   t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
-  //   t.same(badge.redeemClaimCode(code, 'otherguy@example.org'), false);
-  //   t.end();
-  // });
+  test('Badge#claimClaimCode', function (t) {
+    const badge = fixtures['offline-badge'];
+    const code ='will-claim';
+    t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
+    t.same(badge.redeemClaimCode(code, 'otherguy@example.org'), false);
+    t.end();
+  });
 
-  // test('Badge#claimCodeIsClaimed', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const code ='already-claimed';
-  //   t.same(badge.claimCodeIsClaimed(code), true);
-  //   t.same(badge.claimCodeIsClaimed('never-claim'), false);
-  //   t.same(badge.claimCodeIsClaimed('does not exist'), null);
-  //   t.end();
-  // });
+  test('Badge#claimCodeIsClaimed', function (t) {
+    const badge = fixtures['offline-badge'];
+    const code ='already-claimed';
+    t.same(badge.claimCodeIsClaimed(code), true);
+    t.same(badge.claimCodeIsClaimed('never-claim'), false);
+    t.same(badge.claimCodeIsClaimed('does not exist'), null);
+    t.end();
+  });
 
-  // test('Badge#getClaimCode', function (t) {
-  //   const badge = fixtures['offline-badge'];
-  //   const code = badge.getClaimCode('already-claimed');
-  //   t.same(code.claimedBy, 'brian@example.org');
-  //   t.end();
-  // });
+  test('Badge#getClaimCode', function (t) {
+    const badge = fixtures['offline-badge'];
+    const code = badge.getClaimCode('already-claimed');
+    t.same(code.claimedBy, 'brian@example.org');
+    t.end();
+  });
 
-  // test('Badge.findByClaimCode', function (t) {
-  //   const code = 'will-claim';
-  //   Badge.findByClaimCode(code, function (err, badge) {
-  //     t.notOk(err, 'no error');
-  //     t.ok(badge, 'yes badge');;
-  //     t.same(badge.shortname, 'offline-badge');
-  //     t.end();
-  //   });
-  // });
+  test('Badge.findByClaimCode', function (t) {
+    const code = 'will-claim';
+    Badge.findByClaimCode(code, function (err, badge) {
+      t.notOk(err, 'no error');
+      t.ok(badge, 'yes badge');;
+      t.same(badge.shortname, 'offline-badge');
+      t.end();
+    });
+  });
 
-  // test('Badge.getAllClaimCodes', function (t) {
-  //   // we have six codes defined in fixtures, so we want at least that many
-  //   var expect = 6;
-  //   Badge.getAllClaimCodes(function (err, codes) {
-  //     t.ok(codes.length >= expect, 'should have at least six codes');
-  //     t.end();
-  //   });
-  // });
+  test('Badge.getAllClaimCodes', function (t) {
+    // we have six codes defined in fixtures, so we want at least that many
+    var expect = 6;
+    Badge.getAllClaimCodes(function (err, codes) {
+      t.ok(codes.length >= expect, 'should have at least six codes');
+      t.end();
+    });
+  });
 
   test('Badge#generateClaimCodes', function (t) {
     const badge = fixtures['random-badge'];
-    const count = 10000;
+    const count = 1000;
     badge.generateClaimCodes({count: count}, function (err, codes) {
       t.notOk(err, 'should not have any errors');
       t.same(codes.length, count);
@@ -334,6 +334,17 @@ test.applyFixtures(fixtures, function () {
       t.end();
     });
   });
+
+  test('Badge#removeClaimCode', function (t) {
+    const badge = fixtures['offline-badge'];
+    badge.removeClaimCode('remove-claim');
+    badge.claimCodes.forEach(function (claim) {
+      if (claim.code == 'remove-claim')
+        t.fail('should have removed');
+    });
+    t.end();
+  });
+
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {
