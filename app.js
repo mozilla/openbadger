@@ -104,7 +104,9 @@ app.get('/badge/image/:shortname.png', [
   findBadgeByParamShortname
 ], badge.image);
 app.get('/badge/assertion/:hash', badge.assertion);
-app.get('/badge/criteria/:shortname', badge.criteria);
+app.get('/badge/criteria/:shortname', [
+   findBadgeByParamShortname
+], admin.criteria);
 
 // User login/logout
 // -------------------

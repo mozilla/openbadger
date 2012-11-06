@@ -1,0 +1,35 @@
+{% extends "public/layout.html" %}
+{% block head %}
+  <link rel="stylesheet" href="/stylesheets/criteria.css">
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="span7">
+      <h2>Mozilla Webmaker Badges</h2>
+      <p>
+        Cupcake ipsum dolor sit. Amet bear claw jelly-o candy jujubes
+        cheesecake. Gingerbread marshmallow jelly-o cake biscuit apple
+        pie candy canes liquorice.
+      </p>
+    </div>
+  </div>
+  <div class="media card">
+    <img class="img badge" src="{{ badge.relativeUrl('image')}}">
+    <div class="bd">
+      <hgroup>
+        <span class="wordmark">Mozilla</span>
+        <h1>{{ badge.name }}</h1>
+      </hgroup>
+      <dl class="dl-horizontal narrow-dt">
+        <dt>Description:</dt>
+        <dd>
+          {% if badge.criteria.content %}
+            {{ badge.criteria.content | stupidSafe }}
+          {% else %}
+            {{ badge.description | stupidSafe }}
+          {% endif %}
+        </dd>
+      </dl>
+    </div>
+  </div>
+{% endblock %}

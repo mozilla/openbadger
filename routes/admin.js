@@ -57,6 +57,12 @@ exports.showBadge = function (req, res) {
   });
 };
 
+exports.criteria = function criteria(req, res) {
+  return res.render('public/criteria.html', {
+    badge: req.badge,
+  });
+}
+
 exports.manageClaimCodes = function (req, res) {
   return res.render('admin/manage-claim-codes.html', {
     page: 'edit-badge',
