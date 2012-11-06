@@ -81,6 +81,7 @@ exports.assertion = function assertion(req, res) {
   });
 };
 
+<<<<<<< HEAD
 function identity(x) { return x };
 function instance(method) {
   return function (o) {
@@ -112,6 +113,9 @@ exports.removeClaimCode = function removeClaimCode(req, res, next) {
   });
 };
 
+exports.criteria = function criteria(req, res) {
+  res.render('criteria/criteria.html');
+}
 
 exports.findByShortName = function (options) {
   var required = !!options.required;
