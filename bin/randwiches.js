@@ -57,7 +57,7 @@ function main() {
   iteratorStream(phrases.iterator, {
     transform: function (v) { return v.join('-') },
     filter: inArrayFilter(exclude),
-    take: 1000,
+    take: count,
     separator: '\n',
     method: 'random'
   }).pipe(process.stdout);
