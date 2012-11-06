@@ -15,14 +15,16 @@
       (<code>{{ badge.shortname }}</code>)
       <br>{{ badge.description | stupidSafe }}
       
-      <br><a href="" class="btn btn-small remove-link js-show-remove">Remove</a>
+      <br>
+      <a href="/admin/badge/{{ badge.shortname }}/edit" class="btn btn-info btn-small edit-link">Edit</a>
+      <a href="" class="btn btn-small remove-link js-show-remove">Remove</a>
+      
       <button class="btn btn-small js-cancel-button">Nevermind</button>
       <input type="submit" value="Remove badge" class="btn btn-danger btn-small js-remove-button"> 
     </form>
   </li>
 {% endfor %}
 </ul>
-
 
 <h1>Behaviors (<a href="/admin/behavior">Create a new behavior</a>)</h1>
 <ul class="behavior-list">

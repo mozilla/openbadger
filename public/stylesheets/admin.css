@@ -55,3 +55,22 @@
   width: 80px;
   float: left;
 }
+
+.show-badge .badge-criteria {
+  background: #fff;
+  border: #eee;
+  resize: none;
+  height: 133px;
+}
+
+.show-badge dt, .show-badge dd {
+  margin-bottom: 4px;
+}
+
+textarea {
+  width: 420px;
+}
+
+span.help-block {
+  width: 420px;
+}

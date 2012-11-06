@@ -85,8 +85,10 @@ app.get('/admin/badge/:shortname', [behavior.findAll], admin.showBadge);
 app.get('/admin/badge/:shortname/edit', admin.editBadgeForm);
 app.get('/admin/badge/:shortname/claims/', admin.manageClaimCodes);
 
-app.post('/admin/badge', badge.create);
-app.post('/admin/badge/:shortname/edit',[
+app.post('/admin/badge', [
+  badge.getUploadedImage({ required: true })
+], badge.create);
+app.post('/admin/badge/:shortname/edit', [
   badge.getUploadedImage()
 ], badge.update);
 app.delete('/admin/badge/:shortname', badge.destroy);

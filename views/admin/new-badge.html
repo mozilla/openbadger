@@ -13,14 +13,27 @@
         also awesome.
       </span>
     </div>
+    
     <div>
-      <label for="description">Badge Description</label>
+      <label for="description">Description</label>
       <textarea id="description" rows="5" name="description"></textarea>
       <span class="help-block">
         A description of your badge, this will appear in every assertion
         created from this badge.
       </span>
     </div>
+    
+    <div>
+      <label for="criteria">Criteria</label>
+      <textarea id="criteria" rows="5" name="criteria"></textarea>
+      <span class="help-block">
+        The criteria text for the badge. This can be markdown, but don't go
+        crazy, okay? Keep it simple. That also means you'll have to escape
+        markup, by using <code>&amp;lt;</code> and <code>&amp;gt;</code> instead
+        of <code>&lt;</code> and <code>&gt;</code>
+      </span>
+    </div>
+    
     <div>
       <label for="image">Image</label>
       <input type="file" name="image" accept="image/png">

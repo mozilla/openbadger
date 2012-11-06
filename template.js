@@ -1,3 +1,4 @@
+var markdown = require('markdown').markdown;
 var nunjucks = require('nunjucks');
 var env = (new nunjucks.Environment(
   new nunjucks.FileSystemLoader('views')
@@ -10,6 +11,10 @@ env.addFilter('activize', function (actual, expect) {
     return 'class="active"';
   return '';
 });
+env.addFilter('markdown', function (string) {
+  return markdown.toHTML(string);
+});
+
 env.addFilter('stupidSafe', function (html) {
   return (
     html

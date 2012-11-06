@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block main %}
-<div class="row">
+<div class="show-badge row">
   <div class="span8">
     <h2>{{ badge.name }} (<a href="/admin/badge/{{ badge.shortname }}/edit">Edit</a>)</h2>
     {% if badge.image %}
@@ -17,10 +17,14 @@
     {% endif %}
     <dl>
       <dt>Shortname</dt>
-      <dd>{{ badge.shortname }}</dd>
+      <dd><code>{{ badge.shortname }}</code></dd>
       
       <dt>Description</dt>
       <dd>{{ badge.description | stupidSafe }}</dd>
+      
+      <br style="clear: both">
+      <dt>Criteria (<a href="/badge/criteria/{{ badge.shortname }}">Preview</a>)</dt>
+      <dd><textarea class="badge-criteria" disabled>{{ badge.criteria.content }}</textarea></dd>
     </dl>
     
     <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">

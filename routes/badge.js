@@ -2,27 +2,17 @@ var fs = require('fs');
 var Badge = require('../models/badge');
 var BadgeInstance = require('../models/badge-instance');
 
-exports.create = function create(req, res) {
+exports.create = function create(req, res, next) {
   var form = req.body;
-  var badge = new Badge(form);
-
-  // #TODO: the stuff to do with getting the image from the post,
-  // verifying it, reading it and all that should be abstracted, maybe
-  // into Badge#fromTemporary?
-  var tmpImage = req.files.image;
-  if (!tmpImage)
-    return res.send(400, 'need to specify an image');
-  fs.readFile(tmpImage.path, function (err, imageBuf) {
-    if (err)
-      return res.send(500, err);
-    badge.image = imageBuf;
-    badge.save(function (err, result) {
-      if (err) {
-        err.status = 'error';
-        return res.send(500, err);
-      }
-      return res.redirect('/admin/badge/' + badge.shortname);
-    });
+  var badge = new Badge({
+    name: form.name,
+    description: form.description,
+    image: req.imageBuffer,
+    criteria: { content: form.criteria }
+  });
+  badge.save(function (err, result) {
+    if (err) return next(err);
+    return res.redirect('/admin/badge/' + badge.shortname);
   });
 };
 
@@ -43,7 +33,6 @@ exports.getUploadedImage = function getUploadedImage(options) {
   }
 };
 
-
 exports.destroy = function destroy(req, res) {
   var badge = req.badge;
   return badge.remove(function (err) {
@@ -60,6 +49,7 @@ exports.update = function update(req, res, next) {
   var redirectTo = '/admin/badge/' + badge.shortname;
   badge.name = form.name;
   badge.description = form.description;
+  badge.criteria.content = form.criteria;
   if (imageBuffer)
     badge.image = imageBuffer;
   badge.save(function (err) {

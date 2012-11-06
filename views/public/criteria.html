@@ -24,7 +24,7 @@
         <dt>Description:</dt>
         <dd>
           {% if badge.criteria.content %}
-            {{ badge.criteria.content | stupidSafe }}
+            {{ badge.criteria.content | markdown }}
           {% else %}
             {{ badge.description | stupidSafe }}
           {% endif %}
