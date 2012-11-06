@@ -8,7 +8,7 @@ lint:
 	@jshint *.js lib/*.js models/*.js routes/*.js
 
 test:
-	@node test && node_modules/.bin/tap test/*.test.js
+	@node test && node_modules/.bin/tap tests/*.test.js
 
 verbose-test:
 	@node test/*.test.js
