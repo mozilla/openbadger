@@ -66,3 +66,12 @@ test('set#intersection', function (t) {
   t.same(result, expect);
   t.end();
 });
+
+test('set constructor, options', function (t) {
+  var complex = new Set([1, 2, 3, 4]);
+  var simple = new Set([1, 2, 3, 4], { simple: true });
+  t.same(complex.encoder, JSON.stringify);
+  t.ok(simple.encoder !== JSON.stringify, 'should not be stringify');
+  t.same(simple.values(), [1,2,3,4]);
+  t.end();
+});
