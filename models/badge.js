@@ -3,7 +3,9 @@ var mongoose = require('mongoose');
 var env = require('../lib/environment');
 var util = require('../lib/util');
 var Issuer = require('./issuer');
+var phraseGenerator = require('../lib/phrases');
 var Schema = mongoose.Schema;
+
 
 function maxLength(field, length) {
   function lengthValidator() {
@@ -209,6 +211,7 @@ function dedupe(array) {
  * @param {Object} options
  *   - `codes`: Array of claim codes to add
  *   - `limit`: Maximum number of codes to add. [default: Infinity]
+ *   - `alreadyClean`: Boolean whether or not items are already unique
  * @param {Function} callback
  *   Expects `function (err, accepted, rejected)`
  * @return {[async]}
@@ -220,11 +223,14 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
     options = { codes: options };
 
   // remove duplicates
-  const codes = dedupe(options.codes);
+  const codes = (options.alreadyClean
+    ? options.codes
+    : dedupe(options.codes));
   const limit = options.limit || Infinity;
 
   var accepted = [];
   var rejected = [];
+  var idx, newClaimCodes;
   Badge.getAllClaimCodes(function (err, existingCodes) {
     if (err) return callback(err);
 
@@ -248,9 +254,45 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
   }.bind(this));
 };
 
-function inArray(array, thing) {
-  return array.indexOf(thing) > -1;
-}
+function extracount(opts) {
+  const padded = Math.pow(opts.count, 1.06) | 0;
+  if (padded < opts.minimum)
+    return opts.minimum;
+  return padded;
+};
+
+/**
+ * Adds a set of random claim codes to the badge.
+ *
+ * @param {Object} options
+ *   - `count`: how many codes to try to generate
+ * @param {Function} callback
+ *   Expects `function (err, codes)`
+ * @return {[async]}
+ *   - `codes`: the codes that got generated
+ * @see Badge#addClaimCodes
+ */
+
+Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
+  // We want to generate more than we need upfront so if there are
+  // duplicates when we compare against all of the badges in the
+  // database we'll have backups.
+  const count = options.count;
+  const countWithExtra = extracount({
+    count: count,
+    minimum: 100
+  });
+  const phrases = phraseGenerator(countWithExtra);
+
+  this.addClaimCodes({
+    codes: phrases,
+    limit: count,
+    alreadyClean: true,
+  }, function (err, accepted, rejected) {
+    if (err) return callback(err);
+    return callback(null, accepted);
+  });
+};
 
 /**
  * Find an claim code by name
