@@ -130,9 +130,10 @@ app.configure('development', function () {
 
 var server = module.exports = http.createServer(app);
 
-console.log('Environment: \n' + util.inspect(app.env.all()));
+console.log('Environment: \n' + util.inspect(env.all()));
 if (!module.parent) {
-  server.listen(app.env.get('port'), function () {
-    app.logger.info("Express server listening on port " + app.env.get('port'));
+  var port = env.get('port', process.env.PORT);
+  server.listen(port, function () {
+    app.logger.info("Express server listening on port " + port);
   });
 }
