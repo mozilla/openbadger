@@ -148,10 +148,12 @@ exports.releaseClaimCode = function releaseClaimCode(req, res, next) {
 
 
 exports.awardToUser = function awardToUser(req, res, next) {
-  var email = req.body.email;
-  var code = req.body.code;
+  var form = req.body
+  var email = (form.email || '').trim();
+  var code = (form.code || '').trim();
   var badge = req.badge;
-  if (!badge.redeemClaimCode(code, email))
+  var couldClaim = badge.redeemClaimCode(code, email);
+  if (!couldClaim)
     return res.send({ status: 'already-claimed' })
   badge.awardOrFind(email, function (err, instance) {
     if (err) return res.send({ status: 'error', error: err });
@@ -168,11 +170,13 @@ exports.awardToUser = function awardToUser(req, res, next) {
 exports.findByClaimCode = function findByClaimCode(options) {
   return function (req, res, next) {
     var code = req.body.code;
-    Badge.findByClaimCode(code, function (err, badge) {
+    var normalizedCode = code.trim().replace(/ /g, '-').toLowerCase();
+    Badge.findByClaimCode(normalizedCode, function (err, badge) {
       if (err) return next(err);
       if (!badge)
         return res.redirect('/claim?code=' + code + '&missing=true');
       req.badge = badge;
+      req.claim = badge.getClaimCode('normalizedCode');
       return next();
     });
   }

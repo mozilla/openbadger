@@ -281,9 +281,10 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  test('Badge#claimClaimCode', function (t) {
+  test('Badge#redeemClaimCode', function (t) {
     const badge = fixtures['offline-badge'];
     const code ='will-claim';
+    t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
     t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
     t.same(badge.redeemClaimCode(code, 'otherguy@example.org'), false);
     t.end();

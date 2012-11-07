@@ -23,7 +23,11 @@
     var url;
     getAssertion(email, function (err, data) {
       if (err)
-        return window.alert('there was an error trying to claim the badge :(');
+        return window.alert('There was an error trying to claim the badge');
+
+      if (data.status === 'already-claimed')
+        return window.alert('This badge has already been claimed by someone');
+
       url = data.assertionUrl;
       OpenBadges.issue([url]);
     });

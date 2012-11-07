@@ -88,6 +88,7 @@ exports.confirmClaim = function confirmClaim(req, res) {
   return res.render('public/confirm-claim.html', {
     csrf: req.session._csrf,
     code: req.body.code,
+    claim: req.claim,
     badge: req.badge,
   });
 };
