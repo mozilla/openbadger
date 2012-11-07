@@ -63,6 +63,10 @@
   height: 133px;
 }
 
+.show-badge dl {
+  overflow: hidden;
+}
+
 .show-badge dt, .show-badge dd {
   margin-bottom: 4px;
 }
