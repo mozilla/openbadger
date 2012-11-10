@@ -76,6 +76,12 @@ exports.criteria = function criteria(req, res) {
   });
 }
 
+exports.all = function all(req, res) {
+  return res.render('public/all.html', {
+    badges: req.badges,
+  });
+};
+
 exports.claim = function claim(req, res) {
   return res.render('public/claim.html', {
     csrf: req.session._csrf,

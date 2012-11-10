@@ -37,6 +37,7 @@ app.configure(function () {
   }));
   app.use(user.requireAuth({
     whitelist: [
+      '/',
       '/login',
       '/logout',
       '/badge/*', // public badge resources
@@ -65,7 +66,7 @@ app.post('/admin/config', issuer.update);
 // Badge listing
 // -------------
 var indexMiddleware = [badge.findAll, behavior.findAll];
-app.get('/', indexMiddleware, admin.badgeIndex);
+app.get('/', badge.findAll, admin.all);
 app.get('/admin', indexMiddleware, admin.badgeIndex);
 app.get('/admin/badges', indexMiddleware, admin.badgeIndex);
 
