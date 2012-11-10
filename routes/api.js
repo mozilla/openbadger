@@ -15,6 +15,9 @@ exports.badges = function badges(req, res) {
   Badge.find(function (err, badges) {
     if (err)
       return res.send(500, { status: 'error', error: err });
+    badges = badges.filter(function (badge) {
+      return badge.claimCodes.length === 0;
+    });
     badges.forEach(function (badge) {
       result.badges[badge.shortname] = {
         name: badge.name,
