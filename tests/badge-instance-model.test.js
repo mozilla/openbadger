@@ -32,6 +32,20 @@ test.applyFixtures({
     assertion: '{ "assertion" : "yep" }',
     seen: false
   }),
+  'delete-instance1': new BadgeInstance({
+    user: 'brian-delete@example.org',
+    hash: 'hash',
+    badge: 'link-hyper-advanced',
+    assertion: '{ "assertion" : "yep" }',
+    seen: false
+  }),
+  'delete-instance2': new BadgeInstance({
+    user: 'brian-delete@example.org',
+    hash: 'otherhash',
+    badge: 'link-turbo-advanced',
+    assertion: '{ "assertion" : "yep" }',
+    seen: false
+  }),
 }, function (fixtures) {
   test('BadgeInstance#save: test defaults', function (t) {
     var currentish = Date.now() - 1;
@@ -74,6 +88,19 @@ test.applyFixtures({
       BadgeInstance.find({ user: email }, function (err, results) {
         t.same(results[0].seen, true, 'should become true');
         t.same(results[1].seen, true, 'should become true');
+        t.end();
+      });
+    });
+  });
+
+
+  test('BadgeInstance.deleteAllByUser', function (t) {
+    var instance1 = fixtures['delete-instance1'];
+    var instance2 = fixtures['delete-instance2'];
+    var email = instance1.user;
+    BadgeInstance.deleteAllByUser(email, function (err) {
+      BadgeInstance.find({ user: email }, function (err, instances) {
+        t.same(instances.length, 0, 'should not have any instances');
         t.end();
       });
     });

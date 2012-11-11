@@ -1,3 +1,4 @@
+var async = require('async');
 var db = require('./');
 var env = require('../lib/environment');
 var mongoose = require('mongoose');
@@ -152,5 +153,25 @@ BadgeInstance.markAllAsSeen = function markAllAsSeen(email, callback) {
   BadgeInstance.update(query, update, options, callback);
 };
 BadgeInstance.markAllAsRead = BadgeInstance.markAllAsSeen;
+
+/**
+ * Remove all badge instances assigned to a user
+ *
+ * @param {String} email
+ */
+
+BadgeInstance.deleteAllByUser = function deleteAllByUser(email, callback) {
+  function remover(i, callback) { return i.remove(callback) }
+  var query = { user: email };
+  BadgeInstance.find(query, function (err, instances) {
+    if (err) return callback(err);
+    async.map(instances, remover, function (err) {
+      if (err) return callback(err);
+      return callback(null, instances);
+    });
+  });
+};
+
+
 
 module.exports = BadgeInstance;
