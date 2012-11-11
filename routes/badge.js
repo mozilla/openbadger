@@ -1,4 +1,5 @@
 var fs = require('fs');
+var logger = require('../lib/logger');
 var Badge = require('../models/badge');
 var BadgeInstance = require('../models/badge-instance');
 
@@ -57,7 +58,6 @@ exports.update = function update(req, res, next) {
     return res.redirect(redirectTo);
   });
 };
-
 
 exports.addBehavior = function addBehavior(req, res) {
   var form = req.body;
@@ -146,19 +146,26 @@ exports.releaseClaimCode = function releaseClaimCode(req, res, next) {
   })
 };
 
+function reportError(err) {
+  return { status: 'error', error: err };
+}
 
 exports.awardToUser = function awardToUser(req, res, next) {
   var form = req.body
   var email = (form.email || '').trim();
   var code = (form.code || '').trim();
   var badge = req.badge;
-  var couldClaim = badge.redeemClaimCode(code, email);
-  // if (!couldClaim)
-  //   return res.send({ status: 'already-claimed' })
+  var claimSuccess = badge.redeemClaimCode(code, email);
+
+  if (claimSuccess === false)
+    return res.send({ status: 'already-claimed' })
+  if (claimSuccess === null)
+    return res.send({ status: 'not-found' })
+
   badge.awardOrFind(email, function (err, instance) {
-    if (err) return res.send({ status: 'error', error: err });
+    if (err) return res.send(reportError(err));
     badge.save(function (err) {
-      if (err) return res.send({ status: 'error', error: err });
+      if (err) return res.send(reportError(err));
       return res.send({
         status: 'ok',
         assertionUrl: instance.absoluteUrl('assertion')
@@ -170,13 +177,13 @@ exports.awardToUser = function awardToUser(req, res, next) {
 exports.findByClaimCode = function findByClaimCode(options) {
   return function (req, res, next) {
     var code = req.body.code;
-    var normalizedCode = code.trim().replace(/ /g, '-').toLowerCase();
+    var normalizedCode = code.trim().replace(/ +/g, '-').toLowerCase();
     Badge.findByClaimCode(normalizedCode, function (err, badge) {
       if (err) return next(err);
       if (!badge)
         return res.redirect('/claim?code=' + code + '&missing=true');
       req.badge = badge;
-      req.claim = badge.getClaimCode('normalizedCode');
+      req.claim = badge.getClaimCode(normalizedCode);
       return next();
     });
   }

@@ -22,7 +22,7 @@
     var email = $emailInput.val().trim();
     var url;
     getAssertion(email, function (err, data) {
-      if (err)
+      if (err || data.status === 'not-found')
         return window.alert('There was an error trying to claim the badge');
 
       if (data.status === 'already-claimed')

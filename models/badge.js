@@ -303,9 +303,10 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
 
 Badge.prototype.getClaimCode = function getClaimCode(code) {
   const codes = this.claimCodes;
+  const normalizedCode = code.trim().replace(/ /g, '-').toLowerCase();
   var idx = codes.length;
   while (idx--) {
-    if (codes[idx].code === code)
+    if (codes[idx].code === normalizedCode)
       return codes[idx];
   }
   return null;
@@ -339,7 +340,6 @@ Badge.prototype.claimCodeIsClaimed = function claimCodeIsClaimed(code) {
 
 Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   const claim = this.getClaimCode(code);
-  console.dir(claim);
   if (!claim)
     return null;
   if (claim.claimedBy && claim.claimedBy !== email)
