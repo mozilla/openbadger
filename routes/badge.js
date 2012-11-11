@@ -182,6 +182,7 @@ exports.findByClaimCode = function findByClaimCode(options) {
   }
 };
 
+// #TODO: refactor the following three fuctions into just one, probably
 exports.findByShortName = function (options) {
   var required = !!options.required;
 
@@ -210,10 +211,22 @@ exports.findByShortName = function (options) {
 
 exports.findAll = function findAll(req, res, next) {
   Badge.find({}, function (err, badges) {
-    // #TODO: don't show the error directly
-    if (err)
-      return res.send(500, err);
+    if (err) return next(err)
     req.badges = badges;
-    next();
+    return next();
+  });
+};
+
+exports.findNonOffline = function findNonOffline(req, res, next) {
+  var query = {
+    '$or': [
+      {claimCodes: {'$exists': false }} ,
+      {claimCodes: {'$size': 0 }}
+    ]
+  };
+  Badge.find(query, function (err, badges) {
+    if (err) return next(err);
+    req.badges = badges;
+    return next();
   });
 };

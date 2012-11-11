@@ -66,7 +66,7 @@ app.post('/admin/config', issuer.update);
 // Badge listing
 // -------------
 var indexMiddleware = [badge.findAll, behavior.findAll];
-app.get('/', badge.findAll, admin.all);
+app.get('/', badge.findNonOffline, admin.all);
 app.get('/admin', indexMiddleware, admin.badgeIndex);
 app.get('/admin/badges', indexMiddleware, admin.badgeIndex);
 
