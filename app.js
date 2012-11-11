@@ -137,6 +137,11 @@ app.get('/login', admin.login);
 app.post('/login', user.login);
 app.post('/logout', user.logout);
 
+app.get('/admin/users',[
+  user.findAll()
+], admin.userList);
+
+app.delete('/admin/users', user.deleteInstancesByEmail);
 
 // API endpoints
 // -------------

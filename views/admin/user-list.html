@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block main %}
+<h1>Badge Earners</h1>
+
+{% if not users.length %}
+<h2>No badges awarded</h2>
+
+{% else %}
+<ul>
+  {% for earner in users %}
+  <li>
+    <form method="post">
+      <input type="hidden" name="_method" value="delete">
+      <input type="hidden" name="email" value="{{ earner.email }}">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <dt>{{ earner.email }}</dt>
+      <dd>
+        {{ earner.badges.join(', ') }} 
+        <br><input type="submit" class="btn btn-danger btn-small" value="Delete User Data">
+      </dd>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+
+{% endif %}
+
+{% endblock %}

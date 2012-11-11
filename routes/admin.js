@@ -129,3 +129,13 @@ exports.showFlushDbForm = function (req, res) {
     csrf: req.session._csrf
   });
 };
+
+exports.userList = function userList(req, res, next) {
+  return res.render('admin/user-list.html', {
+    page: 'user-list',
+    issuer: req.issuer,
+    user: req.session.user,
+    csrf: req.session._csrf,
+    users: req.users
+  });
+};
