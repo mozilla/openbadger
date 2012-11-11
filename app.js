@@ -48,6 +48,8 @@ app.configure(function () {
   }));
   app.use(issuer.getIssuerConfig());
   app.use(app.router);
+  // if we've fallen through the router, it's a 404
+  app.use(admin.notFound);
 });
 
 app.configure('development', function () {
@@ -130,6 +132,8 @@ app.post('/claim',[
 app.post('/claim/confirm',[
   badge.findByClaimCode()
 ], badge.awardToUser);
+
+app.get('/404', admin.notFound);
 
 // User login/logout
 // -------------------

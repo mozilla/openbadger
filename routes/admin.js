@@ -139,3 +139,7 @@ exports.userList = function userList(req, res, next) {
     users: req.users
   });
 };
+
+exports.notFound = function notFound(req, res, next) {
+  return res.render('public/404.html', {});
+};
