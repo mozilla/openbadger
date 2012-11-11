@@ -48,17 +48,21 @@ app.configure(function () {
   }));
   app.use(issuer.getIssuerConfig());
   app.use(app.router);
+
   // if we've fallen through the router, it's a 404
   app.use(admin.notFound);
 });
 
 app.configure('development', function () {
+  app.get('/500', admin.nextError);
   app.use(express.errorHandler());
 });
 
+app.configure('production', function () {
+  app.use(admin.errorHandler);
+});
+
 /** Routes */
-// Route middleware
-// ----------------
 
 // Issuer configuration
 // --------------------

@@ -1,6 +1,6 @@
 var Badge = require('../models/badge');
 var phrases = require('../lib/phrases');
-
+var logger = require('../lib/logger');
 /*
  * Administrative Pages
  */
@@ -141,5 +141,16 @@ exports.userList = function userList(req, res, next) {
 };
 
 exports.notFound = function notFound(req, res, next) {
+  res.status(404)
   return res.render('public/404.html', {});
+};
+
+exports.nextError = function nextError(req, res, next) {
+  return next(new Error('some error'));
+};
+
+exports.errorHandler = function (err, req, res, next) {
+  logger.error('there was an error at ' + req.url, err);
+  res.status(500);
+  return res.render('public/500.html');
 };
