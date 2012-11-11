@@ -341,7 +341,7 @@ Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   const claim = this.getClaimCode(code);
   if (!claim)
     return null;
-  if (claim.claimedBy && claim.claimedBy != email)
+  if (claim.claimedBy && claim.claimedBy !== email)
     return false;
   claim.claimedBy = email;
   return true;

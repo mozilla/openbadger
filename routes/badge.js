@@ -152,9 +152,9 @@ exports.awardToUser = function awardToUser(req, res, next) {
   var email = (form.email || '').trim();
   var code = (form.code || '').trim();
   var badge = req.badge;
-  var couldClaim = badge.redeemClaimCode(code, email);
-  if (!couldClaim)
-    return res.send({ status: 'already-claimed' })
+  // var couldClaim = badge.redeemClaimCode(code, email);
+  // if (!couldClaim)
+  //   return res.send({ status: 'already-claimed' })
   badge.awardOrFind(email, function (err, instance) {
     if (err) return res.send({ status: 'error', error: err });
     badge.save(function (err) {
