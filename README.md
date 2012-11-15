@@ -13,6 +13,7 @@ Here is an example configuration. This assumes you are running redis
 and mongo locally.
 
 ```bash
+export NODE_ENV="development"
 export OPENBADGER_HOST="localhost"
 export OPENBADGER_PROTOCOL="http"
 export OPENBADGER_PORT=3000
@@ -28,10 +29,11 @@ export OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
 ```
 
 You can either paste that directly into your terminal, or you can put
-that in a file and `source` it. For example, if you save a version of this at `config.sh`, do:
+that in a file and `source` it. For example, if you save a version of
+this at `config.env`, do:
 
 ```bash
-$ source config.sh
+$ source config.env
 ```
 
 # Installing deps & starting the server
@@ -42,11 +44,20 @@ $ make     # will do `npm install` and then start server
 
 # Running the test suite
 
+The test suite looks at all of the same environment variables, however
+it makes sure that `NODE_ENV` is either "development" or "travis" (for
+TravisCI). You can use the following commands to run the entire suite:
+
 ```bash
 $ make test         # normally you'd use this
 $ make verbose-test # if you want to see debugging
 $ make lint         # to lint the codebase
 ```
+
+You can also run the tests one-off by doing
+`node tests/<name-of-file>.js`. This is useful for when one file is
+giving you trouble and you don't want to run through the whole suite
+to debug just that one thing.
 
 # CloudFoundry configuration
 
