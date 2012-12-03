@@ -41,17 +41,17 @@ hgroup span {
   margin-top: 45px;
 }
 
-h1 {
-  font-family: "Open Sans Light Bold", sans-serif;
+h1, h2 {
   -webkit-font-smoothing: auto;
-  font-weight: 100;
+  font-weight: 100;  
+}
+h1 {
+  font-family: "Open Sans Bold", sans-serif;
   font-size: 46px;
   margin-bottom: 0.8em;
 }
 h2 {
   font-family: "Open Sans Light", sans-serif;
-  -webkit-font-smoothing: auto;
-  font-weight: 100;
   color: #4199D6;
 }
 
