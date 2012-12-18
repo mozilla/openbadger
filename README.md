@@ -1,6 +1,6 @@
-# Clothespin (or clopenbadger, whatever)
+# openbadger
 
-Badging for webmaker.
+Badging.
 
 # Prerequisites
 
