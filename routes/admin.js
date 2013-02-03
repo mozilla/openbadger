@@ -140,6 +140,17 @@ exports.userList = function userList(req, res, next) {
   });
 };
 
+exports.stats = function stats(req, res, next) {
+  return res.render('admin/stats.html', {
+    page: 'stats',
+    issuer: req.issuer,
+    stats: req.stats,
+    user: req.session.user,
+    csrf: req.session._csrf,
+    users: req.users
+  });
+};
+
 exports.notFound = function notFound(req, res, next) {
   res.status(404)
   return res.render('public/404.html', {});
