@@ -13,6 +13,7 @@ var admin = require('./routes/admin');
 var issuer = require('./routes/issuer');
 var api = require('./routes/api');
 var debug = require('./routes/debug');
+var stats = require('./routes/stats');
 
 var app = express();
 var logger = app.logger = require('./lib/logger');
@@ -68,6 +69,9 @@ app.configure('production', function () {
 // --------------------
 app.get('/admin/config', admin.configure);
 app.post('/admin/config', issuer.update);
+
+app.get('/admin/stats', [stats.monthly], admin.stats);
+
 
 // Badge listing
 // -------------

@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% block main %}
+
+<h1>Statistics</h1>
+
+<ul>
+{% for stat in stats %}
+  <li>
+    <dl>
+      <dt>{{ stat.month }}</dt>
+      <dd>{{ stat.count }} badges issued</dd>
+    </dl>
+  </li>
+{% endfor %}
+</ul>
+
+{% endblock %}
