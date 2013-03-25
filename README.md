@@ -107,6 +107,7 @@ And finally:
 $ vmc restart clopenbadger
     Staging Application: OK
     Starting Application: OK
+```
 
 # Heroku configuration
 
