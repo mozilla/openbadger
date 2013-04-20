@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app"
+    "start": "node app",
+    "test": "NODE_ENV=test ./node_modules/.bin/tap tests/*test.js"
   },
   "dependencies": {
     "express": "~3.0.1",
