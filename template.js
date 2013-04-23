@@ -17,7 +17,7 @@ env.addFilter('markdown', function (string) {
 });
 env.addFilter('imageForBadge', function (badge) {
   if (!badge || !badge.relativeUrl)
-    return;
+    return '';
   return util.format(
     '<img src="%s" style="float: right">',
     badge.relativeUrl('image'));
