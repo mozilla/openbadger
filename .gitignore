@@ -7,3 +7,4 @@ db
 /wiki/
 /dump.rdb
 generated-codes
+.tern-port
