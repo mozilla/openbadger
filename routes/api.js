@@ -25,11 +25,11 @@ exports.badges = function badges(req, res) {
         prerequisites: badge.prerequisites,
         image: badge.absoluteUrl('image'),
         behaviors: badge.behaviors.map(function (behavior) {
-          return { name: behavior.shortname, score: behavior.count }
+          return { name: behavior.shortname, score: behavior.count };
         })
       };
     });
-    res.send(200, result);
+    return res.send(200, result);
   });
 };
 
@@ -116,7 +116,7 @@ exports.credit = function credit(req, res) {
       return obj;
     }, {});
 
-    res.send(statusCode, result);
+    return res.send(statusCode, result);
   });
 };
 
@@ -150,7 +150,7 @@ exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
 exports.auth = function auth(req, res, next) {
   var param = req.method === "POST" ? req.body : req.query;
   var token = param.auth;
-  var email = param.email
+  var email = param.email;
   var issuer = req.issuer;
   var secret = issuer.jwtSecret;
   var origin = env.origin();
