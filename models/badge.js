@@ -247,7 +247,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
       this.claimCodes.push({ code: code });
     }.bind(this));
 
-    this.save(function (err, result) {
+    return this.save(function (err, result) {
       if (err) return callback(err);
       return callback(null, accepted, rejected);
     });
@@ -544,7 +544,7 @@ Badge.prototype.makeAssertion = function makeAssertion(details, options, callbac
     callback = options;
     options = null;
   }
-  options = options || { json: true }
+  options = options || { json: true };
   var salt = details.salt || util.randomString(64);
 
   var assertion = {};

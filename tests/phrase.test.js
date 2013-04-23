@@ -2,8 +2,8 @@ var test = require('./');
 var phrases = require('../lib/phrases');
 
 function dedupe(array) {
-  const matches = {}
-  const results = []
+  const matches = {};
+  const results = [];
   var idx = array.length;
   var word;
   while (idx--) {
@@ -14,11 +14,11 @@ function dedupe(array) {
   return results;
 }
 
-test('phrases', function (t) {
+test('generating a whole bunch of phrases', function (t) {
   var count = 100000;
 
   test.clock.start('phrase generation');
-  var words = phrases(count)
+  var words = phrases(count);
   test.clock.stop();
 
   test.clock.start('counting duplicates');
