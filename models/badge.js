@@ -6,7 +6,6 @@ var Issuer = require('./issuer');
 var phraseGenerator = require('../lib/phrases');
 var Schema = mongoose.Schema;
 
-
 function maxLength(field, length) {
   function lengthValidator() {
     if (!this[field]) return true;
@@ -114,7 +113,7 @@ BadgeSchema.pre('validate', setShortNameDefault);
  */
 
 Badge.findByBehavior = function findByBehavior(shortnames, callback) {
-  shortnames = Array.isArray(shortnames) ? shortnames : [shortnames]
+  shortnames = Array.isArray(shortnames) ? shortnames : [shortnames];
   var searchTerms = { behaviors: { '$elemMatch': { shortname: {'$in': shortnames }}}};
   return Badge.find(searchTerms, callback);
 };
@@ -132,7 +131,7 @@ Badge.getAll = function getAll(callback) {
       result[badge.shortname] = badge;
       return result;
     }, {});
-    callback(null, byName);
+    return callback(null, byName);
   });
 };
 
@@ -167,7 +166,7 @@ Badge.getAllClaimCodes = function getAllClaimCodes(callback) {
       });
       return codes;
     }, []);
-    callback(null, codes);
+    return callback(null, codes);
   });
 };
 
@@ -191,8 +190,8 @@ function inArray(array, thing) {
 }
 
 function dedupe(array) {
-  const matches = {}
-  const results = []
+  const matches = {};
+  const results = [];
   var idx = array.length;
   var word;
   while (idx--) {
@@ -449,7 +448,7 @@ Badge.prototype.creditsUntilAward = function creditsUntilAward(user) {
     if (userCredits < behavior.count)
       result[name] = behavior.count - userCredits;
     return result;
-  }, {})
+  }, {});
 };
 
 
