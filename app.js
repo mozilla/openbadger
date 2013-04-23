@@ -31,8 +31,8 @@ app.configure(function () {
   app.use(middleware.session());
   app.use(middleware.flash());
   app.use(express.static(path.join(__dirname, 'public')));
-  app.use(middleware.csrf({whitelist: ['/v1/*']}));
-  app.use(middleware.cors({whitelist: ['/v1/*']}));
+  app.use(middleware.csrf({whitelist: ['/v(1|2)/*']}));
+  app.use(middleware.cors({whitelist: ['/v(1|2)/*']}));
   app.use(middleware.noCache({
     whitelist: ['/badge/assertion/*']
   }));
@@ -41,8 +41,8 @@ app.configure(function () {
       '/',
       '/login',
       '/logout',
-      '/badge/*', // public badge resources
-      '/v1/*',     // api endpoints
+      '/badge/*',  // public badge resources
+      '/v(1|2)/*', // api endpoints
       '/claim*'
     ],
     redirectTo: '/login'
@@ -69,7 +69,6 @@ app.configure('production', function () {
 // --------------------
 app.get('/admin/config', admin.configure);
 app.post('/admin/config', issuer.update);
-
 app.get('/admin/stats', [stats.monthly], admin.stats);
 
 
@@ -157,10 +156,10 @@ app.delete('/admin/users', user.deleteInstancesByEmail);
 
 // API endpoints
 // -------------
-app.get('/v1/badges', api.badges);
-app.get('/v1/user', [api.auth], api.user);
-app.post('/v1/user/behavior/:behavior/credit', [api.auth], api.credit);
-app.post('/v1/user/mark-all-badges-as-read',
+app.get('/v2/badges', api.badges);
+app.get('/v2/user', [api.auth], api.user);
+app.post('/v2/user/behavior/:behavior/credit', [api.auth], api.credit);
+app.post('/v2/user/mark-all-badges-as-read',
          [api.auth],
          api.markAllBadgesAsRead);
 
