@@ -107,6 +107,7 @@ And finally:
 $ vmc restart clopenbadger
     Staging Application: OK
     Starting Application: OK
+```
 
 # Heroku configuration
 
@@ -127,7 +128,7 @@ $ heroku create
     http://evening-fjord-7837.herokuapp.com/ | git@heroku.com:evening-fjord-7837.git
     Git remote heroku added
 
-$ git push heroku master
+$ git push heroku HEAD:master
     Counting objects: 23, done.
     Delta compression using up to 4 threads.
     Compressing objects: 100% (13/13), done.
