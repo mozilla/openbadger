@@ -231,11 +231,18 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  test('Badge.hasClaimCode', function (t) {
+  test('Badge#hasClaimCode', function (t) {
     const badge = fixtures['offline-badge'];
     const code = 'will-claim';
     t.same(badge.hasClaimCode(code), true);
     t.same(badge.hasClaimCode('nopeniopenope'), false);
+    t.end();
+  });
+
+  test('Badge#getClaimCodes', function (t) {
+    const badge = fixtures['offline-badge'];
+    const expect = [ 'already-claimed', 'never-claim', 'will-claim', 'remove-claim' ];
+    t.same(badge.getClaimCodes(), expect);
     t.end();
   });
 

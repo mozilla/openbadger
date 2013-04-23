@@ -293,12 +293,6 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
   });
 };
 
-/**
- * Find an claim code by name
- *
- * @param {String} code
- * @return {Object|Null}
- */
 
 Badge.prototype.getClaimCode = function getClaimCode(code) {
   const codes = this.claimCodes;
@@ -309,6 +303,13 @@ Badge.prototype.getClaimCode = function getClaimCode(code) {
       return codes[idx];
   }
   return null;
+};
+
+Badge.prototype.getClaimCodes = function getClaimCodes() {
+  const codes = this.claimCodes;
+  return codes.map(function (entry) {
+    return entry.code;
+  });
 };
 
 /**
