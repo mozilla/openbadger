@@ -308,13 +308,11 @@ Badge.prototype.getClaimCode = function getClaimCode(code) {
 
 Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
   opts = _.defaults(opts||{}, {unclaimed: false});
-  const onlyShowUnclaimed = opts.unclaimed || false;
   const codes = this.claimCodes;
   
-  var filterFn = function () { return true };
-  
-  if (onlyShowUnclaimed)
-    filterFn = function (entry) { return !entry.claimedBy };
+  var filterFn = opts.unclaimed
+    ? function (o) { return !o.claimedBy }
+    : function (o) { return true };
   
   return codes.filter(filterFn).map(function (entry) {
     return { code: entry.code, claimed: !!entry.claimedBy };
