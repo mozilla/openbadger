@@ -1,10 +1,11 @@
-var db = require('./');
-var mongoose = require('mongoose');
-var env = require('../lib/environment');
-var util = require('../lib/util');
-var Issuer = require('./issuer');
-var phraseGenerator = require('../lib/phrases');
-var Schema = mongoose.Schema;
+const _ = require('underscore');
+const db = require('./');
+const mongoose = require('mongoose');
+const env = require('../lib/environment');
+const util = require('../lib/util');
+const Issuer = require('./issuer');
+const phraseGenerator = require('../lib/phrases');
+const Schema = mongoose.Schema;
 
 function maxLength(field, length) {
   function lengthValidator() {
@@ -305,10 +306,18 @@ Badge.prototype.getClaimCode = function getClaimCode(code) {
   return null;
 };
 
-Badge.prototype.getClaimCodes = function getClaimCodes() {
+Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
+  opts = _.defaults(opts||{}, {unclaimed: false});
+  const onlyShowUnclaimed = opts.unclaimed || false;
   const codes = this.claimCodes;
-  return codes.map(function (entry) {
-    return entry.code;
+  
+  var filterFn = function () { return true };
+  
+  if (onlyShowUnclaimed)
+    filterFn = function (entry) { return !entry.claimedBy };
+  
+  return codes.filter(filterFn).map(function (entry) {
+    return { code: entry.code, claimed: !!entry.claimedBy };
   });
 };
 

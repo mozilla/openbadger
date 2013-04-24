@@ -157,17 +157,31 @@ app.delete('/admin/users', user.deleteInstancesByEmail);
 // API endpoints
 // -------------
 app.get('/v2/badges', api.badges);
-app.get('/v2/user', [api.auth], api.user);
-app.post('/v2/user/behavior/:behavior/credit', [api.auth], api.credit);
-app.post('/v2/user/mark-all-badges-as-read',
-         [api.auth],
-         api.markAllBadgesAsRead);
+
+app.get('/v2/user', [
+  api.auth()
+], api.user);
+
+app.get('/v2/badge/:shortname/claimcodes', [
+  api.auth({user: false}),
+  findBadgeByParamShortname,
+], api.badgeClaimCodes);
+
+app.post('/v2/user/behavior/:behavior/credit', [
+  api.auth()
+], api.credit);
+
+app.post('/v2/user/mark-all-badges-as-read',[
+  api.auth()
+],api.markAllBadgesAsRead);
 
 // Debug endpoints
 // ---------------
 app.configure('development', function () {
   app.get('/debug/flush', admin.showFlushDbForm);
   app.post('/debug/flush', debug.flushDb);
+  app.get('/debug/token', debug.generateToken);
+  app.post('/debug/token', debug.generateToken);
 });
 
 var server = module.exports = http.createServer(app);

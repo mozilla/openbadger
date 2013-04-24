@@ -241,8 +241,25 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#getClaimCodes', function (t) {
     const badge = fixtures['offline-badge'];
-    const expect = [ 'already-claimed', 'never-claim', 'will-claim', 'remove-claim' ];
+    const expect = [
+      {code: 'already-claimed', claimed: true},
+      {code: 'never-claim', claimed: false},
+      {code: 'will-claim', claimed: false},
+      {code: 'remove-claim', claimed: false},
+    ];
+;
     t.same(badge.getClaimCodes(), expect);
+    t.end();
+  });
+  
+  test('Badge#getClaimCodes, only unclaimed', function (t) {
+    const badge = fixtures['offline-badge'];
+    const expect = [
+      {code: 'never-claim', claimed: false},
+      {code: 'will-claim', claimed: false},
+      {code: 'remove-claim', claimed: false},
+    ];
+    t.same(badge.getClaimCodes({unclaimed: true}), expect);
     t.end();
   });
 
