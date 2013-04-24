@@ -22,9 +22,6 @@ function flushInstances(callback) {
 exports.generateToken = function generateToken(req, res) {
   const param = req.query;
   const secret = param.secret;
-  
-  console.dir(secret);
-  
   delete param.secret;
   res.type('text').send(200, jwt.encode(param, secret));
 };
