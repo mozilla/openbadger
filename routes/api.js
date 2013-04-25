@@ -100,6 +100,66 @@ exports.user = function user(req, res) {
   });
 };
 
+exports.awardBadge = function awardBadge(req, res, next) {
+  const badge = req.badge;
+  const email = req.body.email;
+  if (!badge)
+    return res.json(404, {status: 'error', reason: 'badge not found'});
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+  
+  return badge.award(email, function (err, instance) {
+    if (err) {
+      // TODO: log error properly
+      console.dir(err);
+      return res.json(500, {
+        status: 'error',
+        reason: 'database'
+      });
+    }
+    if (!instance)
+      return res.json(409, {
+        status: 'error',
+        reason: util.format('user `%s` already has badge', email),
+        user: email,
+      });
+    return res.json(200, {
+      status: 'ok',
+      url: instance.absoluteUrl('assertion'),
+    });
+  });
+};
+
+exports.removeBadge = function removeBadge(req, res, next) {
+  const shortname = req.param('shortname');
+  const email = req.body.email;
+
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+  
+  return BadgeInstance.findOneAndRemove({
+    badge: shortname,
+    user: email
+  }, function (err, result) {
+    if (err) {
+      // TODO: log error properly
+      console.dir(err);
+      return res.json(500, {
+        status: 'error',
+        reason: 'database'
+      });
+    }
+      
+    if (!result)
+      return res.json(404, {
+        status: 'error',
+        reason: util.format('user `%s` does not have that badge', email),
+        user: email,
+      });
+    return res.json(200, {status: 'ok'}); 
+  });
+};
+
 /**
  * Credit a user with a behavior
  */
@@ -188,7 +248,7 @@ exports.auth = function auth(options) {
     user: true
   });
   return function (req, res, next) {
-    const param = req.method === "POST" ? req.body : req.query;
+    const param = req.method === "GET" ? req.query : req.body;
     const token = param.auth;
     const email = param.email;
     const issuer = req.issuer;

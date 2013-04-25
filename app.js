@@ -162,6 +162,15 @@ app.get('/v2/user', [
   api.auth()
 ], api.user);
 
+app.delete('/v2/user/badge/:shortname', [
+  api.auth(),
+], api.removeBadge);
+
+app.post('/v2/user/badge/:shortname', [
+  api.auth(),
+  findBadgeByParamShortname,
+], api.awardBadge);
+
 app.get('/v2/badge/:shortname/claimcodes', [
   api.auth({user: false}),
   findBadgeByParamShortname,
