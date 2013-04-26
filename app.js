@@ -156,10 +156,10 @@ app.delete('/admin/users', user.deleteInstancesByEmail);
 
 // API endpoints
 // -------------
-app.get('/v2/badges', api.badges);
-app.get('/v2/user', [api.auth], api.user);
-app.post('/v2/user/behavior/:behavior/credit', [api.auth], api.credit);
-app.post('/v2/user/mark-all-badges-as-read',
+app.get('/v1/badges', api.badges);
+app.get('/v1/user', [api.auth], api.user);
+app.post('/v1/user/behavior/:behavior/credit', [api.auth], api.credit);
+app.post('/v1/user/mark-all-badges-as-read',
          [api.auth],
          api.markAllBadgesAsRead);
 
