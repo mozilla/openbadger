@@ -99,11 +99,39 @@ Issuer.prototype.hasAccess = function hasAccess(email) {
   });
 };
 
-/**
- * Get an object compatible with the `badge.issuer` portion of the
- * OpenBadges spec.
- */
+Issuer.prototype.addAccess = function addAccess(emails) {
+  if (arguments.length > 1)
+    return this.addAccess([].slice.call(arguments));
+  if (typeof emails === 'string')
+    return this.addAccess([emails]);
 
+  emails = emails.filter(function (email) {
+    return !this.hasAccess(email);
+  }.bind(this));
+
+  if (emails.length == 0)
+    return false;
+
+  emails.forEach(function (email) {
+    this.accessList.push({email: email});
+  }.bind(this));
+
+  return true;
+};
+
+Issuer.prototype.removeAccess = function removeAccess(email) {
+  const oldList = this.accessList;
+  const newList = oldList.filter(function (acl) {
+    return acl.email !== email;
+  });
+  if (newList.length === oldList.length)
+    return false;
+  this.accessList = newList;
+  return true;
+};
+
+// TODO: change this to work with the fact that we now have the concept
+// of multiple issuers & multiple organizations for each issuer.
 Issuer.getAssertionObject = function getAssertionObject(callback) {
   Issuer.findOne(function (err, issuer) {
     if (err)

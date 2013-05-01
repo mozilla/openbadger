@@ -15,10 +15,6 @@ test.applyFixtures({
   'testIssuer': new Issuer({
     name: 'Mozilla',
     contact: 'brian@mozillafoundation.org',
-    accessList: [
-      {email: 'one@example.org'},
-      {email: 'two@example.org'}
-    ],
   })
 }, function (fixtures) {
   test('Issuer#validate: everything is cool', function (t) {
@@ -51,9 +47,39 @@ test.applyFixtures({
   });
 
   test('Issuer#hasAccess', function (t) {
-    const issuer = fixtures['testIssuer'];
+    const issuer = new Issuer({
+      accessList: [
+        {email: 'one@example.org'},
+        {email: 'two@example.org'},
+      ]
+    });
+    t.same(issuer.hasAccess('one@example.org'), true);
     t.same(issuer.hasAccess('two@example.org'), true);
     t.same(issuer.hasAccess('three@example.org'), false);
+    t.end();
+  });
+
+  test('Issuer#removeAccess', function (t) {
+    const issuer = new Issuer({
+      accessList: [{email: 'remove-me@example.org'}],
+    });
+    t.same(issuer.hasAccess('remove-me@example.org'), true);
+    t.same(issuer.removeAccess('remove-me@example.org'), true);
+    t.same(issuer.hasAccess('remove-me@example.org'), false);
+    t.end();
+  });
+
+  test('Issuer#addAccess', function (t) {
+    const issuer = new Issuer();
+    issuer.addAccess('test1@example.org');
+    issuer.addAccess('test1@example.org');
+    issuer.addAccess('test1@example.org');
+    issuer.addAccess(['test2@example.org', 'test3@example.org']);
+    issuer.addAccess('test4@example.org', 'test5@example.org');
+
+    [1,2,3,4,5].forEach(function (n) {
+      t.same(issuer.hasAccess('test'+n+'@example.org'), true);
+    });
     t.end();
   });
 
