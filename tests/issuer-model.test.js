@@ -1,12 +1,12 @@
-var test = require('./');
-var env = require('../lib/environment');
-var db = require('../models');
-var Issuer = require('../models/issuer');
+const _ = require('underscore');
+const test = require('./');
+const env = require('../lib/environment');
+const db = require('../models');
+const Issuer = require('../models/issuer');
 
 function validIssuer() {
   return new Issuer({
     name: 'Some Issuer',
-    org: 'Some Organization',
     contact: 'badges@example.org'
   });
 }
@@ -14,45 +14,53 @@ function validIssuer() {
 test.applyFixtures({
   'testIssuer': new Issuer({
     name: 'Mozilla',
-    org: 'Webmaker',
-    contact: 'brian@mozillafoundation.org'
+    contact: 'brian@mozillafoundation.org',
+    accessList: [
+      {email: 'one@example.org'},
+      {email: 'two@example.org'}
+    ],
   })
 }, function (fixtures) {
   test('Issuer#validate: everything is cool', function (t) {
-    var issuer = validIssuer();
+    const issuer = validIssuer();
     issuer.validate(function (err) {
       t.notOk(err, 'should not have any errors');
       t.end();
     });
   });
 
-  test('Issuer#validate: bad contact', function (t) {
-    var issuer = validIssuer();
-    issuer.contact = 'not an email address'
-    issuer.validate(function (err) {
-      var error;
-      t.ok(err, 'should have errors');
-      error = err.errors.contact;
-      t.ok(error, 'should have a contact error');
-      t.same(error.type, 'regexp', 'should be a regexp error');
+  test('Issuer.findOne: works as expected, has default jwtSecret', function (t) {
+    const expect = fixtures['testIssuer'];
+    Issuer.findOne(function (err, result) {
+      t.same(expect.id, result.id, 'should be the expected issuer');
+      t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
+      t.same(expect.uid, 'mozilla', 'should generate uid from slug of name');
       t.end();
     });
   });
 
-  test('Issuer.findOne: works as expected, has default jwtSecret', function (t) {
-    var expect = fixtures['testIssuer'];
-    Issuer.findOne(function (err, result) {
-      t.same(expect.id, result.id, 'should be the expected issuer');
-      t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
+  test('Issuer#addOrganization', function (t) {
+    const issuer = fixtures['testIssuer'];
+    const orgs = ['Webmaker', 'Engagement', 'WebDev'].sort();
+    orgs.forEach(function (o) {issuer.addOrganization({name: o})});
+    issuer.save(function (err, result) {
+      const orgNames = _.pluck(result.organizations, 'name').sort();
+      t.same(orgNames, orgs);
       t.end();
     });
+  });
+
+  test('Issuer#hasAccess', function (t) {
+    const issuer = fixtures['testIssuer'];
+    t.same(issuer.hasAccess('two@example.org'), true);
+    t.same(issuer.hasAccess('three@example.org'), false);
+    t.end();
   });
 
   test('Issuer.getAssertionObject', function (t) {
     env.temp({ origin: 'http://example.org' }, function (resetEnv) {
-      var expect = {
+      const expect = {
         name: 'Mozilla',
-        org: 'Webmaker',
         contact: 'brian@mozillafoundation.org',
         origin: 'http://example.org',
       };
@@ -60,7 +68,7 @@ test.applyFixtures({
         t.same(result, expect);
         resetEnv();
         t.end();
-      })
+      });
     });
   });
 
