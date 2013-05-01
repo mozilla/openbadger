@@ -15,7 +15,23 @@ test.applyFixtures({
   'testIssuer': new Issuer({
     name: 'Mozilla',
     contact: 'brian@mozillafoundation.org',
-  })
+  }),
+  'issuer1': new Issuer({
+    name: 'Issuer One',
+    contact: 'one@example.org',
+    accessList: [
+      {email: 'both@example.org'},
+      {email: 'one@example.org'},
+    ],
+  }),
+  'issuer2': new Issuer({
+    name: 'Issuer Two',
+    contact: 'two@example.org',
+    accessList: [
+      {email: 'both@example.org'},
+      {email: 'two@example.org'},
+    ],
+  }),
 }, function (fixtures) {
   test('Issuer#validate: everything is cool', function (t) {
     const issuer = validIssuer();
@@ -35,13 +51,13 @@ test.applyFixtures({
     });
   });
 
-  test('Issuer#addOrganization', function (t) {
+  test('Issuer#addProgram', function (t) {
     const issuer = fixtures['testIssuer'];
-    const orgs = ['Webmaker', 'Engagement', 'WebDev'].sort();
-    orgs.forEach(function (o) {issuer.addOrganization({name: o})});
+    const programs = ['Webmaker', 'Engagement', 'WebDev'].sort();
+    programs.forEach(function (o) {issuer.addProgram({name: o})});
     issuer.save(function (err, result) {
-      const orgNames = _.pluck(result.organizations, 'name').sort();
-      t.same(orgNames, orgs);
+      const orgNames = _.pluck(result.programs, 'name').sort();
+      t.same(orgNames, programs);
       t.end();
     });
   });
@@ -83,18 +99,17 @@ test.applyFixtures({
     t.end();
   });
 
-  test('Issuer.getAssertionObject', function (t) {
-    env.temp({ origin: 'http://example.org' }, function (resetEnv) {
-      const expect = {
-        name: 'Mozilla',
-        contact: 'brian@mozillafoundation.org',
-        origin: 'http://example.org',
-      };
-      Issuer.getAssertionObject(function (err, result) {
-        t.same(result, expect);
-        resetEnv();
-        t.end();
-      });
+  test('Issuer.findByAccess', function (t) {
+    t.plan(3);
+    Issuer.findByAccess('one@example.org', function (err, results) {
+      t.same(fixtures['issuer1'].name, results[0].name);
+    });
+    Issuer.findByAccess('two@example.org', function (err, results) {
+      t.same(fixtures['issuer2'].name, results[0].name);
+    });
+    Issuer.findByAccess('both@example.org', function (err, results) {
+      const names = results.map(function (o) { return o.name }).sort();
+      t.same(names, ['Issuer One', 'Issuer Two']);
     });
   });
 

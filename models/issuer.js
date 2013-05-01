@@ -25,7 +25,7 @@ const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
 };
 
-const OrganizationSchema = new Schema({
+const ProgramSchema = new Schema({
   name: {
     type: String,
     trim: true,
@@ -66,7 +66,7 @@ const IssuerSchema = new Schema({
     default: generateRandomSecret
   },
   accessList: [AccessUser],
-  organizations: [OrganizationSchema]
+  programs: [ProgramSchema]
 });
 const Issuer = db.model('Issuer', IssuerSchema);
 
@@ -89,8 +89,13 @@ IssuerSchema.pre('validate', function defaultUid(next) {
   return next();
 });
 
-Issuer.prototype.addOrganization = function addOrganization(props) {
-  return this.organizations.push(props);
+Issuer.findByAccess = function findByAccess(email, callback) {
+  const query = {accessList: {'$elemMatch': {email: email }}};
+  return Issuer.find(query, callback);
+};
+
+Issuer.prototype.addProgram = function addProgram(props) {
+  return this.programs.push(props);
 };
 
 Issuer.prototype.hasAccess = function hasAccess(email) {
