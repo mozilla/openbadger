@@ -119,7 +119,7 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#earnableBy: not enough', function (t) {
     var badge = fixtures['link-comment'];
-    var user = { credit: { link: 10 }}
+    var user = { credit: { link: 10 }};
     var expect = false;
     var result = badge.earnableBy(user);
     t.same(expect, result);
@@ -143,7 +143,7 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#creditsUntilAward: see how many credits remain until user gets badge', function (t) {
     var badge = fixtures['link-comment'];
-    var user = { credit: { link: 26 }}
+    var user = { credit: { link: 26 }};
     var expect = { comment: 5 };
     var result = badge.creditsUntilAward(user);
     t.same(result, expect);
@@ -154,7 +154,7 @@ test.applyFixtures(fixtures, function () {
     var badge = new Badge({
       name: 'An   awesome badge!',
       description: 'some sorta badge',
-    })
+    });
     badge.save(function (err, result) {
       t.same(badge.shortname, 'an-awesome-badge', 'should slugify if shortname is not provided');
       t.end();
@@ -192,42 +192,6 @@ test.applyFixtures(fixtures, function () {
     t.same(badge.behaviors.length, 1, 'should have one left');
     t.same(badge.behaviors[0].shortname, 'comment', 'should be the comment one');
     t.end();
-  });
-
-  test('Badge#makeAssertion: makes a good assertion', function (t) {
-    var tempenv = { protocol: 'http', host: 'example.org', port: 80 };
-    env.temp(tempenv, function (resetEnv) {
-      var badge = fixtures['comment'];
-      var issuer = fixtures['issuer'];
-      var recipient = 'brian@example.org';
-      var salt = 'salt';
-      var expect = {
-        recipient: util.sha256(recipient, salt),
-        salt: salt,
-        badge: {
-          version: '0.5.0',
-          criteria: badge.absoluteUrl('criteria'),
-          image: badge.absoluteUrl('image'),
-          description: badge.description,
-          name: badge.name,
-          issuer: {
-            name: issuer.name,
-            contact: issuer.contact,
-            origin: env.origin()
-          }
-        }
-      };
-      badge.makeAssertion({
-        recipient: recipient,
-        salt: salt,
-      }, {
-        json: false
-      }, function (err, result) {
-        t.same(result, expect);
-        resetEnv();
-        t.end();
-      });
-    });
   });
 
   test('Badge#hasClaimCode', function (t) {

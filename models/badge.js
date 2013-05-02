@@ -104,10 +104,6 @@ const Badge = db.model('Badge', BadgeSchema);
 // Validators & Defaulters
 // -----------------------
 
-/**
- * Middleware for setting default shortname when one is not provided.
- */
-
 function setShortNameDefault(next) {
   if (!this.shortname && this.name)
     this.shortname = util.slugify(this.name);
@@ -118,21 +114,11 @@ BadgeSchema.pre('validate', setShortNameDefault);
 // Model methods
 // -------------
 
-/**
- * Find a badge by the shortname of a behavior associated with the badge.
- *
- * @param {String} shortname
- */
-
 Badge.findByBehavior = function findByBehavior(shortnames, callback) {
   shortnames = Array.isArray(shortnames) ? shortnames : [shortnames];
   const searchTerms = { behaviors: { '$elemMatch': { shortname: {'$in': shortnames }}}};
   return Badge.find(searchTerms, callback);
 };
-
-/**
- * Get all badges and key by shortname
- */
 
 Badge.getAll = function getAll(callback) {
   const query = {};
@@ -147,26 +133,10 @@ Badge.getAll = function getAll(callback) {
   });
 };
 
-/**
- * Find a badge by one of its claim codes
- *
- * @asynchronous
- * @param {String} code
- * @param {Function} callback
- * @return {async: Badge|Null}
- */
-
 Badge.findByClaimCode = function findByClaimCode(code, callback) {
   const query = { claimCodes: { '$elemMatch' : { code: code }}};
   Badge.findOne(query, callback);
 };
-
-/**
- * Get an array of all the claim codes across all badges
- *
- * @asynchronous
- * @return {async: Array}
- */
 
 Badge.getAllClaimCodes = function getAllClaimCodes(callback) {
   Badge.find(function (err, badges) {
@@ -184,14 +154,6 @@ Badge.getAllClaimCodes = function getAllClaimCodes(callback) {
 
 // Instance methods
 // ----------------
-
-/**
- * Tests whether the badge has an claim code
- *
- * @param {String} code
- * @return {Boolean}
- * @see Badge#getClaimCode
- */
 
 Badge.prototype.hasClaimCode = function hasClaimCode(code) {
   return !!this.getClaimCode(code);
@@ -330,31 +292,12 @@ Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
   });
 };
 
-/**
- * Whether or not an claim code is claimed
- *
- * @param {String} code
- * @return {Boolean|Null}
- *   true if claimed, false if not, null if not found
- * @see Badge#getClaimCode
- */
-
 Badge.prototype.claimCodeIsClaimed = function claimCodeIsClaimed(code) {
   const claim = this.getClaimCode(code);
   if (!claim)
     return null;
   return !!(claim.claimedBy);
 };
-
-/**
- * Claim an claim code for a user if it hasn't already been claimed
- *
- * @param {String} code
- * @param {String} email
- * @return {Boolean|Null}
- *   true on success, false if already claimed, null if code not found
- * @see Badge#getClaimCode
- */
 
 Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   const claim = this.getClaimCode(code);
@@ -366,37 +309,17 @@ Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   return true;
 };
 
-/**
- * Remove a claim code from the list.
- *
- * @param {String} code
- */
-
 Badge.prototype.removeClaimCode = function removeClaimCode(code) {
   this.claimCodes = this.claimCodes.filter(function (claim) {
     return claim.code !== code;
   });
 };
 
-/**
- * Release a claim code back into the wild (remove `claimedBy`)
- *
- * @param {String} code
- */
-
 Badge.prototype.releaseClaimCode = function releaseClaimCode(code) {
   const claim = this.getClaimCode(code);
   claim.claimedBy = null;
   return true;
 };
-
-
-/**
- * Check if the credits are enough to earn the badge
- *
- * @param {User} user An object resembling a User object.
- * @return {Boolean} whether or not the badge is earned by the credits
- */
 
 Badge.prototype.earnableBy = function earnableBy(user) {
   return this.behaviors.map(function (behavior) {
@@ -407,12 +330,6 @@ Badge.prototype.earnableBy = function earnableBy(user) {
     return result && value;
   }, true);
 };
-
-/**
- * Award a badge to a user
- *
- * @param {String} email
- */
 
 Badge.prototype.award = function award(email, callback) {
   // need to load this late to avoid circular dependency race conditions.
@@ -436,10 +353,6 @@ Badge.prototype.award = function award(email, callback) {
   });
 };
 
-/**
- * Award a badge or find the awarded badge
- */
-
 Badge.prototype.awardOrFind = function awardOrFind(email, callback) {
   const BadgeInstance = require('./badge-instance');
   const query = { userBadgeKey: [email, this.shortname].join('.') };
@@ -453,13 +366,6 @@ Badge.prototype.awardOrFind = function awardOrFind(email, callback) {
   });
 };
 
-/**
- * Get how many credits a user has to earn before the badge is earnable.
- *
- * @param {User} user A user-like object, containing `credits` property
- * @return {Object}
- */
-
 Badge.prototype.creditsUntilAward = function creditsUntilAward(user) {
   return this.behaviors.reduce(function (result, behavior) {
     const name = behavior.shortname;
@@ -469,13 +375,6 @@ Badge.prototype.creditsUntilAward = function creditsUntilAward(user) {
     return result;
   }, {});
 };
-
-
-/**
- * Remove a behavior from the list of required behaviors for the badge
- *
- * @param {String} shortname
- */
 
 Badge.prototype.removeBehavior = function removeBehavior(shortname) {
   const behaviors = this.behaviors.filter(function (behavior) {
@@ -487,12 +386,6 @@ Badge.prototype.removeBehavior = function removeBehavior(shortname) {
   return this;
 };
 
-/**
- * Get the image buffer as a data URI
- *
- * @return {String} the data URI representing the image.
- */
-
 Badge.prototype.imageDataURI = function imageDataURI() {
   // #TODO: don't hardcode to PNG maybe?
   const format = 'data:image/png;base64,%s';
@@ -500,12 +393,6 @@ Badge.prototype.imageDataURI = function imageDataURI() {
   return util.format('data:image/png;base64,%s', base64);
 };
 
-/**
- * Get relative URL for a field
- *
- * @param {String} field Should be either `criteria` or `image`
- * @return {String} relative url
- */
 Badge.prototype.relativeUrl = function relativeUrl(field) {
   const formats = {
     criteria: '/badge/criteria/%s',
@@ -514,73 +401,8 @@ Badge.prototype.relativeUrl = function relativeUrl(field) {
   return util.format(formats[field], this.shortname);
 };
 
-
-/**
- * Get absolute URL for a field
- *
- * @param {String} field Should be either `criteria` or `image`
- * @return {String} absolute url
- */
 Badge.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
 };
 
-/**
- * Convert to an assertion compatible object
- *
- * @return {Object} assertion compatible object.
- */
-
-Badge.prototype.toAssertionObject = function () {
-  const VERSION = '0.5.0';
-  return {
-    version: VERSION,
-    name: this.name,
-    description: this.description,
-    image: this.absoluteUrl('image'),
-    criteria: this.absoluteUrl('criteria')
-  };
-};
-
-/**
- * Generate an assertion from the badge.
- *
- * @param {Object} details Recipient details:
- *   - `recipient`: User email
- *   - `evidence`: URL for badge evidence (optional)
- *   - `expires`: When the badge expires (optional)
- *   - `issuedOn`: When the badge was issued (optional)
- *   - `salt`: Salt for hashing the email (optional)
- * @param {Object} options
- *   - `json`: Return JSON (default: true)
- */
-
-Badge.prototype.makeAssertion = function makeAssertion(details, options, callback) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = null;
-  }
-  options = options || { json: true };
-  const salt = details.salt || util.randomString(64);
-
-  const assertion = {};
-  assertion.recipient = util.sha256(details.recipient, salt);
-  assertion.salt = salt;
-  if (details.evidence)
-    assertion.evidence = details.evidence;
-  if (details.expires)
-    assertion.expires = details.expires;
-  if (details.issuedOn)
-    assertion.issued_on = details.issuedOn;
-
-  const badge = assertion.badge = this.toAssertionObject();
-
-  Issuer.getAssertionObject(function (err, issuerObj) {
-    if (err) return callback(err);
-    badge.issuer = issuerObj;
-    if (options.json === true)
-      return callback(null, JSON.stringify(assertion));
-    return callback(null, assertion);
-  });
-};
 module.exports = Badge;
