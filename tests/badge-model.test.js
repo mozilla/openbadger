@@ -40,7 +40,7 @@ test.applyFixtures(fixtures, function () {
   test('Badge#validate: image too big', function (t) {
     var errorKeys;
     var badge = validBadge();
-    var length = 257 * 1024
+    var length = 257 * 1024;
     badge.image = Buffer(length);
     badge.validate(function (err) {
       t.ok(err, 'should have errors');
@@ -212,7 +212,6 @@ test.applyFixtures(fixtures, function () {
           name: badge.name,
           issuer: {
             name: issuer.name,
-            org: issuer.org,
             contact: issuer.contact,
             origin: env.origin()
           }
@@ -251,7 +250,7 @@ test.applyFixtures(fixtures, function () {
     t.same(badge.getClaimCodes(), expect);
     t.end();
   });
-  
+
   test('Badge#getClaimCodes, only unclaimed', function (t) {
     const badge = fixtures['offline-badge'];
     const expect = [

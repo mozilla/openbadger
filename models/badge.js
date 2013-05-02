@@ -12,11 +12,11 @@ function maxLength(field, length) {
     if (!this[field]) return true;
     return this[field].length <= length;
   }
-  var msg = 'maxLength';
+  const msg = 'maxLength';
   return [lengthValidator, msg];
 }
 
-var BehaviorSchema = new Schema({
+const BehaviorSchema = new Schema({
   shortname: {
     type: String,
     trim: true,
@@ -29,7 +29,7 @@ var BehaviorSchema = new Schema({
   }
 });
 
-var ClaimCodeSchema = new Schema({
+const ClaimCodeSchema = new Schema({
   code: {
     type: String,
     required: true,
@@ -42,13 +42,24 @@ var ClaimCodeSchema = new Schema({
   }
 });
 
-var BadgeSchema = new Schema({
+const BadgeSchema = new Schema({
+  _id: {
+    type: String,
+    unique: true,
+    required: true,
+    default: db.generateId,
+  },
   shortname: {
     type: String,
     trim: true,
     required: true,
     unique: true
   },
+  program: {
+    type: String,
+    ref: 'Program',
+  },
+  tags: [String],
   name: {
     type: String,
     trim: true,
@@ -72,6 +83,11 @@ var BadgeSchema = new Schema({
       trim: true
     }
   },
+  image: {
+    type: Buffer,
+    required: true,
+    validate: maxLength('image', 256 * 1024)
+  },
   behaviors: {
     type: [BehaviorSchema],
     unique: true
@@ -82,13 +98,8 @@ var BadgeSchema = new Schema({
   prerequisites: {
     type: [String]
   },
-  image: {
-    type: Buffer,
-    required: true,
-    validate: maxLength('image', 256 * 1024)
-  }
 });
-var Badge = db.model('Badge', BadgeSchema);
+const Badge = db.model('Badge', BadgeSchema);
 
 // Validators & Defaulters
 // -----------------------
@@ -115,7 +126,7 @@ BadgeSchema.pre('validate', setShortNameDefault);
 
 Badge.findByBehavior = function findByBehavior(shortnames, callback) {
   shortnames = Array.isArray(shortnames) ? shortnames : [shortnames];
-  var searchTerms = { behaviors: { '$elemMatch': { shortname: {'$in': shortnames }}}};
+  const searchTerms = { behaviors: { '$elemMatch': { shortname: {'$in': shortnames }}}};
   return Badge.find(searchTerms, callback);
 };
 
@@ -124,11 +135,11 @@ Badge.findByBehavior = function findByBehavior(shortnames, callback) {
  */
 
 Badge.getAll = function getAll(callback) {
-  var query = {};
-  var exclude = { '__v': 0, image: 0 };
+  const query = {};
+  const exclude = { '__v': 0, image: 0 };
   Badge.find(query, exclude, function (err, badges) {
     if (err) return callback(err);
-    var byName = badges.reduce(function (result, badge) {
+    const byName = badges.reduce(function (result, badge) {
       result[badge.shortname] = badge;
       return result;
     }, {});
@@ -228,8 +239,8 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
     : dedupe(options.codes));
   const limit = options.limit || Infinity;
 
-  var accepted = [];
-  var rejected = [];
+  const accepted = [];
+  const rejected = [];
   var idx, newClaimCodes;
   Badge.getAllClaimCodes(function (err, existingCodes) {
     if (err) return callback(err);
@@ -309,11 +320,11 @@ Badge.prototype.getClaimCode = function getClaimCode(code) {
 Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
   opts = _.defaults(opts||{}, {unclaimed: false});
   const codes = this.claimCodes;
-  
-  var filterFn = opts.unclaimed
+
+  const filterFn = opts.unclaimed
     ? function (o) { return !o.claimedBy }
     : function (o) { return true };
-  
+
   return codes.filter(filterFn).map(function (entry) {
     return { code: entry.code, claimed: !!entry.claimedBy };
   });
@@ -389,8 +400,8 @@ Badge.prototype.releaseClaimCode = function releaseClaimCode(code) {
 
 Badge.prototype.earnableBy = function earnableBy(user) {
   return this.behaviors.map(function (behavior) {
-    var name = behavior.shortname;
-    var minimum = behavior.count;
+    const name = behavior.shortname;
+    const minimum = behavior.count;
     return user.credit[name] >= minimum;
   }).reduce(function (result, value) {
     return result && value;
@@ -405,9 +416,9 @@ Badge.prototype.earnableBy = function earnableBy(user) {
 
 Badge.prototype.award = function award(email, callback) {
   // need to load this late to avoid circular dependency race conditions.
-  var DUP_KEY_ERROR_CODE = 11000;
-  var BadgeInstance = require('./badge-instance');
-  var instance = new BadgeInstance({
+  const DUP_KEY_ERROR_CODE = 11000;
+  const BadgeInstance = require('./badge-instance');
+  const instance = new BadgeInstance({
     user: email,
     badge: this.shortname
   });
@@ -430,8 +441,8 @@ Badge.prototype.award = function award(email, callback) {
  */
 
 Badge.prototype.awardOrFind = function awardOrFind(email, callback) {
-  var BadgeInstance = require('./badge-instance');
-  var query = { userBadgeKey: [email, this.shortname].join('.') };
+  const BadgeInstance = require('./badge-instance');
+  const query = { userBadgeKey: [email, this.shortname].join('.') };
   this.award(email, function (err, instance) {
     if (!instance) {
       BadgeInstance.findOne(query, function (err, instance) {
@@ -451,8 +462,8 @@ Badge.prototype.awardOrFind = function awardOrFind(email, callback) {
 
 Badge.prototype.creditsUntilAward = function creditsUntilAward(user) {
   return this.behaviors.reduce(function (result, behavior) {
-    var name = behavior.shortname;
-    var userCredits = user.credit[name] || 0;
+    const name = behavior.shortname;
+    const userCredits = user.credit[name] || 0;
     if (userCredits < behavior.count)
       result[name] = behavior.count - userCredits;
     return result;
@@ -467,7 +478,7 @@ Badge.prototype.creditsUntilAward = function creditsUntilAward(user) {
  */
 
 Badge.prototype.removeBehavior = function removeBehavior(shortname) {
-  var behaviors = this.behaviors.filter(function (behavior) {
+  const behaviors = this.behaviors.filter(function (behavior) {
     if (behavior.shortname === shortname)
       return null;
     return behavior;
@@ -483,11 +494,9 @@ Badge.prototype.removeBehavior = function removeBehavior(shortname) {
  */
 
 Badge.prototype.imageDataURI = function imageDataURI() {
-  // #TODO: don't hardcode PNG maybe
-  var base64 = '';
-  var format = 'data:image/png;base64,%s';
-  if (this.image)
-    base64 = this.image.toString('base64');
+  // #TODO: don't hardcode to PNG maybe?
+  const format = 'data:image/png;base64,%s';
+  const base64 = this.image ? this.image.toString('base64') : '';
   return util.format('data:image/png;base64,%s', base64);
 };
 
@@ -498,7 +507,7 @@ Badge.prototype.imageDataURI = function imageDataURI() {
  * @return {String} relative url
  */
 Badge.prototype.relativeUrl = function relativeUrl(field) {
-  var formats = {
+  const formats = {
     criteria: '/badge/criteria/%s',
     image: '/badge/image/%s.png'
   };
@@ -523,7 +532,7 @@ Badge.prototype.absoluteUrl = function absoluteUrl(field) {
  */
 
 Badge.prototype.toAssertionObject = function () {
-  var VERSION = '0.5.0';
+  const VERSION = '0.5.0';
   return {
     version: VERSION,
     name: this.name,
@@ -552,9 +561,9 @@ Badge.prototype.makeAssertion = function makeAssertion(details, options, callbac
     options = null;
   }
   options = options || { json: true };
-  var salt = details.salt || util.randomString(64);
+  const salt = details.salt || util.randomString(64);
 
-  var assertion = {};
+  const assertion = {};
   assertion.recipient = util.sha256(details.recipient, salt);
   assertion.salt = salt;
   if (details.evidence)
@@ -564,7 +573,7 @@ Badge.prototype.makeAssertion = function makeAssertion(details, options, callbac
   if (details.issuedOn)
     assertion.issued_on = details.issuedOn;
 
-  var badge = assertion.badge = this.toAssertionObject();
+  const badge = assertion.badge = this.toAssertionObject();
 
   Issuer.getAssertionObject(function (err, issuerObj) {
     if (err) return callback(err);

@@ -10,8 +10,11 @@ const IMAGE = test.asset('sample.png');
 module.exports = {
   'issuer': new Issuer({
     name: 'Badge Authority',
-    org: 'Some Org',
-    contact: 'brian@example.org'
+    contact: 'brian@example.org',
+    programs: [
+      {name: 'Org 1'},
+      {name: 'Org 2'},
+    ]
   }),
   'link-basic': new Badge({
     name: 'Link Badge, basic',
@@ -92,4 +95,3 @@ module.exports = {
     seen: true
   })
 };
-

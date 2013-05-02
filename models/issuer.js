@@ -1,4 +1,5 @@
 const db = require('./');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const env = require('../lib/environment');
 const util = require('../lib/util');
@@ -12,27 +13,10 @@ function generateRandomSecret() {
   return util.strongRandomString(DEFAULT_SECRET_LENGTH);
 }
 
-function maxLength(field, length) {
-  function lengthValidator() {
-    if (!this[field]) return true;
-    return this[field].length <= length;
-  }
-  var msg = 'maxLength';
-  return [lengthValidator, msg];
-}
-
 const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
 };
 
-const ProgramSchema = new Schema({
-  name: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-  badges: [{ type: Schema.Types.ObjectId, ref: 'Badge'}]
-});
 const AccessUser = new Schema({
   email: {
     type: String,
@@ -41,23 +25,38 @@ const AccessUser = new Schema({
     match: regex.email
   },
 });
+
 const IssuerSchema = new Schema({
+  _id: {
+    type: String,
+    unique: true,
+    required: true,
+    default: db.generateId,
+  },
   name: {
     type: String,
     trim: true,
     required: true,
-    validate: maxLength('name', NAME_MAX_LENGTH)
   },
-  uid: {
+  shortname: {
     type: String,
     trim: true,
     required: true,
+    unique: true,
   },
   contact: {
     type: String,
     trim: true,
     required: true,
     match: regex.email
+  },
+  url: {
+    type: String,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
   },
   jwtSecret: {
     type: String,
@@ -66,8 +65,9 @@ const IssuerSchema = new Schema({
     default: generateRandomSecret
   },
   accessList: [AccessUser],
-  programs: [ProgramSchema]
+  programs: [{ type: String, ref: 'Program' }]
 });
+
 const Issuer = db.model('Issuer', IssuerSchema);
 
 /**
@@ -83,19 +83,15 @@ IssuerSchema.pre('validate', function defaultSecret(next) {
   return next();
 });
 
-IssuerSchema.pre('validate', function defaultUid(next) {
-  if (this.uid) return next();
-  this.uid = util.slugify(this.name);
+IssuerSchema.pre('validate', function defaultShortname(next) {
+  if (this.shortname) return next();
+  this.shortname = util.slugify(this.name);
   return next();
 });
 
 Issuer.findByAccess = function findByAccess(email, callback) {
   const query = {accessList: {'$elemMatch': {email: email }}};
   return Issuer.find(query, callback);
-};
-
-Issuer.prototype.addProgram = function addProgram(props) {
-  return this.programs.push(props);
 };
 
 Issuer.prototype.hasAccess = function hasAccess(email) {

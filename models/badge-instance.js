@@ -1,16 +1,16 @@
-var async = require('async');
-var db = require('./');
-var env = require('../lib/environment');
-var mongoose = require('mongoose');
-var Badge = require('./badge');
-var Schema = mongoose.Schema;
-var util = require('../lib/util');
+const async = require('async');
+const db = require('./');
+const env = require('../lib/environment');
+const mongoose = require('mongoose');
+const Badge = require('./badge');
+const Schema = mongoose.Schema;
+const util = require('../lib/util');
 
-var regex = {
+const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
-}
+};
 
-var BadgeInstanceSchema = new Schema({
+const BadgeInstanceSchema = new Schema({
   user: {
     type: String,
     required: true,
@@ -19,8 +19,7 @@ var BadgeInstanceSchema = new Schema({
   },
   badge: {
     type: String,
-    trim: true,
-    required: true
+    ref: 'Badge'
   },
   assertion: {
     type: String,
@@ -48,7 +47,7 @@ var BadgeInstanceSchema = new Schema({
     unique: true
   },
 });
-var BadgeInstance = db.model('BadgeInstance', BadgeInstanceSchema);
+const BadgeInstance = db.model('BadgeInstance', BadgeInstanceSchema);
 
 /**
  * Set the `assertion` by pulling badge by the shortname in the `badge`
@@ -79,7 +78,7 @@ BadgeInstanceSchema.pre('validate', function assertionDefault(next) {
 BadgeInstanceSchema.pre('validate', function hashDefault(next) {
   if (this.hash) return next();
   this.hash = util.hash(this.assertion);
-  next();
+  return next();
 });
 
 /**
@@ -89,7 +88,7 @@ BadgeInstanceSchema.pre('validate', function hashDefault(next) {
 BadgeInstanceSchema.pre('validate', function userBadgeKeyDefault(next) {
   if (this.userBadgeKey) return next();
   this.userBadgeKey = this.user + '.' + this.badge;
-  next();
+  return next();
 });
 
 /**

@@ -3,6 +3,7 @@ const test = require('./');
 const env = require('../lib/environment');
 const db = require('../models');
 const Issuer = require('../models/issuer');
+const Program = require('../models/program');
 
 function validIssuer() {
   return new Issuer({
@@ -12,19 +13,18 @@ function validIssuer() {
 }
 
 test.applyFixtures({
-  'testIssuer': new Issuer({
-    name: 'Mozilla',
-    contact: 'brian@mozillafoundation.org',
-  }),
   'issuer1': new Issuer({
+    _id: 'issuer1',
     name: 'Issuer One',
     contact: 'one@example.org',
     accessList: [
       {email: 'both@example.org'},
       {email: 'one@example.org'},
     ],
+    programs: ['program1', 'program2'],
   }),
   'issuer2': new Issuer({
+    _id: 'issuer2',
     name: 'Issuer Two',
     contact: 'two@example.org',
     accessList: [
@@ -32,7 +32,29 @@ test.applyFixtures({
       {email: 'two@example.org'},
     ],
   }),
+  'program1': new Program({
+    _id: 'program1',
+    name: 'Program 1',
+    issuer: 'issuer1',
+  }),
+  'program2': new Program({
+    _id: 'program2',
+    name: 'Program 2',
+    issuer: 'issuer1',
+  }),
 }, function (fixtures) {
+
+  test('Find & populate programs', function (t) {
+    const issuer = fixtures['issuer1'];
+    const programs = ['program1', 'program2'];
+    Issuer.findOne({_id: issuer._id})
+      .populate('programs')
+      .exec(function (err, result) {
+        t.same(_.pluck(result.programs, '_id'), programs);
+        t.end();
+      });
+  });
+
   test('Issuer#validate: everything is cool', function (t) {
     const issuer = validIssuer();
     issuer.validate(function (err) {
@@ -42,22 +64,11 @@ test.applyFixtures({
   });
 
   test('Issuer.findOne: works as expected, has default jwtSecret', function (t) {
-    const expect = fixtures['testIssuer'];
-    Issuer.findOne(function (err, result) {
+    const expect = fixtures['issuer1'];
+    Issuer.findOne({'_id': expect._id }, function (err, result) {
       t.same(expect.id, result.id, 'should be the expected issuer');
       t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
-      t.same(expect.uid, 'mozilla', 'should generate uid from slug of name');
-      t.end();
-    });
-  });
-
-  test('Issuer#addProgram', function (t) {
-    const issuer = fixtures['testIssuer'];
-    const programs = ['Webmaker', 'Engagement', 'WebDev'].sort();
-    programs.forEach(function (o) {issuer.addProgram({name: o})});
-    issuer.save(function (err, result) {
-      const orgNames = _.pluck(result.programs, 'name').sort();
-      t.same(orgNames, programs);
+      t.same(expect.shortname, 'issuer-one', 'should generate shortname from slug of name');
       t.end();
     });
   });
@@ -108,6 +119,7 @@ test.applyFixtures({
       t.same(fixtures['issuer2'].name, results[0].name);
     });
     Issuer.findByAccess('both@example.org', function (err, results) {
+      console.dir(results);
       const names = results.map(function (o) { return o.name }).sort();
       t.same(names, ['Issuer One', 'Issuer Two']);
     });
