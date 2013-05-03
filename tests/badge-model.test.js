@@ -17,6 +17,29 @@ function validBadge() {
 
 var fixtures = require('./badge-model.fixtures.js');
 test.applyFixtures(fixtures, function () {
+
+  test('Badge#makeJson', function (t) {
+    env.temp({origin: 'https://example.org'}, function (done) {
+      const program = fixtures['program'];
+      const badge = fixtures['link-basic'];
+
+      badge.populate('program', function () {
+        const expect = {
+          name: badge.name,
+          description: badge.description,
+          image: badge.imageDataURI(),
+          criteria: badge.absoluteUrl('criteria'),
+          issuer: program.absoluteUrl('json'),
+          tags: badge.tags
+        };
+        t.same(badge.makeJson(), expect);
+        t.end();
+        done();
+      });
+    });
+  });
+
+
   test('Badge#imageDataURI', function (t) {
     var badge = new Badge({image: test.asset('sample.png')});
     var dataURI = badge.imageDataURI();

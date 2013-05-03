@@ -407,9 +407,15 @@ Badge.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
 };
 
-Badge.prototype.makeJson = function makeJson(opts) {
-  const root = opts.root || '';
-  const ext = opts.ext || '.json';
-
+Badge.prototype.makeJson = function makeJson() {
+  // expects a populated instance
+  return {
+    name: this.name,
+    description: this.description,
+    image: this.imageDataURI(),
+    criteria: this.absoluteUrl('criteria'),
+    issuer: this.program.absoluteUrl('json'),
+    tags: this.tags
+  };
 };
 module.exports = Badge;

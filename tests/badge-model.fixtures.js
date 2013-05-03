@@ -3,12 +3,14 @@ const Issuer = require('../models/issuer');
 const User = require('../models/user');
 const BadgeInstance = require('../models/badge-instance');
 const Badge = require('../models/badge');
+const Program = require('../models/program');
 const test = require('./');
 
 const IMAGE = test.asset('sample.png');
 
 module.exports = {
   'issuer': new Issuer({
+    id: 'issuer',
     name: 'Badge Authority',
     contact: 'brian@example.org',
     programs: [
@@ -16,11 +18,18 @@ module.exports = {
       {name: 'Org 2'},
     ]
   }),
+  'program': new Program({
+    _id: 'program',
+    name: 'Some Program',
+    issuer: 'issuer',
+    url: 'http://example.org/program',
+  }),
   'link-basic': new Badge({
     name: 'Link Badge, basic',
     shortname: 'link-basic',
     description: 'For doing links.',
     image: IMAGE,
+    program: 'program',
     tags: ['linking', 'webdev'],
     behaviors: [
       { shortname: 'link', count: 5 }

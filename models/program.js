@@ -1,5 +1,7 @@
 const db = require('./');
 const Schema = require('mongoose').Schema;
+const env = require('../lib/environment');
+const util = require('../lib/util');
 
 const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
@@ -42,6 +44,7 @@ module.exports = Program;
 
 
 Program.prototype.makeJson = function makeIssuerJson() {
+  // expects a populated instance
   const issuer = this.issuer;
   return {
     name: issuer.name,
@@ -50,4 +53,14 @@ Program.prototype.makeJson = function makeIssuerJson() {
     url: this.url || issuer.url,
     description: this.description || issuer.description
   };
+};
+Program.prototype.relativeUrl = function relativeUrl(field) {
+  const formats = {
+    json: '/program/meta/%s.json'
+  };
+  return util.format(formats[field], this._id);
+};
+
+Program.prototype.absoluteUrl = function absoluteUrl(field) {
+  return env.qualifyUrl(this.relativeUrl(field));
 };
