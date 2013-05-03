@@ -21,6 +21,7 @@ module.exports = {
     shortname: 'link-basic',
     description: 'For doing links.',
     image: IMAGE,
+    tags: ['linking', 'webdev'],
     behaviors: [
       { shortname: 'link', count: 5 }
     ]

@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const env = require('../lib/environment');
 const util = require('../lib/util');
 const Issuer = require('./issuer');
+const BadgeInstance = require('./badge-instance');
 const phraseGenerator = require('../lib/phrases');
 const Schema = mongoose.Schema;
 
@@ -332,12 +333,12 @@ Badge.prototype.earnableBy = function earnableBy(user) {
 };
 
 Badge.prototype.award = function award(email, callback) {
-  // need to load this late to avoid circular dependency race conditions.
   const DUP_KEY_ERROR_CODE = 11000;
-  const BadgeInstance = require('./badge-instance');
   const instance = new BadgeInstance({
     user: email,
-    badge: this.shortname
+    badge: this.shortname,
+    // #TODO: fix this
+    assertion: Date.now()+'1234'+Math.random(),
   });
 
   // We don't want to fail with an error if the user already has the
@@ -396,7 +397,8 @@ Badge.prototype.imageDataURI = function imageDataURI() {
 Badge.prototype.relativeUrl = function relativeUrl(field) {
   const formats = {
     criteria: '/badge/criteria/%s',
-    image: '/badge/image/%s.png'
+    image: '/badge/image/%s.png',
+    json: '/badge/meta/%s.json'
   };
   return util.format(formats[field], this.shortname);
 };
@@ -405,4 +407,9 @@ Badge.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
 };
 
+Badge.prototype.makeJson = function makeJson(opts) {
+  const root = opts.root || '';
+  const ext = opts.ext || '.json';
+
+};
 module.exports = Badge;
