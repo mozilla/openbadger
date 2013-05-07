@@ -62,7 +62,7 @@ test.applyFixtures({
     var email = expect.user;
     User.credit(email, ['link', 'comment'], function (err, result, awarded, inProgress) {
       t.notOk(err, 'should not have an error');
-      t.same(result.credit.link, expect.credit.link + 1)
+      t.same(result.credit.link, expect.credit.link + 1);
       t.same(result.credit.comment, 1);
 
       t.same(awarded.length, 1);

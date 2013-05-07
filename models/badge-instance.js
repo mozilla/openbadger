@@ -48,7 +48,7 @@ const BadgeInstanceSchema = new Schema({
   },
   hash: {
     type: String,
-    required: true,
+    required: false,
   },
   userBadgeKey: {
     type: String,
@@ -59,7 +59,7 @@ const BadgeInstanceSchema = new Schema({
 const BadgeInstance = db.model('BadgeInstance', BadgeInstanceSchema);
 
 BadgeInstanceSchema.pre('validate', function hashDefault(next) {
-  if (this.hash) return next();
+  if (this.hash || !this.assertion) return next();
   this.hash = util.hash(this.assertion);
   return next();
 });
