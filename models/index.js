@@ -2,6 +2,7 @@ const env = require('../lib/environment');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const opts = env.get('mongo');
+const util = require('../lib/util');
 
 const authOpts = {};
 
@@ -20,5 +21,5 @@ function sha1(input) {
   return crypto.createHash('sha1').update(input).digest('hex');
 }
 function generateId() {
-  return sha1('' + Date.now() + crypto.randomBytes(16));
+  return sha1('' + Date.now() + util.randomString(16));
 }
