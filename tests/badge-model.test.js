@@ -17,6 +17,29 @@ function validBadge() {
 
 var fixtures = require('./badge-model.fixtures.js');
 test.applyFixtures(fixtures, function () {
+
+  test('Badge#makeJson', function (t) {
+    env.temp({origin: 'https://example.org'}, function (done) {
+      const program = fixtures['program'];
+      const badge = fixtures['link-basic'];
+
+      badge.populate('program', function () {
+        const expect = {
+          name: badge.name,
+          description: badge.description,
+          image: badge.imageDataURI(),
+          criteria: badge.absoluteUrl('criteria'),
+          issuer: program.absoluteUrl('json'),
+          tags: badge.tags
+        };
+        t.same(badge.makeJson(), expect);
+        t.end();
+        done();
+      });
+    });
+  });
+
+
   test('Badge#imageDataURI', function (t) {
     var badge = new Badge({image: test.asset('sample.png')});
     var dataURI = badge.imageDataURI();
@@ -40,7 +63,7 @@ test.applyFixtures(fixtures, function () {
   test('Badge#validate: image too big', function (t) {
     var errorKeys;
     var badge = validBadge();
-    var length = 257 * 1024
+    var length = 257 * 1024;
     badge.image = Buffer(length);
     badge.validate(function (err) {
       t.ok(err, 'should have errors');
@@ -119,7 +142,7 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#earnableBy: not enough', function (t) {
     var badge = fixtures['link-comment'];
-    var user = { credit: { link: 10 }}
+    var user = { credit: { link: 10 }};
     var expect = false;
     var result = badge.earnableBy(user);
     t.same(expect, result);
@@ -143,7 +166,7 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#creditsUntilAward: see how many credits remain until user gets badge', function (t) {
     var badge = fixtures['link-comment'];
-    var user = { credit: { link: 26 }}
+    var user = { credit: { link: 26 }};
     var expect = { comment: 5 };
     var result = badge.creditsUntilAward(user);
     t.same(result, expect);
@@ -154,7 +177,7 @@ test.applyFixtures(fixtures, function () {
     var badge = new Badge({
       name: 'An   awesome badge!',
       description: 'some sorta badge',
-    })
+    });
     badge.save(function (err, result) {
       t.same(badge.shortname, 'an-awesome-badge', 'should slugify if shortname is not provided');
       t.end();
@@ -194,43 +217,6 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
-  test('Badge#makeAssertion: makes a good assertion', function (t) {
-    var tempenv = { protocol: 'http', host: 'example.org', port: 80 };
-    env.temp(tempenv, function (resetEnv) {
-      var badge = fixtures['comment'];
-      var issuer = fixtures['issuer'];
-      var recipient = 'brian@example.org';
-      var salt = 'salt';
-      var expect = {
-        recipient: util.sha256(recipient, salt),
-        salt: salt,
-        badge: {
-          version: '0.5.0',
-          criteria: badge.absoluteUrl('criteria'),
-          image: badge.absoluteUrl('image'),
-          description: badge.description,
-          name: badge.name,
-          issuer: {
-            name: issuer.name,
-            org: issuer.org,
-            contact: issuer.contact,
-            origin: env.origin()
-          }
-        }
-      };
-      badge.makeAssertion({
-        recipient: recipient,
-        salt: salt,
-      }, {
-        json: false
-      }, function (err, result) {
-        t.same(result, expect);
-        resetEnv();
-        t.end();
-      });
-    });
-  });
-
   test('Badge#hasClaimCode', function (t) {
     const badge = fixtures['offline-badge'];
     const code = 'will-claim';
@@ -251,7 +237,7 @@ test.applyFixtures(fixtures, function () {
     t.same(badge.getClaimCodes(), expect);
     t.end();
   });
-  
+
   test('Badge#getClaimCodes, only unclaimed', function (t) {
     const badge = fixtures['offline-badge'];
     const expect = [

@@ -1,16 +1,25 @@
-var env = require('../lib/environment');
-var mongoose = require('mongoose');
-var opts = env.get('mongo');
+const env = require('../lib/environment');
+const crypto = require('crypto');
+const mongoose = require('mongoose');
+const opts = env.get('mongo');
+const util = require('../lib/util');
 
-var authOpts = {};
+const authOpts = {};
 
 if (opts.pass){
   authOpts.pass = opts.pass;
 }
-
 if (opts.user){
   authOpts.user = opts.user;
 }
-var connection = mongoose.createConnection(opts.host, opts.db, opts.port, authOpts);
+const connection = module.exports = Object.create(
+  mongoose.createConnection(opts.host, opts.db, opts.port, authOpts)
+);
+connection.generateId = generateId;
 
-module.exports = connection;
+function sha1(input) {
+  return crypto.createHash('sha1').update(input).digest('hex');
+}
+function generateId() {
+  return sha1('' + Date.now() + util.randomString(16));
+}

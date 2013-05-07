@@ -89,7 +89,7 @@ test.applyFixtures = function applyFixtures(fixtures, carryOn) {
     async.map(models(fixtures), flush, function (err, results) {
       if (err) throw err;
       callback(results);
-    })
+    });
   }
 
   /**
@@ -101,7 +101,7 @@ test.applyFixtures = function applyFixtures(fixtures, carryOn) {
     }
     async.map(values(fixtures), saver, function (err, results) {
       if (err) throw err;
-      callback(null, results)
+      callback(null, results);
     });
   }
 

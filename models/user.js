@@ -16,6 +16,7 @@ var UserSchema = new Schema({
     unique: true,
     match: regex.email
   },
+
   // `credit` is an object keyed by the shortname of a behavior with the
   // value being the amount of credit the user has for that behavior.
   // e.g., `{ 'link': 1, 'comment': 2, 'image-tag': 6 }`
