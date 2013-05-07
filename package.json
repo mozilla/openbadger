@@ -24,7 +24,8 @@
     "optimist": "~0.3.5",
     "iterator-stream": "~0.4.0",
     "markdown": "~0.4.0",
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "connect-memcached": "0.0.3"
   },
   "devDependencies": {
     "tap": "~0.3.1"
