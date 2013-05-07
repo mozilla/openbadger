@@ -29,7 +29,7 @@ const BadgeInstanceSchema = new Schema({
   assertion: {
     type: String,
     trim: true,
-    required: true
+    required: false,
   },
   issuedOn: {
     type: Date,

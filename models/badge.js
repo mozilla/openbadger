@@ -337,8 +337,6 @@ Badge.prototype.award = function award(email, callback) {
   const instance = new BadgeInstance({
     user: email,
     badge: this.shortname,
-    // #TODO: fix this
-    assertion: Date.now()+'1234'+Math.random(),
   });
 
   // We don't want to fail with an error if the user already has the
