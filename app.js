@@ -47,7 +47,6 @@ app.configure(function () {
     ],
     redirectTo: '/login'
   }));
-  app.use(issuer.getIssuerConfig());
   app.use(app.router);
 
   // if we've fallen through the router, it's a 404
@@ -67,14 +66,16 @@ app.configure('production', function () {
 
 // Issuer configuration
 // --------------------
-app.get('/admin/config', admin.configure);
-app.post('/admin/config', issuer.update);
 app.get('/admin/stats', [stats.monthly], admin.stats);
 
 
 // Badge listing
 // -------------
-var indexMiddleware = [badge.findAll, behavior.findAll];
+var indexMiddleware = [
+  badge.findAll,
+  behavior.findAll,
+  issuer.findAll,
+];
 app.get('/', badge.findNonOffline, admin.all);
 app.get('/admin', indexMiddleware, admin.badgeIndex);
 app.get('/admin/badges', indexMiddleware, admin.badgeIndex);
@@ -108,6 +109,15 @@ app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
 app.post('/admin/badge/:shortname/claims', badge.addClaimCodes);
 app.delete('/admin/badge/:shortname/claims/:code', badge.removeClaimCode);
 app.patch('/admin/badge/:shortname/claims/:code', badge.releaseClaimCode);
+
+// Issuers
+// -------
+app.all('/admin/issuer/:issuerId*', issuer.findById);
+
+app.get('/admin/issuer', admin.newIssuerForm);
+app.post('/admin/issuer', issuer.create);
+app.get('/admin/issuer/:issuerId', admin.editIssuerForm);
+app.post('/admin/issuer/:issuerId', issuer.update);
 
 // Creating new behaviors
 // ----------------------

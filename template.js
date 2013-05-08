@@ -30,4 +30,8 @@ env.addFilter('stupidSafe', function (html) {
     .replace(/>/g, '&gt;')
   );
 });
+env.addFilter('list', function (list, prop, sep) {
+  return list.map(util.prop(prop)).join(sep);
+});
+
 module.exports = env;

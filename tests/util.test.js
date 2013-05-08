@@ -1,5 +1,6 @@
-var test = require('./');
-var util = require('../lib/util');
+const test = require('./');
+const util = require('../lib/util');
+const async = require('async');
 
 test('util.slugify', function (t) {
   var input = 'RaD    to the Max';
@@ -59,4 +60,27 @@ test('util.pager', function (t) {
   t.same(util.pager(array, {page: 1, count: 100}), array);
   t.same(util.pager(array, {count: 5}), [0,1,2,3,4]);
   t.end();
+});
+
+test('util.method, async', function (t) {
+  const result = ['% bananas', '% apples', '% bears']
+    .map(util.method('replace', /%/g, 'ten'));
+  t.same(result, ['ten bananas', 'ten apples', 'ten bears']);
+  t.end();
+});
+
+test('util.method, async', function (t) {
+  const Thing = function (value) { this.name = value };
+  Thing.prototype.echo = function (callback) {
+    return callback(null, this.name);
+  };
+  const x = new Thing('one');
+  const y = new Thing('two');
+  const z = new Thing('three');
+
+  async.map([z, y, x], util.method('echo'), function (err, results) {
+    t.same(results, ['three', 'two', 'one']);
+    t.end();
+  });
+
 });

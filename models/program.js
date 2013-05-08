@@ -27,10 +27,6 @@ const ProgramSchema = new Schema({
     type: String,
     trim: true,
   },
-  description: {
-    type: String,
-    trim: true,
-  },
   contact: {
     type: String,
     trim: true,
