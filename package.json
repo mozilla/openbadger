@@ -12,10 +12,10 @@
     "nunjucks": "0.1.5",
     "redis": "0.8.1",
     "request": "2.11.4",
-    "habitat": "0.2.2",
+    "habitat": "0.4.2",
     "winston": "0.6.2",
     "connect-redis": "1.4.4",
-    "mongoose": "3.2.1",
+    "mongoose": "3.6.7",
     "async": "0.1.22",
     "up": "0.2.2",
     "connect-flash": "0.1.0",
@@ -23,7 +23,9 @@
     "sandwich": "~0.1.1",
     "optimist": "~0.3.5",
     "iterator-stream": "~0.4.0",
-    "markdown": "~0.4.0"
+    "markdown": "~0.4.0",
+    "underscore": "~1.4.4",
+    "connect-memcached": "0.0.3"
   },
   "devDependencies": {
     "tap": "~0.3.1"

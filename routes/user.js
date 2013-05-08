@@ -9,7 +9,7 @@ exports.login = function login(req, res) {
   persona.verify(assertion, function (err, email) {
     if (err)
       return res.send(util.inspect(err));
-    if (!userIsAuthorized(email))
+    if (!env.isAdmin(email))
       return res.send(403, 'not authorized');
     req.session.user = email;
     return res.redirect(path);
@@ -52,14 +52,14 @@ exports.requireAuth = function requireAuth(options) {
     var user = req.session.user;
     if (isExempt(path))
       return next();
-    if (!user || !userIsAuthorized(user))
+    if (!user || !env.isAdmin(user))
       return res.redirect(options.redirectTo + '?path=' + path);
     return next();
   };
 };
 
 function getElem(key) {
-  return function (obj) { return obj[key] }
+  return function (obj) { return obj[key] };
 }
 
 exports.findAll = function findAll(options) {
@@ -85,15 +85,3 @@ exports.findAll = function findAll(options) {
     });
   };
 };
-
-function userIsAuthorized(email) {
-  var admins = env.get('admins');
-  var authorized = false;
-  admins.forEach(function (admin) {
-    if (authorized) return;
-    var adminRe = new RegExp(admin.replace('*', '.+?'));
-    if (adminRe.test(email))
-      return (authorized = true);
-  });
-  return authorized;
-}

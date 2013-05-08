@@ -1,43 +1,48 @@
-var db = require('./');
-var mongoose = require('mongoose');
-var env = require('../lib/environment');
-var util = require('../lib/util');
-var Schema = mongoose.Schema;
+const db = require('./');
+const crypto = require('crypto');
+const mongoose = require('mongoose');
+const env = require('../lib/environment');
+const util = require('../lib/util');
+const Schema = mongoose.Schema;
 
 const DEFAULT_SECRET_LENGTH = 64;
 const NAME_MAX_LENGTH = 128;
 const ORG_MAX_LENGTH = 128;
 
-
 function generateRandomSecret() {
   return util.strongRandomString(DEFAULT_SECRET_LENGTH);
 }
 
-function maxLength(field, length) {
-  function lengthValidator() {
-    if (!this[field]) return true;
-    return this[field].length <= length;
-  }
-  var msg = 'maxLength';
-  return [lengthValidator, msg];
-}
-
-var regex = {
+const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/
-}
+};
 
-var IssuerSchema = new Schema({
+const AccessUser = new Schema({
+  email: {
+    type: String,
+    trim: true,
+    required: true,
+    match: regex.email
+  },
+});
+
+const IssuerSchema = new Schema({
+  _id: {
+    type: String,
+    unique: true,
+    required: true,
+    default: db.generateId,
+  },
   name: {
     type: String,
     trim: true,
     required: true,
-    validate: maxLength('name', NAME_MAX_LENGTH)
   },
-  org: {
+  shortname: {
     type: String,
     trim: true,
-    required: false,
-    validate: maxLength('org', ORG_MAX_LENGTH)
+    required: true,
+    unique: true,
   },
   contact: {
     type: String,
@@ -45,14 +50,25 @@ var IssuerSchema = new Schema({
     required: true,
     match: regex.email
   },
+  url: {
+    type: String,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
   jwtSecret: {
     type: String,
     trim: true,
     required: true,
     default: generateRandomSecret
   },
+  accessList: [AccessUser],
+  programs: [{ type: String, ref: 'Program' }]
 });
-var Issuer = db.model('Issuer', IssuerSchema);
+
+const Issuer = db.model('Issuer', IssuerSchema);
 
 /**
  * Set a new random secret if one is not already defined.
@@ -67,11 +83,56 @@ IssuerSchema.pre('validate', function defaultSecret(next) {
   return next();
 });
 
-/**
- * Get an object compatible with the `badge.issuer` portion of the
- * OpenBadges spec.
- */
+IssuerSchema.pre('validate', function defaultShortname(next) {
+  if (this.shortname) return next();
+  this.shortname = util.slugify(this.name);
+  return next();
+});
 
+Issuer.findByAccess = function findByAccess(email, callback) {
+  const query = {accessList: {'$elemMatch': {email: email }}};
+  return Issuer.find(query, callback);
+};
+
+Issuer.prototype.hasAccess = function hasAccess(email) {
+  return this.accessList.some(function (acl) {
+    return acl.email === email;
+  });
+};
+
+Issuer.prototype.addAccess = function addAccess(emails) {
+  if (arguments.length > 1)
+    return this.addAccess([].slice.call(arguments));
+  if (typeof emails === 'string')
+    return this.addAccess([emails]);
+
+  emails = emails.filter(function (email) {
+    return !this.hasAccess(email);
+  }.bind(this));
+
+  if (emails.length == 0)
+    return false;
+
+  emails.forEach(function (email) {
+    this.accessList.push({email: email});
+  }.bind(this));
+
+  return true;
+};
+
+Issuer.prototype.removeAccess = function removeAccess(email) {
+  const oldList = this.accessList;
+  const newList = oldList.filter(function (acl) {
+    return acl.email !== email;
+  });
+  if (newList.length === oldList.length)
+    return false;
+  this.accessList = newList;
+  return true;
+};
+
+// TODO: change this to work with the fact that we now have the concept
+// of multiple issuers & multiple organizations for each issuer.
 Issuer.getAssertionObject = function getAssertionObject(callback) {
   Issuer.findOne(function (err, issuer) {
     if (err)
@@ -87,5 +148,6 @@ Issuer.getAssertionObject = function getAssertionObject(callback) {
     return callback(null, result);
   });
 };
+
 
 module.exports = Issuer;

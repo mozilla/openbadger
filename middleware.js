@@ -2,7 +2,6 @@ var env = require('./lib/environment');
 var util = require('./lib/util');
 var logger = require('./lib/logger');
 var express = require('express');
-var RedisStore = require('connect-redis')(express);
 var flash = require('connect-flash');
 
 exports.cookieParser = function () {
@@ -10,15 +9,22 @@ exports.cookieParser = function () {
   return express.cookieParser(secret);
 };
 
-/**
- * Store sessions in redis
- */
+function getSessionStore(env) {
+  const redisOpts = env.get('redis');
+  const memcachedOpts = env.get('memcached');
+  if (memcachedOpts) {
+    const MemcachedStore = require('connect-memcached')(express);
+    return new MemcachedStore(memcachedOpts);
+  }
+  const RedisStore = require('connect-redis')(express);
+  redisOpts.db = env.get('redis_session_db');
+  return new RedisStore(redisOpts);
+}
+
 exports.session = function () {
-  var options = env.get('redis');
-  options.db = env.get('redis_session_db');
   return express.session({
     key: 'openbadger.sid',
-    store: new RedisStore(options),
+    store: getSessionStore(env),
     secret: env.get('secret'),
   });
 };

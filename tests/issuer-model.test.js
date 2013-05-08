@@ -1,66 +1,127 @@
-var test = require('./');
-var env = require('../lib/environment');
-var db = require('../models');
-var Issuer = require('../models/issuer');
+const _ = require('underscore');
+const test = require('./');
+const env = require('../lib/environment');
+const db = require('../models');
+const Issuer = require('../models/issuer');
+const Program = require('../models/program');
 
 function validIssuer() {
   return new Issuer({
     name: 'Some Issuer',
-    org: 'Some Organization',
     contact: 'badges@example.org'
   });
 }
 
 test.applyFixtures({
-  'testIssuer': new Issuer({
-    name: 'Mozilla',
-    org: 'Webmaker',
-    contact: 'brian@mozillafoundation.org'
-  })
+  'issuer1': new Issuer({
+    _id: 'issuer1',
+    name: 'Issuer One',
+    contact: 'one@example.org',
+    accessList: [
+      {email: 'both@example.org'},
+      {email: 'one@example.org'},
+    ],
+    programs: ['program1', 'program2'],
+  }),
+  'issuer2': new Issuer({
+    _id: 'issuer2',
+    name: 'Issuer Two',
+    contact: 'two@example.org',
+    accessList: [
+      {email: 'both@example.org'},
+      {email: 'two@example.org'},
+    ],
+  }),
+  'program1': new Program({
+    _id: 'program1',
+    name: 'Program 1',
+    issuer: 'issuer1',
+  }),
+  'program2': new Program({
+    _id: 'program2',
+    name: 'Program 2',
+    issuer: 'issuer1',
+  }),
 }, function (fixtures) {
+
+  test('Find & populate programs', function (t) {
+    const issuer = fixtures['issuer1'];
+    const programs = ['program1', 'program2'];
+    Issuer.findOne({_id: issuer._id})
+      .populate('programs')
+      .exec(function (err, result) {
+        t.same(_.pluck(result.programs, '_id'), programs);
+        t.end();
+      });
+  });
+
   test('Issuer#validate: everything is cool', function (t) {
-    var issuer = validIssuer();
+    const issuer = validIssuer();
     issuer.validate(function (err) {
       t.notOk(err, 'should not have any errors');
       t.end();
     });
   });
 
-  test('Issuer#validate: bad contact', function (t) {
-    var issuer = validIssuer();
-    issuer.contact = 'not an email address'
-    issuer.validate(function (err) {
-      var error;
-      t.ok(err, 'should have errors');
-      error = err.errors.contact;
-      t.ok(error, 'should have a contact error');
-      t.same(error.type, 'regexp', 'should be a regexp error');
-      t.end();
-    });
-  });
-
   test('Issuer.findOne: works as expected, has default jwtSecret', function (t) {
-    var expect = fixtures['testIssuer'];
-    Issuer.findOne(function (err, result) {
+    const expect = fixtures['issuer1'];
+    Issuer.findOne({'_id': expect._id }, function (err, result) {
       t.same(expect.id, result.id, 'should be the expected issuer');
       t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
+      t.same(expect.shortname, 'issuer-one', 'should generate shortname from slug of name');
       t.end();
     });
   });
 
-  test('Issuer.getAssertionObject', function (t) {
-    env.temp({ origin: 'http://example.org' }, function (resetEnv) {
-      var expect = {
-        name: 'Mozilla',
-        org: 'Webmaker',
-        contact: 'brian@mozillafoundation.org',
-        origin: 'http://example.org',
-      };
-      Issuer.getAssertionObject(function (err, result) {
-        t.same(result, expect);
-        resetEnv();
-        t.end();
-      })
+  test('Issuer#hasAccess', function (t) {
+    const issuer = new Issuer({
+      accessList: [
+        {email: 'one@example.org'},
+        {email: 'two@example.org'},
+      ]
+    });
+    t.same(issuer.hasAccess('one@example.org'), true);
+    t.same(issuer.hasAccess('two@example.org'), true);
+    t.same(issuer.hasAccess('three@example.org'), false);
+    t.end();
+  });
+
+  test('Issuer#removeAccess', function (t) {
+    const issuer = new Issuer({
+      accessList: [{email: 'remove-me@example.org'}],
+    });
+    t.same(issuer.hasAccess('remove-me@example.org'), true);
+    t.same(issuer.removeAccess('remove-me@example.org'), true);
+    t.same(issuer.hasAccess('remove-me@example.org'), false);
+    t.end();
+  });
+
+  test('Issuer#addAccess', function (t) {
+    const issuer = new Issuer();
+    issuer.addAccess('test1@example.org');
+    issuer.addAccess('test1@example.org');
+    issuer.addAccess('test1@example.org');
+    issuer.addAccess(['test2@example.org', 'test3@example.org']);
+    issuer.addAccess('test4@example.org', 'test5@example.org');
+
+    [1,2,3,4,5].forEach(function (n) {
+      t.same(issuer.hasAccess('test'+n+'@example.org'), true);
+    });
+    t.end();
+  });
+
+  test('Issuer.findByAccess', function (t) {
+    t.plan(3);
+    Issuer.findByAccess('one@example.org', function (err, results) {
+      t.same(fixtures['issuer1'].name, results[0].name);
+    });
+    Issuer.findByAccess('two@example.org', function (err, results) {
+      t.same(fixtures['issuer2'].name, results[0].name);
+    });
+    Issuer.findByAccess('both@example.org', function (err, results) {
+      console.dir(results);
+      const names = results.map(function (o) { return o.name }).sort();
+      t.same(names, ['Issuer One', 'Issuer Two']);
     });
   });
 

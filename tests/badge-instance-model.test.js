@@ -1,9 +1,10 @@
-var test = require('./');
-var db = require('../models');
-var BadgeInstance = require('../models/badge-instance');
-var Badge = require('../models/badge');
-var Issuer = require('../models/issuer');
-var util = require('../lib/util');
+const test = require('./');
+const db = require('../models');
+const BadgeInstance = require('../models/badge-instance');
+const Badge = require('../models/badge');
+const Issuer = require('../models/issuer');
+const util = require('../lib/util');
+const env = require('../lib/environment');
 
 test.applyFixtures({
   'issuer': new Issuer({
@@ -12,6 +13,7 @@ test.applyFixtures({
     contact: 'brian@example.org'
   }),
   'link-basic': new Badge({
+    _id: 'link-basic',
     name: 'Link Badge, basic',
     shortname: 'link-basic',
     description: 'For doing links.',
@@ -19,53 +21,68 @@ test.applyFixtures({
     behaviors: [{ shortname: 'link', count: 5 }]
   }),
   'instance': new BadgeInstance({
+    _id: 'abcd',
     user: 'brian@example.org',
     hash: 'hash',
-    badge: 'link-advanced',
+    badge: 'link-basic',
     assertion: '{ "assertion" : "yep" }',
     seen: false
   }),
   'other-instance': new BadgeInstance({
     user: 'brian@example.org',
     hash: 'hash',
-    badge: 'link-hyper-advanced',
+    badge: 'link-basic',
     assertion: '{ "assertion" : "yep" }',
     seen: false
   }),
   'delete-instance1': new BadgeInstance({
     user: 'brian-delete@example.org',
     hash: 'hash',
-    badge: 'link-hyper-advanced',
+    badge: 'link-basic',
     assertion: '{ "assertion" : "yep" }',
     seen: false
   }),
   'delete-instance2': new BadgeInstance({
     user: 'brian-delete@example.org',
     hash: 'otherhash',
-    badge: 'link-turbo-advanced',
+    badge: 'link-basic',
     assertion: '{ "assertion" : "yep" }',
     seen: false
   }),
 }, function (fixtures) {
-  test('BadgeInstance#save: test defaults', function (t) {
-    var currentish = Date.now() - 1;
-    var instance = new BadgeInstance({
-      user: 'brian@example.org',
-      badge: 'link-basic'
+  test('BadgeInstance#makeAssertion', function (t) {
+    env.temp({ origin: 'https://example.org' }, function (done) {
+      const instance = fixtures['instance'];
+      const badge = fixtures['link-basic'];
+      const salt = 'deadsea';
+      instance.populate('badge', function () {
+        const expect = {
+          uid: instance._id,
+          recipient: {
+            identity: util.sha256(instance.user, salt),
+            type: 'email',
+            hashed: true,
+            salt: salt,
+          },
+          badge: badge.absoluteUrl('json'),
+          verify: {
+            type: 'hosted',
+            url: instance.absoluteUrl('assertion'),
+          },
+          issuedOn: instance.issuedOnUnix()
+        };
+        t.same(instance.makeAssertion({salt: salt}), expect);
+        t.end();
+        return done();
+      });
     });
-    instance.save(function (err, result) {
-      t.notOk(err, 'should not have any errors');
-      t.ok(instance.assertion, 'should have an assertion string');
-      t.same(instance.hash, util.hash(instance.assertion), 'hash should be the hash of the assertion');
-      t.ok(instance.issuedOn > currentish, 'there is some date for issued on');
-      t.end();
-    })
   });
 
+
   test('BadgeInstance#userHasBadge', function (t) {
-    var instance = fixtures['instance'];
-    var user = instance.user;
-    var badge = instance.badge;
+    const instance = fixtures['instance'];
+    const user = instance.user;
+    const badge = instance.badge._id;
     BadgeInstance.userHasBadge(user, badge, function (err, hasBadge) {
       t.notOk(err, 'should not have an error');
       t.same(hasBadge, true, 'user should have badge');
@@ -80,7 +97,7 @@ test.applyFixtures({
   test('BadgeInstance.markAllAsSeen', function (t) {
     var instance = fixtures['instance'];
     var instance2 = fixtures['other-instance'];
-    var email = instance.user
+    var email = instance.user;
     t.same(instance.seen, false, 'should start off false');
     t.same(instance2.seen, false, 'should start off false');
     BadgeInstance.markAllAsSeen(email, function (err) {
@@ -93,7 +110,6 @@ test.applyFixtures({
     });
   });
 
-
   test('BadgeInstance.deleteAllByUser', function (t) {
     var instance1 = fixtures['delete-instance1'];
     var instance2 = fixtures['delete-instance2'];
@@ -104,6 +120,12 @@ test.applyFixtures({
         t.end();
       });
     });
+  });
+
+  test('BadgeInstance.makeAssertion', function (t) {
+    const instance = fixtures['instance1'];
+    console.dir(instance);
+    t.end();
   });
 
 

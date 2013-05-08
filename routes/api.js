@@ -1,10 +1,11 @@
-var jwt = require('jwt-simple');
-var urlutil = require('url');
-var env = require('../lib/environment');
-var util = require('../lib/util');
-var Badge = require('../models/badge');
-var User = require('../models/user');
-var BadgeInstance = require('../models/badge-instance');
+const _ = require('underscore');
+const jwt = require('jwt-simple');
+const urlutil = require('url');
+const env = require('../lib/environment');
+const util = require('../lib/util');
+const Badge = require('../models/badge');
+const User = require('../models/user');
+const BadgeInstance = require('../models/badge-instance');
 
 /**
  * Get listing of all badges
@@ -30,6 +31,41 @@ exports.badges = function badges(req, res) {
       };
     });
     return res.send(200, result);
+  });
+};
+
+exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
+  const badge = req.badge;
+  const queryOpts = req.query;
+  
+  // theoretically this should never happen - this route should always
+  // be preceded by middleware that finds the badge or 404s.
+  if (!badge)
+    return res.json(404, {status: 'error', reason: 'badge not found'});
+  
+  const options = {
+    page: parseInt(queryOpts.page, 10) || 1,
+    count: parseInt(queryOpts.count, 10) || 100,
+    unclaimed: false,
+  };
+  
+  if (queryOpts.count === '0' || queryOpts.limit === 'false')
+    options.count = Infinity;
+  
+  const allCodes = badge.getClaimCodes({
+    unclaimed: options.unclaimed
+  });
+  const someCodes = util.pager(allCodes, {
+    page: options.page,
+    count: options.count
+  });
+  
+  return res.json(200, {
+    status: 'ok',
+    total: allCodes.length,
+    claimcodes: someCodes,
+    page: options.page,
+    count: options.count,
   });
 };
 
@@ -61,6 +97,66 @@ exports.user = function user(req, res) {
       };
     });
     return res.send(200, result);
+  });
+};
+
+exports.awardBadge = function awardBadge(req, res, next) {
+  const badge = req.badge;
+  const email = req.body.email;
+  if (!badge)
+    return res.json(404, {status: 'error', reason: 'badge not found'});
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+  
+  return badge.award(email, function (err, instance) {
+    if (err) {
+      // TODO: log error properly
+      console.dir(err);
+      return res.json(500, {
+        status: 'error',
+        reason: 'database'
+      });
+    }
+    if (!instance)
+      return res.json(409, {
+        status: 'error',
+        reason: util.format('user `%s` already has badge', email),
+        user: email,
+      });
+    return res.json(200, {
+      status: 'ok',
+      url: instance.absoluteUrl('assertion'),
+    });
+  });
+};
+
+exports.removeBadge = function removeBadge(req, res, next) {
+  const shortname = req.param('shortname');
+  const email = req.body.email;
+
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+  
+  return BadgeInstance.findOneAndRemove({
+    badge: shortname,
+    user: email
+  }, function (err, result) {
+    if (err) {
+      // TODO: log error properly
+      console.dir(err);
+      return res.json(500, {
+        status: 'error',
+        reason: 'database'
+      });
+    }
+      
+    if (!result)
+      return res.json(404, {
+        status: 'error',
+        reason: util.format('user `%s` does not have that badge', email),
+        user: email,
+      });
+    return res.json(200, {status: 'ok'}); 
   });
 };
 
@@ -147,29 +243,42 @@ exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
  * JWT param and confirming audience and issuer.
  */
 
-exports.auth = function auth(req, res, next) {
-  var param = req.method === "POST" ? req.body : req.query;
-  var token = param.auth;
-  var email = param.email;
-  var issuer = req.issuer;
-  var secret = issuer.jwtSecret;
-  var origin = env.origin();
-  var isXHR = req.headers['x-requested-with'] === 'XMLHttpRequest';
-  var auth, msg;
-  if (!token)
-    return respondWithError(res, 'missing mandatory `auth` param');
-  if (!secret)
-    return respondWithError(res, 'issuer has not configured jwt secret');
-  try {
-    auth = jwt.decode(token, secret);
-  } catch(err) {
-    return respondWithError(res, 'error decoding JWT: ' + err.message);
-  }
-  if (auth.prn !== email) {
-    msg = '`prn` mismatch: given %s, expected %s';
-    return respondWithError(res, util.format(msg, auth.prn, email));
-  }
-  return next();
+exports.auth = function auth(options) {
+  options = _.defaults(options||{}, {
+    user: true
+  });
+  return function (req, res, next) {
+    const param = req.method === "GET" ? req.query : req.body;
+    const token = param.auth;
+    const email = param.email;
+    const issuer = req.issuer;
+    const secret = issuer.jwtSecret;
+    const origin = env.origin();
+    const isXHR = req.headers['x-requested-with'] === 'XMLHttpRequest';
+    const now = Date.now()/1000|0;
+    var auth, msg;
+    if (!token)
+      return respondWithError(res, 'missing mandatory `auth` param');
+    if (!secret)
+      return respondWithError(res, 'issuer has not configured jwt secret');
+    try {
+      auth = jwt.decode(token, secret);
+    } catch(err) {
+      return respondWithError(res, 'error decoding JWT: ' + err.message);
+    }
+    if (options.user && auth.prn !== email) {
+      msg = '`prn` mismatch: given %s, expected %s';
+      return respondWithError(res, util.format(msg, auth.prn, email));
+    }
+    // If the token has an expiration, ensure that it has not passed.
+    // XXX: Should we require an expiration field? It will help prevent
+    // against unauthorized token reuse.
+    if (auth.exp && auth.exp < now) {
+      msg = 'Token has expired';
+      return respondWithError(res, msg);
+    }
+    return next();
+  };
 };
 
 function respondWithError(res, reason) {

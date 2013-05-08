@@ -36,6 +36,15 @@ this at `config.env`, do:
 $ source config.env
 ```
 
+## Using memcached instead of redis for sessions
+In some cases (such as deploying on AWS) it might be easier to use memcached rather than redis.
+
+```bash
+export OPENBADGER_MEMCACHED_HOSTS="127.0.0.1:11211"
+```
+
+Note the use of `HOSTS` in the plural – the memcached session store supports using multiple servers, so you can pass in an array of memcached instances if necessary.
+
 # Installing deps & starting the server
 
 ```bash
@@ -117,9 +126,9 @@ You should only have to do the following once:
 $ heroku login
     Enter your Heroku credentials.
     Email: brian@mozillafoundation.org
-    Password: 
+    Password:
     Could not find an existing public key.
-    Would you like to generate one? [Yn] 
+    Would you like to generate one? [Yn]
     Generating new SSH public key.
     Uploading ssh public key /Users/brian/.ssh/id_rsa.pub
 

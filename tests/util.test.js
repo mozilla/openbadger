@@ -11,7 +11,7 @@ test('util.slugify', function (t) {
 
 test('util.sha256', function (t) {
   var crypto = require('crypto');
-  var sum = crypto.createHash('sha256')
+  var sum = crypto.createHash('sha256');
   var expect = 'sha256$' + sum.update('awesomerad').digest('hex');
   var result = util.sha256('awesome', 'rad');
   t.same(result, expect);
@@ -49,5 +49,14 @@ test('util.toMap', function (t) {
   var obj = util.toMap(array, 'name');
   t.same(obj.ya.value, true);
   t.same(obj.nope.value, false);
+  t.end();
+});
+
+test('util.pager', function (t) {
+  var array = [0,1,2,3,4,5,6,7,8,9];
+  t.same(util.pager(array, {page: 2, count: 3}), [3,4,5]);
+  t.same(util.pager(array, {page: 4, count: 1}), [3]);
+  t.same(util.pager(array, {page: 1, count: 100}), array);
+  t.same(util.pager(array, {count: 5}), [0,1,2,3,4]);
   t.end();
 });
