@@ -5,16 +5,36 @@ const logger = require('../lib/logger');
 /*
  * Administrative Pages
  */
+
+exports.issuerIndex = function (req, res) {
+  return res.render('admin/issuer-index.html', {
+    page: 'issuer-index',
+    badges: req.badges,
+    user: req.session.user,
+    access: req.session.access,
+    csrf: req.session._csrf,
+  });
+};
+
+exports.issueBadge = function (req, res) {
+  return res.render('admin/issue-badge.html', {
+    page: 'issue-badge',
+    badge: req.badge,
+    results: req.flash('results').pop(),
+    user: req.session.user,
+    access: req.session.access,
+    csrf: req.session._csrf,
+  });
+};
+
 exports.login = function (req, res) {
-  var path = req.query['path'] || req.body['path'] || '/admin';
   return res.render('admin/login.html', {
     page: 'login',
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
-    issuerCheckExempt: true,
-    path: path
   });
-}
+};
 
 exports.newBadgeForm = function (req, res) {
   return res.render('admin/create-or-edit-badge.html', {
@@ -22,6 +42,7 @@ exports.newBadgeForm = function (req, res) {
     badge: new Badge,
     issuers: req.issuers,
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
   });
 };
@@ -33,6 +54,7 @@ exports.editBadgeForm = function (req, res) {
     badge: req.badge,
     issuers: req.issuers,
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
   });
 };
@@ -42,6 +64,7 @@ exports.newIssuerForm = function (req, res) {
     page: 'new-issuer',
     issuer: new Issuer,
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
   });
 };
@@ -52,6 +75,7 @@ exports.editIssuerForm = function (req, res) {
     editing: true,
     issuer: req.issuer,
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
   });
 };
@@ -60,9 +84,14 @@ exports.newBehaviorForm = function (req, res) {
   return res.render('admin/new-behavior.html', {
     page: 'new-behavior',
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
     badgeShortName: req.query['for']
   });
+};
+
+exports.index = function (req, res) {
+  console.dir(req.user);
 };
 
 exports.badgeIndex = function (req, res) {
@@ -70,6 +99,7 @@ exports.badgeIndex = function (req, res) {
     page: 'home',
     issuers: req.issuers,
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
     badges: req.badges,
     behaviors: req.behaviors
@@ -80,6 +110,7 @@ exports.showBadge = function (req, res) {
   return res.render('admin/show-badge.html', {
     page: 'edit-badge',
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
     defaultBehavior: req.query['behavior'],
     badge: req.badge,
@@ -120,6 +151,7 @@ exports.manageClaimCodes = function (req, res) {
   return res.render('admin/manage-claim-codes.html', {
     page: 'edit-badge',
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
     badge: req.badge,
     codes: req.badge.claimCodes,
@@ -127,19 +159,11 @@ exports.manageClaimCodes = function (req, res) {
   });
 };
 
-exports.configure = function (req, res) {
-  return res.render('admin/config.html', {
-    page: 'configure',
-    user: req.session.user,
-    csrf: req.session._csrf,
-    issuerCheckExempt: true
-  });
-};
-
 exports.showFlushDbForm = function (req, res) {
   return res.render('admin/flush-user-info.html', {
     page: 'flush',
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf
   });
 };
@@ -148,6 +172,7 @@ exports.userList = function userList(req, res, next) {
   return res.render('admin/user-list.html', {
     page: 'user-list',
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
     users: req.users
   });
@@ -158,6 +183,7 @@ exports.stats = function stats(req, res, next) {
     page: 'stats',
     stats: req.stats,
     user: req.session.user,
+    access: req.session.access,
     csrf: req.session._csrf,
     users: req.users
   });
