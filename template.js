@@ -34,4 +34,12 @@ env.addFilter('list', function (list, prop, sep) {
   return list.map(util.prop(prop)).join(sep);
 });
 
+env.addFilter('userHome', function (access) {
+  return {
+    super: '/admin',
+    issuer: '/issuer'
+  }[access];
+});
+
+
 module.exports = env;

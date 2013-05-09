@@ -84,3 +84,17 @@ test('util.method, async', function (t) {
   });
 
 });
+
+test('util.whitelist', function (t) {
+  const list = util.whitelist([
+    'A',
+    'B',
+    'C',
+    '*D'
+  ]);
+  t.same(list.exempt('x'), false);
+  t.same(list.exempt('A'), true);
+  t.same(list.exempt('A1'), false);
+  t.same(list.exempt('AaaaaaaD'), true);
+  t.end();
+});
