@@ -19,6 +19,12 @@ const ProgramSchema = new Schema({
     trim: true,
     required: true,
   },
+  shortname: {
+    type: String,
+    trim: true,
+    required: true,
+    unique: true
+  },
   issuer: {
     type: String,
     ref: 'Issuer',
@@ -42,6 +48,15 @@ const ProgramSchema = new Schema({
 const Program = db.model('Program', ProgramSchema);
 module.exports = Program;
 
+// Validators & Defaulters
+// -----------------------
+
+function setShortNameDefault(next) {
+  if (!this.shortname && this.name)
+    this.shortname = util.slugify(this.name);
+  next();
+}
+ProgramSchema.pre('validate', setShortNameDefault);
 
 Program.prototype.makeJson = function makeIssuerJson() {
   // expects a populated instance

@@ -6,6 +6,8 @@ const util = require('../lib/util');
 const Badge = require('../models/badge');
 const User = require('../models/user');
 const BadgeInstance = require('../models/badge-instance');
+const Program = require('../models/program');
+const mongoose = require('mongoose');
 
 /**
  * Get listing of all badges
@@ -37,21 +39,21 @@ exports.badges = function badges(req, res) {
 exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
   const badge = req.badge;
   const queryOpts = req.query;
-  
+
   // theoretically this should never happen - this route should always
   // be preceded by middleware that finds the badge or 404s.
   if (!badge)
     return res.json(404, {status: 'error', reason: 'badge not found'});
-  
+
   const options = {
     page: parseInt(queryOpts.page, 10) || 1,
     count: parseInt(queryOpts.count, 10) || 100,
     unclaimed: false,
   };
-  
+
   if (queryOpts.count === '0' || queryOpts.limit === 'false')
     options.count = Infinity;
-  
+
   const allCodes = badge.getClaimCodes({
     unclaimed: options.unclaimed
   });
@@ -59,7 +61,7 @@ exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
     page: options.page,
     count: options.count
   });
-  
+
   return res.json(200, {
     status: 'ok',
     total: allCodes.length,
@@ -107,7 +109,7 @@ exports.awardBadge = function awardBadge(req, res, next) {
     return res.json(404, {status: 'error', reason: 'badge not found'});
   if (!email)
     return res.json(400, {status: 'error', reason: 'missing email address'});
-  
+
   return badge.award(email, function (err, instance) {
     if (err) {
       // TODO: log error properly
@@ -136,7 +138,7 @@ exports.removeBadge = function removeBadge(req, res, next) {
 
   if (!email)
     return res.json(400, {status: 'error', reason: 'missing email address'});
-  
+
   return BadgeInstance.findOneAndRemove({
     badge: shortname,
     user: email
@@ -149,14 +151,14 @@ exports.removeBadge = function removeBadge(req, res, next) {
         reason: 'database'
       });
     }
-      
+
     if (!result)
       return res.json(404, {
         status: 'error',
         reason: util.format('user `%s` does not have that badge', email),
         user: email,
       });
-    return res.json(200, {status: 'ok'}); 
+    return res.json(200, {status: 'ok'});
   });
 };
 
@@ -236,6 +238,40 @@ exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
       return res.send(500, { status: 'error', error: err });
     return res.send(200, { status: 'ok' });
   });
+};
+
+/**
+ * List the programs, or a specific program.
+ */
+
+exports.programs = function programs(req, res) {
+  if (req.params.programShortName) {
+    var programShortName = escape(req.params.programShortName);
+    Program.findOne({shortname:programShortName}, function(err, program) {
+      debugger;
+      if (err) {
+        return res.send(500, "There was an error retrieving the program");
+      }
+      if (program) {
+        return res.send(200, { name: program.name });
+      } else {
+        return res.send(404, "Not Found");
+      }
+    });
+
+  } else {
+    Program.find({}, function(err, programs) {
+      if (err) {
+        return res.send(500, "There was an error retrieving the list of programs");
+      }
+      return res.send(200,
+                      _.map(programs,
+                            function(p) { return {name: p.name, shortname: p.shortname } }
+                           )
+                     );
+
+    });
+  }
 };
 
 /**
