@@ -32,12 +32,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/">
+          <a class="brand" href="/admin">
             OpenBadger
           </a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li {{ page | activize('home') }}><a href="/">Home</a></li>
+              <li {{ page | activize('home') }}><a href="/admin">Home</a></li>
               {% if user %}
                 <li {{ page | activize('new-issuer') }}>
                   <a href="/admin/issuer">New Issuer</a>
