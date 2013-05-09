@@ -32,7 +32,6 @@ const ProgramSchema = new Schema({
     trim: true,
     match: regex.email
   },
-  badges: [{ type: Schema.Types.ObjectId, ref: 'Badge' }]
 });
 
 const Program = db.model('Program', ProgramSchema);
