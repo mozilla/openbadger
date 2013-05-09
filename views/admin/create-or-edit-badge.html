@@ -2,8 +2,8 @@
 
 {% block main %}
   <form method="post" action="?" enctype="multipart/form-data">
-    <input id="name" type="hidden" name="csrf" value="{{ csrf }}">
-    
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+
     <legend>
       {% if editing %}
         Edit Badge: {{ badge.name }}
@@ -11,7 +11,7 @@
         New Badge
       {% endif %}
     </legend>
-    
+
     <div>
       {{ badge | imageForBadge }}
       <label for="name">Name</label>
@@ -27,7 +27,7 @@
         also awesome.
       </span>
     </div>
-    
+
     <div>
       <label for="description">Description</label>
       <textarea
@@ -41,7 +41,7 @@
         created from this badge.
       </span>
     </div>
-    
+
     <div>
       <label for="criteria">Criteria</label>
       <textarea
@@ -55,7 +55,7 @@
         markup by wrapping it in backticks: <code>`&lt;strong&gt;`</code>
       </span>
     </div>
-    
+
     <div>
       <label for="image">New Image</label>
       <input
@@ -69,7 +69,7 @@
         {% if editing %} Leave blank to keep old image. {% endif %}
       </span>
     </div>
-    
+
     <div class="form-actions">
       <button id="update-badge" type="submit" class="btn btn-primary">Update</button>
     </div>
@@ -79,4 +79,3 @@
 {% block footer %}
 <script src="/js/admin.js"></script>
 {% endblock %}
-
