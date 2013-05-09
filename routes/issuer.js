@@ -28,6 +28,16 @@ exports.findById = function findById(req, res, next) {
     });
 };
 
+exports.findByAccess = function findByAccess(req, res, next) {
+  Issuer.findByAccess(req.session.user)
+    .populate('programs')
+    .exec(function (err, issuers) {
+      if (err) return next(err);
+      req.issuers = issuers;
+      return next();
+    });
+};
+
 exports.create = function create(req, res, next) {
   const post = req.body;
   const accessList = handleAccessList(post.accessList);

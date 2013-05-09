@@ -1,7 +1,9 @@
-var fs = require('fs');
-var logger = require('../lib/logger');
-var Badge = require('../models/badge');
-var BadgeInstance = require('../models/badge-instance');
+const fs = require('fs');
+const logger = require('../lib/logger');
+const Badge = require('../models/badge');
+const BadgeInstance = require('../models/badge-instance');
+const util = require('../lib/util');
+const async = require('async');
 
 exports.create = function create(req, res, next) {
   const form = req.body;
@@ -108,20 +110,13 @@ exports.assertion = function assertion(req, res) {
   });
 };
 
-function identity(x) { return x };
-function instance(method) {
-  return function (o) {
-    var args = [].slice.call(arguments);
-    return o[method].apply(o, args);
-  };
-}
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
   var badge = req.badge;
   var rawCodes = req.body.codes;
   var codes = (rawCodes
     .split('\n')
-    .map(instance('trim'))
-    .filter(identity));
+    .map(util.method('trim'))
+    .filter(util.prop('length')));
 
   badge.addClaimCodes(codes, function(err) {
     if (err) return next(err);
@@ -146,7 +141,7 @@ exports.releaseClaimCode = function releaseClaimCode(req, res, next) {
   badge.save(function (err) {
     if (err) return next(err);
     return res.redirect('back');
-  })
+  });
 };
 
 function reportError(err) {
@@ -174,6 +169,34 @@ exports.awardToUser = function awardToUser(req, res, next) {
         assertionUrl: instance.absoluteUrl('assertion')
       });
     });
+  });
+};
+
+function issueAndEmail(badge) {
+  return function (email, callback) {
+    if (!util.isEmail(email))
+      return callback(null, {email: email, status: 'invalid'});
+    badge.award(email, function (err, instance) {
+      if (err) return callback(err);
+      // #TODO: SHOULD PUT EMAIL CODE HERE
+      if (!instance)
+        return callback(null, {email: email, status: 'dupe'});
+      return callback(null, {email: email, status: 'okay'});
+    });
+  };
+}
+
+exports.issueMany = function issueMany(req, res, next) {
+  const badge = req.badge;
+  const post = req.body;
+  const emails = post.emails
+    .trim()
+    .split('\n')
+    .map(util.method('trim'));
+  async.map(emails, issueAndEmail(badge), function (err, results) {
+    if (err) return next(err);
+    req.flash('results', results);
+    return res.redirect(303, 'back');
   });
 };
 
@@ -223,6 +246,50 @@ exports.findByShortName = function (options) {
         });
       });
   };
+};
+
+exports.confirmAccess = function confirmAccess(req, res, next) {
+  const badge = req.badge;
+  const email = req.session.user;
+  const hasAccess = badge.program &&
+    badge.program.issuer &&
+    badge.program.issuer.hasAccess(email);
+  if (!hasAccess)
+    return res.send(403);
+  return next();
+};
+
+exports.findById = function findById(req, res, next) {
+  Badge.findById(req.param('badgeId'))
+    .populate('program')
+    .exec(function (err, badge) {
+      if (err) return next(err);
+      if (!badge) return res.send(404);
+      req.badge = badge;
+      badge.program.populate('issuer', function (err) {
+        if (err) return next(err);
+        return next();
+      });
+    });
+};
+
+exports.findByIssuers = function findByIssuers(req, res, next) {
+  const issuers = req.issuers;
+  const query = {
+    '$or': issuers
+      .reduce(function (arr, issuer) {
+        return arr.concat(issuer.programs);
+      }, [])
+      .map(util.prop('_id'))
+      .map(util.objWrap('program'))
+  };
+  Badge.find(query)
+    .populate('program')
+    .exec(function (err, badges) {
+      if (err) return next(err);
+      req.badges = badges;
+      return next();
+    });
 };
 
 exports.findAll = function findAll(req, res, next) {

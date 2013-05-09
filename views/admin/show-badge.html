@@ -17,7 +17,13 @@
     {% endif %}
     <dl>
       <dt>Program</dt>
-      <dd>{{ badge.program.issuer.name | e }}: {{ badge.program.name | e }}</dd>
+      <dd>
+        {% if badge.program %}
+          {{ badge.program.issuer.name | e }}: {{ badge.program.name | e }}
+        {% else %}
+          <em>No program</em>
+        {% endif %}
+      </dd>
 
       <dt>Shortname</dt>
       <dd><code>{{ badge.shortname }}</code></dd>
