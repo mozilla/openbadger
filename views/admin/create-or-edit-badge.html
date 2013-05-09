@@ -3,7 +3,6 @@
 {% block main %}
   <form method="post" action="?" enctype="multipart/form-data">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-
     <legend>
       {% if editing %}
         Edit Badge: {{ badge.name }}
@@ -11,6 +10,30 @@
         New Badge
       {% endif %}
     </legend>
+
+    <div>
+      <label for="program">Program</label>
+      <select id="program" name="program">
+        <option>Select a Program</option>
+        {% for issuer in issuers %}
+        <optgroup label="{{issuer.name | e}}">
+          {% for program in issuer.programs %}
+            <option
+               {% if badge.program == program.id %}
+                 selected
+               {% endif %}
+               value="{{program.id}}">
+
+               {{program.name | e}}
+            </option>
+          {% endfor %}
+        </optgroup>
+        {% endfor %}
+      </select>
+      <span class="help-block">
+        The program this badge is associated with.
+      </span>
+    </div>
 
     <div>
       {{ badge | imageForBadge }}

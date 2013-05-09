@@ -91,6 +91,7 @@ var findBadgeByParamShortname = badge.findByShortName({
 
 // section middleware
 app.all('/admin/badge/:shortname*', findBadgeByParamShortname);
+app.all('/admin/badge*', issuer.findAll);
 
 app.get('/admin/badge', admin.newBadgeForm);
 app.get('/admin/badge/:shortname', [behavior.findAll], admin.showBadge);

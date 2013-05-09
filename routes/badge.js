@@ -4,16 +4,35 @@ var Badge = require('../models/badge');
 var BadgeInstance = require('../models/badge-instance');
 
 exports.create = function create(req, res, next) {
-  var form = req.body;
-  var badge = new Badge({
+  const form = req.body;
+  const badge = new Badge({
     name: form.name,
+    program: form.program,
     description: form.description,
     image: req.imageBuffer,
-    criteria: { content: form.criteria }
+    criteria: { content: form.criteria },
   });
   badge.save(function (err, result) {
     if (err) return next(err);
     return res.redirect('/admin/badge/' + badge.shortname);
+  });
+};
+
+exports.update = function update(req, res, next) {
+  const form = req.body;
+  const badge = req.badge;
+  const imageBuffer = req.imageBuffer;
+  const redirectTo = '/admin/badge/' + badge.shortname;
+  badge.name = form.name;
+  badge.description = form.description;
+  badge.criteria.content = form.criteria;
+  badge.program = form.program;
+
+  if (imageBuffer)
+    badge.image = imageBuffer;
+  badge.save(function (err) {
+    if (err) return next(err);
+    return res.redirect(redirectTo);
   });
 };
 
@@ -40,22 +59,6 @@ exports.destroy = function destroy(req, res) {
     if (err)
       return res.send(500, err);
     return res.redirect('/');
-  });
-};
-
-exports.update = function update(req, res, next) {
-  var form = req.body;
-  var badge = req.badge;
-  var imageBuffer = req.imageBuffer;
-  var redirectTo = '/admin/badge/' + badge.shortname;
-  badge.name = form.name;
-  badge.description = form.description;
-  badge.criteria.content = form.criteria;
-  if (imageBuffer)
-    badge.image = imageBuffer;
-  badge.save(function (err) {
-    if (err) return next(err);
-    return res.redirect(redirectTo);
   });
 };
 
@@ -99,7 +102,7 @@ exports.assertion = function assertion(req, res) {
     if (err)
       return res.send(500, err);
     if (!instance)
-      return res.send(404)
+      return res.send(404);
     res.type('json');
     return res.send(200, instance.assertion);
   });
@@ -151,16 +154,16 @@ function reportError(err) {
 }
 
 exports.awardToUser = function awardToUser(req, res, next) {
-  var form = req.body
+  var form = req.body;
   var email = (form.email || '').trim();
   var code = (form.code || '').trim();
   var badge = req.badge;
   var claimSuccess = badge.redeemClaimCode(code, email);
 
   if (claimSuccess === false)
-    return res.send({ status: 'already-claimed' })
+    return res.send({ status: 'already-claimed' });
   if (claimSuccess === null)
-    return res.send({ status: 'not-found' })
+    return res.send({ status: 'not-found' });
 
   badge.awardOrFind(email, function (err, instance) {
     if (err) return res.send(reportError(err));
@@ -170,7 +173,7 @@ exports.awardToUser = function awardToUser(req, res, next) {
         status: 'ok',
         assertionUrl: instance.absoluteUrl('assertion')
       });
-    })
+    });
   });
 };
 
@@ -186,7 +189,7 @@ exports.findByClaimCode = function findByClaimCode(options) {
       req.claim = badge.getClaimCode(normalizedCode);
       return next();
     });
-  }
+  };
 };
 
 // #TODO: refactor the following three fuctions into just one, probably
@@ -204,21 +207,27 @@ exports.findByShortName = function (options) {
     if (!name && required)
       return res.send(404);
 
-    Badge.findOne({ shortname: name }, function (err, badge) {
-      // #TODO: don't show the error directly
-      if (err)
-        return res.send(500, err);
-      if (!badge && required)
-        return res.send(404);
-      req.badge = badge;
-      return next();
-    });
+    Badge.findOne({ shortname: name })
+      .populate('program')
+      .exec(function (err, badge) {
+        // #TODO: don't show the error directly
+        if (err)
+          return res.send(500, err);
+        if (!badge && required)
+          return res.send(404);
+
+        badge.program.populate('issuer', function (err) {
+          if (err) return next(err);
+          req.badge = badge;
+          return next();
+        });
+      });
   };
 };
 
 exports.findAll = function findAll(req, res, next) {
   Badge.find({}, function (err, badges) {
-    if (err) return next(err)
+    if (err) return next(err);
     req.badges = badges;
     return next();
   });

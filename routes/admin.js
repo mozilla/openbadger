@@ -20,6 +20,18 @@ exports.newBadgeForm = function (req, res) {
   return res.render('admin/create-or-edit-badge.html', {
     page: 'new-badge',
     badge: new Badge,
+    issuers: req.issuers,
+    user: req.session.user,
+    csrf: req.session._csrf,
+  });
+};
+
+exports.editBadgeForm = function (req, res) {
+  return res.render('admin/create-or-edit-badge.html', {
+    page: 'edit-badge',
+    editing: true,
+    badge: req.badge,
+    issuers: req.issuers,
     user: req.session.user,
     csrf: req.session._csrf,
   });
@@ -39,16 +51,6 @@ exports.editIssuerForm = function (req, res) {
     page: 'edit-issuer',
     editing: true,
     issuer: req.issuer,
-    user: req.session.user,
-    csrf: req.session._csrf,
-  });
-};
-
-exports.editBadgeForm = function (req, res) {
-  return res.render('admin/create-or-edit-badge.html', {
-    page: 'edit-badge',
-    editing: true,
-    badge: req.badge,
     user: req.session.user,
     csrf: req.session._csrf,
   });

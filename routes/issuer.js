@@ -7,11 +7,13 @@ const method = util.method;
 const prop = util.prop;
 
 exports.findAll = function findAll(req, res, next) {
-  Issuer.find(function (err, issuers) {
-    if (err) return next(err);
-    req.issuers = issuers;
-    return next();
-  });
+  Issuer.find({})
+    .populate('programs')
+    .exec(function (err, issuers) {
+      if (err) return next(err);
+      req.issuers = issuers;
+      return next();
+    });
 };
 
 exports.findById = function findById(req, res, next) {
