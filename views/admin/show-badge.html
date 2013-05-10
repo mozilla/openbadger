@@ -16,17 +16,26 @@
       <img class="badge-image" src="{{ badge.imageDataURI() }}">
     {% endif %}
     <dl>
+      <dt>Program</dt>
+      <dd>
+        {% if badge.program %}
+          {{ badge.program.issuer.name | e }}: {{ badge.program.name | e }}
+        {% else %}
+          <em>No program</em>
+        {% endif %}
+      </dd>
+
       <dt>Shortname</dt>
       <dd><code>{{ badge.shortname }}</code></dd>
-      
+
       <dt>Description</dt>
       <dd>{{ badge.description | stupidSafe }}</dd>
-      
+
       <br style="clear: both">
       <dt>Criteria (<a href="/badge/criteria/{{ badge.shortname }}">Preview</a>)</dt>
       <dd><textarea class="badge-criteria" disabled>{{ badge.criteria.content }}</textarea></dd>
     </dl>
-    
+
     <form method="post" action="/admin/badge/{{ badge.shortname }}/behavior">
       <input id="name" type="hidden" name="csrf" value="{{ csrf }}">
       <legend>
@@ -66,10 +75,10 @@
             Add this behavior
           </button>
         </div>
-      {% endif %}  
+      {% endif %}
     </form>
   </div><!--end trigger list span-->
-  
+
   <div class="span4">
     <h3>Triggers</h3>
     {% if badge.behaviors.length %}
@@ -91,5 +100,5 @@
     {% endif %}
   </div>
 </div><!--end row 1-->
-  
+
 {% endblock %}

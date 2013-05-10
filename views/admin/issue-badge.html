@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% block main %}
+<h1>Issuing "{{ badge.name }}"</h1>
+
+{% if results %}
+  <h2>Results</h2>
+  <ul>
+  {% for result in results %}
+    <li>{{ result.email | e }}: {{ result.status }}</li>
+  {% endfor %}
+  </ul>
+{% endif %}
+
+<form method="post" action="?">
+  <input type="hidden" name="csrf" value="{{csrf}}">
+  <div>
+    <label for="emails">Email Addresses</label>
+    <textarea
+       id="emails"
+       name="emails"
+       placeholder="user@example.org"
+       style="height: 400px"
+       required></textarea>
+    <span class="help-block">
+      Enter each earner's email address, one email address per line.
+    </span>
+  </div>
+
+  <div>
+    <input class="btn btn-primary" type="submit" value="Issue Badges">
+  </div>
+</form>
+{% endblock %}

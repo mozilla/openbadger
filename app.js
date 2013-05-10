@@ -9,7 +9,7 @@ var template = require('./template');
 var user = require('./routes/user');
 var behavior = require('./routes/behavior');
 var badge = require('./routes/badge');
-var admin = require('./routes/admin');
+var render = require('./routes/render');
 var issuer = require('./routes/issuer');
 var api = require('./routes/api');
 var debug = require('./routes/debug');
@@ -36,48 +36,58 @@ app.configure(function () {
   app.use(middleware.noCache({
     whitelist: ['/badge/assertion/*']
   }));
-  app.use(user.requireAuth({
-    whitelist: [
-      '/',
-      '/login',
-      '/logout',
-      '/badge/*',  // public badge resources
-      '/v(1|2)/*', // api endpoints
-      '/claim*'
-    ],
-    redirectTo: '/login'
-  }));
-  app.use(issuer.getIssuerConfig());
   app.use(app.router);
 
   // if we've fallen through the router, it's a 404
-  app.use(admin.notFound);
+  app.use(render.notFound);
 });
 
 app.configure('development', function () {
-  app.get('/500', admin.nextError);
+  app.get('/500', render.nextError);
   app.use(express.errorHandler());
 });
 
 app.configure('production', function () {
-  app.use(admin.errorHandler);
+  app.use(render.errorHandler);
 });
 
 /** Routes */
+app.get('/', badge.findNonOffline, render.all);
 
-// Issuer configuration
-// --------------------
-app.get('/admin/config', admin.configure);
-app.post('/admin/config', issuer.update);
-app.get('/admin/stats', [stats.monthly], admin.stats);
+app.all('/issuer*', user.requireAuth({
+  level: 'issuer',
+  redirectTo: '/login'
+}));
 
+app.get('/issuer', [
+  issuer.findByAccess,
+  badge.findByIssuers,
+], render.issuerIndex);
+
+app.all('/issue/:badgeId', [
+  badge.findById,
+  badge.confirmAccess,
+]);
+app.get('/issue/:badgeId', render.issueBadge);
+app.post('/issue/:badgeId', badge.issueMany);
+
+app.all('/admin*', user.requireAuth({
+  level: 'super',
+  redirectTo: '/login'
+}));
+
+app.get('/admin/stats', [stats.monthly], render.stats);
 
 // Badge listing
 // -------------
-var indexMiddleware = [badge.findAll, behavior.findAll];
-app.get('/', badge.findNonOffline, admin.all);
-app.get('/admin', indexMiddleware, admin.badgeIndex);
-app.get('/admin/badges', indexMiddleware, admin.badgeIndex);
+var indexMiddleware = [
+  badge.findAll,
+  behavior.findAll,
+  issuer.findAll,
+];
+
+app.get('/admin', indexMiddleware, render.badgeIndex);
+app.get('/admin/badges', indexMiddleware, render.badgeIndex);
 
 // Creating and editing a badge
 // ----------------------------
@@ -90,11 +100,12 @@ var findBadgeByParamShortname = badge.findByShortName({
 
 // section middleware
 app.all('/admin/badge/:shortname*', findBadgeByParamShortname);
+app.all('/admin/badge*', issuer.findAll);
 
-app.get('/admin/badge', admin.newBadgeForm);
-app.get('/admin/badge/:shortname', [behavior.findAll], admin.showBadge);
-app.get('/admin/badge/:shortname/edit', admin.editBadgeForm);
-app.get('/admin/badge/:shortname/claims/', admin.manageClaimCodes);
+app.get('/admin/badge', render.newBadgeForm);
+app.get('/admin/badge/:shortname', [behavior.findAll], render.showBadge);
+app.get('/admin/badge/:shortname/edit', render.editBadgeForm);
+app.get('/admin/badge/:shortname/claims/', render.manageClaimCodes);
 
 app.post('/admin/badge', [
   badge.getUploadedImage({ required: true })
@@ -109,13 +120,29 @@ app.post('/admin/badge/:shortname/claims', badge.addClaimCodes);
 app.delete('/admin/badge/:shortname/claims/:code', badge.removeClaimCode);
 app.patch('/admin/badge/:shortname/claims/:code', badge.releaseClaimCode);
 
+// Issuers
+// -------
+app.all('/admin/issuer/:issuerId*', issuer.findById);
+
+app.get('/admin/issuer', render.newIssuerForm);
+app.post('/admin/issuer', issuer.create);
+app.get('/admin/issuer/:issuerId', render.editIssuerForm);
+app.post('/admin/issuer/:issuerId', issuer.update);
+
 // Creating new behaviors
 // ----------------------
-app.get('/admin/behavior', admin.newBehaviorForm);
+app.get('/admin/behavior', render.newBehaviorForm);
 app.post('/admin/behavior', behavior.create);
 app.delete('/admin/behavior/:shortname', [
   behavior.findByShortName
 ], behavior.destroy);
+
+app.get('/admin/users',[
+  user.findAll()
+], render.userList);
+
+app.delete('/admin/users', user.deleteInstancesByEmail);
+
 
 // Public, non-admin endpoints
 // ---------------------------
@@ -128,31 +155,25 @@ app.get('/badge/image/:shortname.png', [
 app.get('/badge/assertion/:hash', badge.assertion);
 app.get('/badge/criteria/:shortname', [
    findBadgeByParamShortname
-], admin.criteria);
+], render.criteria);
 
-app.get('/claim', admin.claim);
+app.get('/claim', render.claim);
 
 app.post('/claim',[
   badge.findByClaimCode()
-], admin.confirmClaim);
+], render.confirmClaim);
 
 app.post('/claim/confirm',[
   badge.findByClaimCode()
 ], badge.awardToUser);
 
-app.get('/404', admin.notFound);
+app.get('/404', render.notFound);
 
 // User login/logout
 // -------------------
-app.get('/login', admin.login);
+app.get('/login', render.login);
 app.post('/login', user.login);
 app.post('/logout', user.logout);
-
-app.get('/admin/users',[
-  user.findAll()
-], admin.userList);
-
-app.delete('/admin/users', user.deleteInstancesByEmail);
 
 // API endpoints
 // -------------
@@ -187,7 +208,7 @@ app.post('/v2/user/mark-all-badges-as-read',[
 // Debug endpoints
 // ---------------
 app.configure('development', function () {
-  app.get('/debug/flush', admin.showFlushDbForm);
+  app.get('/debug/flush', render.showFlushDbForm);
   app.post('/debug/flush', debug.flushDb);
   app.get('/debug/token', debug.generateToken);
   app.post('/debug/token', debug.generateToken);

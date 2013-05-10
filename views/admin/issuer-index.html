@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% block main %}
+<h1>Issue Badges</h1>
+<ul>
+{% for badge in badges %}
+  <li>
+    <strong>
+      <a href="/issue/{{badge.id}}">{{ badge.name | e }}</a>
+    </strong>
+    (<em>{{ badge.program.name }}</em>)
+  </li>
+{% endfor %}
+</ul>
+{% endblock %}
