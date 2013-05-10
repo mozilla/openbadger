@@ -262,7 +262,7 @@ exports.programs = function programs(req, res) {
 exports.program = function program(req, res) {
   if (req.params.programShortName) {
     var programShortName = escape(req.params.programShortName);
-    Program.findOne({shortname:programShortName}, function(err, program) {
+    Program.findOne({shortname: programShortName}, function(err, program) {
       if (err) {
         return res.send(500, "There was an error retrieving the program");
       }
@@ -273,7 +273,7 @@ exports.program = function program(req, res) {
       }
     });
   } else {
-    res.send(404)
+    res.send(404);
   };
 };
 
