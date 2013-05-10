@@ -261,7 +261,7 @@ exports.programs = function programs(req, res) {
  */
 exports.program = function program(req, res) {
   if (req.params.programShortName) {
-    var programShortName = escape(req.params.programShortName);
+    var programShortName = req.params.programShortName;
     Program.findOne({shortname: programShortName}, function(err, program) {
       if (err) {
         return res.send(500, "There was an error retrieving the program");
