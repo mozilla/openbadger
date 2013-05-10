@@ -249,7 +249,7 @@ exports.programs = function programs(req, res) {
     if (err) {
       return res.send(500, "There was an error retrieving the list of programs");
     }
-    return res.send(200,
+    return res.json(200,
                     _.map(programs,
                           function(p) { return {name: p.name, shortname: p.shortname } }
                          )
@@ -270,7 +270,7 @@ exports.program = function program(req, res) {
         return res.send(500, "There was an error retrieving the program");
       }
       if (program) {
-        return res.send(200, { name: program.name });
+        return res.json(200, { name: program.name });
       } else {
         return res.send(404, "Not Found");
       }
