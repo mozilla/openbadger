@@ -186,7 +186,7 @@ app.post('/v2/user/mark-all-badges-as-read',[
 
 app.get('/v2/programs', api.programs);
 
-app.get('/v2/program/:programShortName', api.programs);
+app.get('/v2/program/:programShortName', api.program);
 
 // Debug endpoints
 // ---------------

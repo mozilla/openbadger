@@ -241,10 +241,28 @@ exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
 };
 
 /**
- * List the programs, or a specific program.
+ * List the programs
  */
 
 exports.programs = function programs(req, res) {
+  Program.find({}, function(err, programs) {
+    if (err) {
+      return res.send(500, "There was an error retrieving the list of programs");
+    }
+    return res.send(200,
+                    _.map(programs,
+                          function(p) { return {name: p.name, shortname: p.shortname } }
+                         )
+                   );
+
+  });
+};
+
+
+/**
+ * List a program
+ */
+exports.program = function program(req, res) {
   if (req.params.programShortName) {
     var programShortName = escape(req.params.programShortName);
     Program.findOne({shortname:programShortName}, function(err, program) {
@@ -258,20 +276,9 @@ exports.programs = function programs(req, res) {
         return res.send(404, "Not Found");
       }
     });
-
   } else {
-    Program.find({}, function(err, programs) {
-      if (err) {
-        return res.send(500, "There was an error retrieving the list of programs");
-      }
-      return res.send(200,
-                      _.map(programs,
-                            function(p) { return {name: p.name, shortname: p.shortname } }
-                           )
-                     );
-
-    });
-  }
+    res.send(404)
+  };
 };
 
 /**
