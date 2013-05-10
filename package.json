@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "express": "~3.0.1",
-    "nunjucks": "0.1.5",
     "redis": "0.8.1",
     "request": "2.11.4",
     "habitat": "0.4.2",
@@ -25,7 +24,8 @@
     "iterator-stream": "~0.4.0",
     "markdown": "~0.4.0",
     "underscore": "~1.4.4",
-    "connect-memcached": "0.0.3"
+    "connect-memcached": "0.0.3",
+    "nunjucks": "~0.1.8a"
   },
   "devDependencies": {
     "tap": "~0.3.1"

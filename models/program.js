@@ -33,16 +33,11 @@ const ProgramSchema = new Schema({
     type: String,
     trim: true,
   },
-  description: {
-    type: String,
-    trim: true,
-  },
   contact: {
     type: String,
     trim: true,
     match: regex.email
   },
-  badges: [{ type: Schema.Types.ObjectId, ref: 'Badge' }]
 });
 
 const Program = db.model('Program', ProgramSchema);

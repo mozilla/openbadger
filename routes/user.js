@@ -1,18 +1,39 @@
-var BadgeInstance = require('../models/badge-instance.js');
-var env = require('../lib/environment');
-var persona = require('../lib/persona');
-var util = require('util');
+const Issuer = require('../models/issuer');
+const BadgeInstance = require('../models/badge-instance');
+const env = require('../lib/environment');
+const persona = require('../lib/persona');
+const util = require('../lib/util');
+const async = require('async');
 
-exports.login = function login(req, res) {
-  var path = req.query['path'] || req.body['path'] || '/admin';
-  var assertion = req.body.assertion;
-  persona.verify(assertion, function (err, email) {
-    if (err)
-      return res.send(util.inspect(err));
-    if (!env.isAdmin(email))
-      return res.send(403, 'not authorized');
+function getAccessLevel(email, callback) {
+  if (env.isAdmin(email))
+    return process.nextTick(callback.bind({}, null, [email, 'super']));
+  return Issuer.findByAccess(email, function (err, issuers) {
+    if (err) return callback(err);
+    if (!issuers.length) return callback(null, [email, null]);
+    return callback(null, [email, 'issuer']);
+  });
+}
+
+exports.login = function login(req, res, next) {
+  const paths = {
+    super: '/admin',
+    issuer: '/issuer',
+  };
+  const assertion = req.body.assertion;
+  async.waterfall([
+    persona.verify.bind({}, assertion),
+    getAccessLevel,
+  ], function (err, result) {
+    if (err) return next(err);
+    // my kingdom for destructuring!
+    const email = result[0];
+    const access = result[1];
+    if (!access)
+      return res.send(403);
     req.session.user = email;
-    return res.redirect(path);
+    req.session.access = access;
+    return res.redirect(paths[access]);
   });
 };
 
@@ -32,28 +53,18 @@ exports.deleteInstancesByEmail = function deleteInstancesByEmail(req, res, next)
 };
 
 exports.requireAuth = function requireAuth(options) {
-  var whitelist = (options.whitelist || []).map(function (entry) {
-    if (typeof entry === 'string') {
-      entry = entry.replace('*', '.*?');
-      return RegExp('^' + entry + '$');
-    }
-    return entry;
-  });
-  function isExempt(path) {
-    var i = whitelist.length;
-    while (i--) {
-      if (whitelist[i].test(path))
-        return true;
-    }
-    return false;
-  }
+  const whitelist = util.whitelist(options.whitelist);
+  const authLevel = options.level || 'super';
   return function (req, res, next) {
-    var path = req.path;
-    var user = req.session.user;
-    if (isExempt(path))
+    const path = req.path;
+    const user = req.session.user;
+    const userLevel = req.session.access;
+    if (whitelist.exempt(path) || userLevel == 'super')
       return next();
-    if (!user || !env.isAdmin(user))
+    if (!user)
       return res.redirect(options.redirectTo + '?path=' + path);
+    if (userLevel != authLevel)
+      return res.send(403);
     return next();
   };
 };
@@ -69,7 +80,7 @@ exports.findAll = function findAll(options) {
       var users = instances.reduce(function (users, instance) {
         var user = users[instance.user];
         if (user)
-          user.push(instance)
+          user.push(instance);
         else
           users[instance.user] = [instance];
         return users;
