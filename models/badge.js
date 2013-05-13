@@ -64,6 +64,10 @@ const BadgeSchema = new Schema({
     type: String,
     ref: 'Program',
   },
+  doNotList: {
+    type: Boolean,
+    default: false,
+  },
   tags: [String],
   name: {
     type: String,

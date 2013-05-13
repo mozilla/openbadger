@@ -13,6 +13,7 @@ exports.create = function create(req, res, next) {
     description: form.description,
     image: req.imageBuffer,
     criteria: { content: form.criteria },
+    doNotList: !form.list
   });
   badge.save(function (err, result) {
     if (err) return next(err);
@@ -29,6 +30,7 @@ exports.update = function update(req, res, next) {
   badge.description = form.description;
   badge.criteria.content = form.criteria;
   badge.program = form.program;
+  badge.doNotList = !form.list;
 
   if (imageBuffer)
     badge.image = imageBuffer;
@@ -232,7 +234,7 @@ exports.findByShortName = function (options) {
     if (!name && required)
       return res.send(404);
 
-    Badge.findOne({ shortname: name })
+    return Badge.findOne({ shortname: name })
       .populate('program')
       .exec(function (err, badge) {
         // #TODO: don't show the error directly
@@ -241,9 +243,12 @@ exports.findByShortName = function (options) {
         if (!badge && required)
           return res.send(404);
 
-        badge.program.populate('issuer', function (err) {
+        req.badge = badge;
+        if (!badge.program)
+          return next();
+
+        return badge.program.populate('issuer', function (err) {
           if (err) return next(err);
-          req.badge = badge;
           return next();
         });
       });
