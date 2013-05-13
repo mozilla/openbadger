@@ -1,0 +1,31 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/mlarsson/nvm/v0.8.9/bin/node',
+1 verbose cli   '/Users/mlarsson/nvm/v0.8.9/bin/npm',
+1 verbose cli   'start' ]
+2 info using npm@1.1.61
+3 info using node@v0.8.9
+4 verbose read json /Users/mlarsson/Work/checkouts/openbadger/package.json
+5 verbose run-script [ 'prestart', 'start', 'poststart' ]
+6 info prestart openbadger@0.0.6
+7 info start openbadger@0.0.6
+8 verbose unsafe-perm in lifecycle true
+9 silly exec sh "-c" "node app"
+10 silly sh,-c,node app,/Users/mlarsson/Work/checkouts/openbadger spawning
+11 info openbadger@0.0.6 Failed to exec start script
+12 error openbadger@0.0.6 start: `node app`
+12 error `sh "-c" "node app"` failed with 1
+13 error Failed at the openbadger@0.0.6 start script.
+13 error This is most likely a problem with the openbadger package,
+13 error not with npm itself.
+13 error Tell the author that this fails on your system:
+13 error     node app
+13 error You can get their info via:
+13 error     npm owner ls openbadger
+13 error There is likely additional logging output above.
+14 error System Darwin 11.4.2
+15 error command "/Users/mlarsson/nvm/v0.8.9/bin/node" "/Users/mlarsson/nvm/v0.8.9/bin/npm" "start"
+16 error cwd /Users/mlarsson/Work/checkouts/openbadger
+17 error node -v v0.8.9
+18 error npm -v 1.1.61
+19 error code ELIFECYCLE
+20 verbose exit [ 1, true ]
