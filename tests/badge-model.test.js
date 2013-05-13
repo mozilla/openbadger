@@ -300,12 +300,28 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
+  test('Badge#redeemClaimCode, multi', function (t) {
+    const badge = fixtures['multi-claim-badge'];
+    const code ='multi-claim';
+    t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
+    t.same(badge.redeemClaimCode(code, 'anyone@example.org'), true);
+    t.same(badge.redeemClaimCode(code, 'otherguy@example.org'), true);
+    t.end();
+  });
+
   test('Badge#claimCodeIsClaimed', function (t) {
     const badge = fixtures['offline-badge'];
     const code ='already-claimed';
     t.same(badge.claimCodeIsClaimed(code), true);
     t.same(badge.claimCodeIsClaimed('never-claim'), false);
     t.same(badge.claimCodeIsClaimed('does not exist'), null);
+    t.end();
+  });
+
+  test('Badge#claimCodeIsClaimed, multi', function (t) {
+    const badge = fixtures['multi-claim-badge'];
+    const code ='multi-claim';
+    t.same(badge.claimCodeIsClaimed(code), false);
     t.end();
   });
 

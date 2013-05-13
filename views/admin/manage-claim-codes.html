@@ -3,6 +3,11 @@
 <h1>{{ badge.name }}</h1>
 <form method="post" action="?">
   <legend>Add new codes</legend>
+  <p>
+    <label>Multi-use?
+      <input type="checkbox" name="multi">
+    </label>
+  </p>
   <textarea rows="5" width="100" placeholder="{{ exampleCode }}" name="codes"></textarea>
   <span class="help-block">One code per line, please</span>
   <div class="form-actions">
@@ -25,12 +30,18 @@
       {% for claim in codes %}
       <tr>
         <td>{{ claim.code }}</td>
-        <td>{{ claim.claimedBy | default('<em>open</em>') }}</td>
+        <td>
+          {% if claim.multi %}
+            *multi*
+          {% else %}
+            {{ claim.claimedBy | default('<em>open</em>') }}
+          {% endif %}
+        </td>
         <td>
           <form method="post" action="{{ claim.code }}" class="claim-action js-claim-action">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="_method" value="" class="js-claim-action-method">
-            
+
             <button class="btn btn-link btn-small" data-method="delete">delete</button>
             {% if claim.claimedBy %}
             |
@@ -39,7 +50,7 @@
           </form>
         </td>
       <tr>
-      {%  endfor %}
+      {% endfor %}
     </tbody>
   </table>
 </form>

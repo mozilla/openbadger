@@ -111,14 +111,16 @@ exports.assertion = function assertion(req, res) {
 };
 
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
-  var badge = req.badge;
-  var rawCodes = req.body.codes;
-  var codes = (rawCodes
-    .split('\n')
-    .map(util.method('trim'))
-    .filter(util.prop('length')));
-
-  badge.addClaimCodes(codes, function(err) {
+  const badge = req.badge;
+  const form = req.body;
+  const options = {
+    codes: form.codes
+      .split('\n')
+      .map(util.method('trim'))
+      .filter(util.prop('length')),
+    multi: !!form.multi
+  };
+  badge.addClaimCodes(options, function(err) {
     if (err) return next(err);
     return res.redirect('back');
   });

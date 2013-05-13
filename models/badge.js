@@ -40,7 +40,11 @@ const ClaimCodeSchema = new Schema({
     type: String,
     required: false,
     trim: true,
-  }
+  },
+  multi: {
+    type: Boolean,
+    default: false
+  },
 });
 
 const BadgeSchema = new Schema({
@@ -185,6 +189,7 @@ function dedupe(array) {
  * @param {Object} options
  *   - `codes`: Array of claim codes to add
  *   - `limit`: Maximum number of codes to add. [default: Infinity]
+ *   - `multi`: Whether or not the claim is multi-use
  *   - `alreadyClean`: Boolean whether or not items are already unique
  * @param {Function} callback
  *   Expects `function (err, accepted, rejected)`
@@ -218,7 +223,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
       return callback(err, accepted, rejected);
 
     accepted.forEach(function(code){
-      this.claimCodes.push({ code: code });
+      this.claimCodes.push({ code: code, multi: options.multi });
     }.bind(this));
 
     return this.save(function (err, result) {
@@ -297,14 +302,14 @@ Badge.prototype.claimCodeIsClaimed = function claimCodeIsClaimed(code) {
   const claim = this.getClaimCode(code);
   if (!claim)
     return null;
-  return !!(claim.claimedBy);
+  return !!(claim.claimedBy && !claim.multi);
 };
 
 Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   const claim = this.getClaimCode(code);
   if (!claim)
     return null;
-  if (claim.claimedBy && claim.claimedBy !== email)
+  if (!claim.multi && claim.claimedBy && claim.claimedBy !== email)
     return false;
   claim.claimedBy = email;
   return true;

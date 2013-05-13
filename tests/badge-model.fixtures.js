@@ -72,7 +72,19 @@ module.exports = {
       { code: 'already-claimed', claimedBy: 'brian@example.org' },
       { code: 'never-claim' },
       { code: 'will-claim' },
-      { code: 'remove-claim' }
+      { code: 'remove-claim' },
+    ]
+  }),
+  'multi-claim-badge': new Badge({
+    name: 'Multi claim badge',
+    shortname: 'multi-claim-badge',
+    description: 'Multi',
+    image: IMAGE,
+    claimCodes: [
+      { code: 'multi-claim',
+        claimedBy: 'someone@example.org',
+        multi: true
+      },
     ]
   }),
   'other-offline-badge': new Badge({
