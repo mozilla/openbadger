@@ -31,6 +31,9 @@
       <dt>Description</dt>
       <dd>{{ badge.description | stupidSafe }}</dd>
 
+      <dt>List in APIs?</dt>
+      <dd>{{ badge.doNotList }}</dd>
+
       <br style="clear: both">
       <dt>Criteria (<a href="/badge/criteria/{{ badge.shortname }}">Preview</a>)</dt>
       <dd><textarea class="badge-criteria" disabled>{{ badge.criteria.content }}</textarea></dd>

@@ -80,6 +80,18 @@
     </div>
 
     <div>
+      <label>
+        List in APIs?
+        <input name="list" type="checkbox" {% if badge.doNotList == false %}checked{% endif %}>
+      </label>
+      <span class="help-block">
+        Whether or not this badge should be shown when an API call is
+        made to list all of the badges. In most cases, this should be
+        left checked.
+      </span>
+    </div>
+
+    <div>
       <label for="image">New Image</label>
       <input
           type="file"
