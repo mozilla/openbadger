@@ -12,6 +12,10 @@
 <div class="show-badge row">
   <div class="span8">
     <h2>{{ badge.name }} (<a href="/admin/badge/{{ badge.shortname }}/edit">Edit</a>)</h2>
+    {% if badge.doNotList %}
+      <p>This badge will not be listed in API calls</p>
+    {% endif %}
+
     {% if badge.image %}
       <img class="badge-image" src="{{ badge.imageDataURI() }}">
     {% endif %}
@@ -31,8 +35,12 @@
       <dt>Description</dt>
       <dd>{{ badge.description | stupidSafe }}</dd>
 
-      <dt>List in APIs?</dt>
-      <dd>{{ badge.doNotList }}</dd>
+      <dt>Tags</dt>
+      <dd>
+        {% for tag in badge.tags %}
+        <code>{{ tag | e }}</code>
+        {% endfor %}
+      </dd>
 
       <br style="clear: both">
       <dt>Criteria (<a href="/badge/criteria/{{ badge.shortname }}">Preview</a>)</dt>

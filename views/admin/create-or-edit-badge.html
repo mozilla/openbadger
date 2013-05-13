@@ -80,6 +80,14 @@
     </div>
 
     <div>
+      <label for="tags">Tags</label>
+      <input type="text" name="tags" id="tags" value="{{badge.tags | join(', ') | e}}">
+      <span class="help-block">
+        Tags for the badge. Individual tags should be comma separated.
+      </span>
+    </div>
+
+    <div>
       <label>
         List in APIs?
         <input name="list" type="checkbox" {% if badge.doNotList == false %}checked{% endif %}>

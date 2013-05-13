@@ -5,6 +5,16 @@ const BadgeInstance = require('../models/badge-instance');
 const util = require('../lib/util');
 const async = require('async');
 
+function handleTagInput(input) {
+  return (
+    input
+      .trim()
+      .split(',')
+      .map(util.method('trim'))
+      .filter(util.prop('length'))
+  );
+}
+
 exports.create = function create(req, res, next) {
   const form = req.body;
   const badge = new Badge({
@@ -13,8 +23,10 @@ exports.create = function create(req, res, next) {
     description: form.description,
     image: req.imageBuffer,
     criteria: { content: form.criteria },
-    doNotList: !form.list
+    doNotList: !form.list,
+    tags: handleTagInput(form.tags)
   });
+
   badge.save(function (err, result) {
     if (err) return next(err);
     return res.redirect('/admin/badge/' + badge.shortname);
@@ -31,6 +43,7 @@ exports.update = function update(req, res, next) {
   badge.criteria.content = form.criteria;
   badge.program = form.program;
   badge.doNotList = !form.list;
+  badge.tags = handleTagInput(form.tags);
 
   if (imageBuffer)
     badge.image = imageBuffer;
