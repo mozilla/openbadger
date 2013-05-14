@@ -39,8 +39,21 @@ exports.badges = function badges(req, res) {
   });
 };
 
+
 exports.badge = function badge(req, res) {
   res.json({ status: 'ok', badge: normalize(req.badge) });
+};
+
+exports.recommendations = function recommendations(req, res, next) {
+  const badge = req.badge;
+  badge.getRecommendations(req.query.email, function (err, badges) {
+    if (err)
+      return res.json(500, { status: 'error', error: err });
+    return res.json(200, {
+      status: 'okay',
+      badges: badges.map(normalize)
+    });
+  });
 };
 
 exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
