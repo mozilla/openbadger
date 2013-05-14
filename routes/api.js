@@ -9,6 +9,18 @@ const BadgeInstance = require('../models/badge-instance');
 const Program = require('../models/program');
 const mongoose = require('mongoose');
 
+function normalize(badge) {
+  return {
+    name: badge.name,
+    description: badge.description,
+    prerequisites: badge.prerequisites,
+    image: badge.absoluteUrl('image'),
+    behaviors: badge.behaviors.map(function (behavior) {
+      return { name: behavior.shortname, score: behavior.count };
+    })
+  };
+}
+
 /**
  * Get listing of all badges
  */
@@ -21,18 +33,14 @@ exports.badges = function badges(req, res) {
     badges.filter(function (badge) {
       return !badge.doNotList;
     }).forEach(function (badge) {
-      result.badges[badge.shortname] = {
-        name: badge.name,
-        description: badge.description,
-        prerequisites: badge.prerequisites,
-        image: badge.absoluteUrl('image'),
-        behaviors: badge.behaviors.map(function (behavior) {
-          return { name: behavior.shortname, score: behavior.count };
-        })
-      };
+      result.badges[badge.shortname] = normalize(badge);
     });
     return res.send(200, result);
   });
+};
+
+exports.badge = function badge(req, res) {
+  res.json({ status: 'ok', badge: normalize(req.badge) });
 };
 
 exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {

@@ -179,6 +179,10 @@ app.post('/logout', user.logout);
 // -------------
 app.get('/v2/badges', api.badges);
 
+app.get('/v2/badge/:shortname', [
+  findBadgeByParamShortname
+], api.badge);
+
 app.get('/v2/user', [
   api.auth()
 ], api.user);
