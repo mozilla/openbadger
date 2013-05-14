@@ -257,8 +257,8 @@ exports.programs = function programs(req, res) {
       return res.send(500, "There was an error retrieving the list of programs");
     }
     var result = { status: 'ok', programs : {} };
-    result.programs = programs.map(function(p) {
-      return {name: p.name, shortname: p.shortname };
+    programs.forEach(function(p) {
+      result.programs[p.shortname] = {name: p.name, shortname: p.shortname };
     });
     return res.json(200, result);
   });
