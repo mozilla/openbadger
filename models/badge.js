@@ -425,4 +425,32 @@ Badge.prototype.makeJson = function makeJson() {
     tags: this.tags
   };
 };
+
+Badge.prototype.getRecommendations = function (email, callback) {
+  if (typeof email == 'function')
+    callback = email, email = null;
+  const query = {
+    '$or': this.tags.map(util.objWrap('tags'))
+  };
+  return Badge.find(query, function (err, badges) {
+    if (!email)
+      return callback(err, badges);
+
+    return BadgeInstance.find({user: email})
+      .populate('badge')
+      .exec(function (err, instances) {
+        if (err)
+          return callback(err);
+
+        const earned = instances.map(function (inst) {
+          return (inst.badge && inst.badge.shortname);
+        }).filter(Boolean);
+
+        return callback(null, badges.filter(function (badge) {
+          return !(_.contains(earned, badge.shortname));
+        }));
+      });
+  });
+
+};
 module.exports = Badge;

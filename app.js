@@ -183,6 +183,10 @@ app.get('/v2/badge/:shortname', [
   findBadgeByParamShortname
 ], api.badge);
 
+app.get('/v2/badge/:shortname/recommendations', [
+  findBadgeByParamShortname
+], api.recommendations);
+
 app.get('/v2/user', [
   api.auth()
 ], api.user);
