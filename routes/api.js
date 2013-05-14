@@ -256,9 +256,11 @@ exports.programs = function programs(req, res) {
     if (err) {
       return res.send(500, "There was an error retrieving the list of programs");
     }
-    return res.json(200, programs.map(function(p) {
+    var result = { status: 'ok', programs : {} };
+    result.programs = programs.map(function(p) {
       return {name: p.name, shortname: p.shortname };
-    }));
+    });
+    return res.json(200, result);
   });
 };
 
@@ -274,7 +276,12 @@ exports.program = function program(req, res) {
         return res.send(500, "There was an error retrieving the program");
       }
       if (program) {
-        return res.json(200, { name: program.name });
+        return res.json(200, {
+          status: 'ok',
+          program: {
+            name: program.name
+          }
+        });
       } else {
         return res.send(404, "Not Found");
       }
