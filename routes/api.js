@@ -7,6 +7,7 @@ const Badge = require('../models/badge');
 const User = require('../models/user');
 const BadgeInstance = require('../models/badge-instance');
 const Program = require('../models/program');
+const Issuer = require('../models/issuer');
 const mongoose = require('mongoose');
 
 function normalize(badge) {
@@ -257,6 +258,27 @@ exports.markAllBadgesAsRead = function markAllBadgesAsRead(req, res) {
     if (err)
       return res.send(500, { status: 'error', error: err });
     return res.send(200, { status: 'ok' });
+  });
+};
+
+/**
+ * List the issuers
+ */
+
+exports.issuers = function issuers(req, res) {
+  Issuer.find({}, function(err, issuers) {
+    if (err) {
+      return res.send(500, "There was an error retrieving the list of issuers");
+    }
+    var result = { status: 'ok', issuers : {} };
+    issuers.forEach(function(item) {
+      result.issuers[item.shortname] = {
+        name: item.name, 
+        shortname: item.shortname, 
+        url: item.url 
+      };
+    });
+    return res.json(200, result);
   });
 };
 
