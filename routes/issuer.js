@@ -104,6 +104,7 @@ function saveExistingPrograms(existing, callback) {
 }
 
 function handleExistingPrograms(existing) {
+  existing = existing || {};
   return Object.keys(existing).map(function (id) {
     return [ id, {
       name: existing[id].name,
