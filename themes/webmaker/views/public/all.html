@@ -1,0 +1,40 @@
+{% extends "public/layout.html" %}
+{% block head %}
+  <link rel="stylesheet" href="/stylesheets/criteria.css">
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="span7">
+      <h2>Mozilla Webmaker Badges</h2>
+    </div>
+    <div class="span10">
+      <strong>Webmaker Badges are here!</strong>
+      <p>
+        Badges are digital records of skills, achievements and participation. Now you can earn Webmaker Badges to recognize the skills that you learn while making awesome webmaking projects, as well as for participating in the Webmaker community and events.
+      </p>
+      <p>
+        Head over to <a href="https://thimble.webmaker.org">Thimble</a>, pick a project and sign in to start earning!
+      </p>
+    </div>
+  </div>
+  {% for badge in badges %}
+  <div class="media card">
+    <img class="img badge" src="{{ badge.relativeUrl('image')}}">
+    <div class="bd">
+      <hgroup>
+        <h1>{{ badge.name }}</h1>
+      </hgroup>
+      <dl class="dl-horizontal narrow-dt">
+        <dt>Description:</dt>
+        <dd>
+          {% if badge.criteria.content %}
+            {{ badge.criteria.content | markdown }}
+          {% else %}
+            {{ badge.description | stupidSafe }}
+          {% endif %}
+        </dd>
+      </dl>
+    </div>
+  </div>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "public/layout.html" %}
+{% block head %}
+  <link rel="stylesheet" href="/stylesheets/criteria.css">
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="span7">
+      <h2>Mozilla Webmaker Badges</h2>
+    </div>
+  </div>
+  <div class="media card">
+    <img class="img badge" src="{{ badge.relativeUrl('image')}}">
+    <div class="bd">
+      <hgroup>
+        <h1>{{ badge.name }}</h1>
+      </hgroup>
+      <dl class="dl-horizontal narrow-dt">
+        <dt>Description:</dt>
+        <dd>
+          {% if badge.criteria.content %}
+            {{ badge.criteria.content | markdown }}
+          {% else %}
+            {{ badge.description | stupidSafe }}
+          {% endif %}
+        </dd>
+      </dl>
+      <hr>
+      
+      <form method="post" action="/claim/confirm" class="confirm-form js-confirm-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="hidden" name="code" value="{{ code }}">
+        <input tabindex="1" type="email" name="email" placeholder="you@example.org" class="input js-email-input" required>
+        <input tabindex="2" type="submit" value="Claim your badge" class="button js-submit-button">
+      </form>
+    </div>
+  </div>
+
+  <script src="https://beta.openbadges.org/issuer.js"></script>
+  <script src="/js/claim-award.js"></script>
+{% endblock %}
+
