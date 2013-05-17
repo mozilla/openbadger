@@ -29,7 +29,7 @@ test("app should serve non-theme static files", function(t) {
     });
 });
 
-test("app should serve theme static files", function(t) {
+test("theme static files override non-theme ones", function(t) {
   var app = express();
   var env = buildEnv({
     themeDir: __dirname + '/example-theme',
@@ -38,13 +38,31 @@ test("app should serve theme static files", function(t) {
   var srv = http.createServer(app);
 
   env.express(app);
-  t.equal(app.locals.THEME_ROOT, '/theme', 'THEME_ROOT env var is ok');
   request(srv)
-    .get('/theme/hai2u.txt')
+    .get('/js/jquery.min.js')
     .expect("hai2u!")
     .expect(200, function(err, res) {
       handle(err, res);
       t.ok(true, "theme static files are retrievable");
+      srv.close();
+      t.end();
+    });
+});
+
+test("theme static file set inherits from non-theme set", function(t) {
+  var app = express();
+  var env = buildEnv({
+    themeDir: __dirname + '/example-theme',
+    staticMiddleware: express.static
+  });
+  var srv = http.createServer(app);
+
+  env.express(app);
+  request(srv)
+    .get('/js/bootstrap.min.js')
+    .expect(200, function(err, res) {
+      handle(err, res);
+      t.ok(true, "non-theme static files are inherited");
       srv.close();
       t.end();
     });

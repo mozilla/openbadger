@@ -17,12 +17,11 @@ exports.buildEnvironment = function buildEnvironment(options) {
 
   env.express = function(app) {
     nunjucks.Environment.prototype.express.apply(this, arguments);
-    app.use(staticMiddleware(path.join(__dirname, 'public')));
     if (themeDir) {
       var staticDir = path.join(themeDir, 'public');
-      app.locals.THEME_ROOT = '/theme';
-      app.use('/theme/', staticMiddleware(staticDir));
+      app.use(staticMiddleware(staticDir));
     }
+    app.use(staticMiddleware(path.join(__dirname, 'public')));
   };
 
   env.addFilter('undef', function (thing) {
