@@ -10,3 +10,6 @@ generated-codes
 .tern-port
 /notes.org
 npm-debug.log
+config.env
+.DS_Store
+public/.DS_Store
