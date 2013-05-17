@@ -19,7 +19,12 @@ var app = express();
 var logger = app.logger = require('./lib/logger');
 var env = app.env = require('./lib/environment');
 
-template.express(app);
+var templateEnv = template.buildEnvironment({
+  themeDir: process.env.THEME_DIR,
+  staticMiddleware: express.static
+});
+
+templateEnv.express(app);
 
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
@@ -30,7 +35,6 @@ app.configure(function () {
   app.use(middleware.cookieParser());
   app.use(middleware.session());
   app.use(middleware.flash());
-  app.use(express.static(path.join(__dirname, 'public')));
   app.use(middleware.csrf({whitelist: ['/v(1|2)/*']}));
   app.use(middleware.cors({whitelist: ['/v(1|2)/*']}));
   app.use(middleware.noCache({
