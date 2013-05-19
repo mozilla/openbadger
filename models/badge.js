@@ -8,15 +8,6 @@ const BadgeInstance = require('./badge-instance');
 const phraseGenerator = require('../lib/phrases');
 const Schema = mongoose.Schema;
 
-function maxLength(field, length) {
-  function lengthValidator() {
-    if (!this[field]) return true;
-    return this[field].length <= length;
-  }
-  const msg = 'maxLength';
-  return [lengthValidator, msg];
-}
-
 const BehaviorSchema = new Schema({
   shortname: {
     type: String,
@@ -74,13 +65,13 @@ const BadgeSchema = new Schema({
     trim: true,
     required: true,
     unique: true,
-    validate: maxLength('name', 128)
+    validate: util.maxLength('name', 128)
   },
   description: {
     type: String,
     trim: true,
     required: true,
-    validate: maxLength('description', 128)
+    validate: util.maxLength('description', 128)
   },
   criteria: {
     content: {
