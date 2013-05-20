@@ -61,5 +61,9 @@ exports.buildEnvironment = function buildEnvironment(options) {
     }[access];
   });
 
+  env.addFilter('dateInput', function (date) {
+    return date.toISOString().split('T')[0];
+  });
+
   return env;
 };

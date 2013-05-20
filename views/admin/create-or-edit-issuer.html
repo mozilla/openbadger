@@ -71,7 +71,7 @@
 
   <div id="js-programs">
   {% for program in issuer.programs %}
-    <div>
+    <div style="float: left; margin-right: 1em;">
       <label> <p>Name</p>
         <input
            type="text"
@@ -90,8 +90,33 @@
            name="existingProgram[{{program.id}}][contact]"
            value="{{ program.contact }}">
       </label>
-      <hr>
     </div>
+
+    <div>
+      <label> <p>Phone Number</p>
+        <input
+           type="tel"
+           name="existingProgram[{{program.id}}][phoneNumber]"
+           value="{{ program.phoneNumber }}">
+      </label>
+
+      <label> <p>Start Date</p>
+        <input
+           type="date"
+           name="existingProgram[{{program.id}}][startDate]"
+           value="{{ program.startDate | dateInput }}">
+      </label>
+
+      <label> <p>End Date</p>
+        <input
+           type="date"
+           name="existingProgram[{{program.id}}][endDate]"
+           value="{{ program.endDate | dateInput }}">
+      </label>
+    </div>
+
+
+    <hr>
   {% endfor %}
   </div>
 
@@ -99,24 +124,49 @@
 </form>
 
 <script type="text/html" id="js-program">
-  <label> <p>Name</p>
-    <input
-       type="text"
-       name="program[%%x%%][name]"
-       placeholder="Program Name">
-  </label>
-  <label> <p>Url (optional)</p>
-    <input
-       type="url"
-       name="program[%%x%%][url]"
-       placeholder="http://example.org/program">
-  </label>
-  <label> <p>Contact (optional)</p>
-    <input
-       type="email"
-       name="program[%%x%%][contact]"
-       placeholder="program-admin@example.org">
-  </label>
+  <div style="float: left; margin-right: 1em;">
+    <label> <p>Name</p>
+      <input
+         type="text"
+         name="program[%%x%%][name]"
+         placeholder="Program Name">
+    </label>
+
+    <label> <p>Url (optional)</p>
+      <input
+         type="url"
+         name="program[%%x%%][url]"
+         placeholder="http://example.org/program">
+    </label>
+
+    <label> <p>Contact Email (optional)</p>
+      <input
+         type="email"
+         name="program[%%x%%][contact]"
+         placeholder="program-admin@example.org">
+    </label>
+  </div>
+
+  <div>
+    <label> <p>Phone Number</p>
+      <input
+         type="tel"
+         name="program[%%x%%][phoneNumber]"
+         placeholder="(555) 555-5555">
+    </label>
+
+    <label> <p>Start Date</p>
+      <input
+         type="date"
+         name="program[%%x%%][startDate]">
+    </label>
+
+    <label> <p>End Date</p>
+      <input
+         type="date"
+         name="program[%%x%%][endDate]">
+    </label>
+  <div>
   <hr>
 </script>
 

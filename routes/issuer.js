@@ -49,10 +49,12 @@ exports.create = function create(req, res, next) {
     description: post.description,
     accessList: accessList,
   });
+
   const programs = handleNewPrograms(post.program, issuer);
-  const objects = ([issuer]).concat(programs);
   issuer.programs = programs.map(prop('_id'));
-  saveNewObjects(objects, function (err, results) {
+
+  const dbObjects = ([issuer]).concat(programs);
+  saveNewObjects(dbObjects, function (err, results) {
     if (err) return next(err);
     return res.redirect(303, '/admin');
   });
@@ -110,6 +112,9 @@ function handleExistingPrograms(existing) {
       name: existing[id].name,
       url: existing[id].url,
       contact: existing[id].contact,
+      startDate: existing[id].startDate,
+      endDate: existing[id].endDate,
+      phoneNumber: existing[id].phoneNumber
     }];
   });
 }
@@ -135,7 +140,10 @@ function handleNewPrograms(progs, issuer) {
       name: prog.name,
       url: prog.url,
       contact: prog.contact,
-      issuer: issuer._id
+      issuer: issuer._id,
+      startDate: prog.startDate,
+      endDate: prog.endDate,
+      phoneNumber: prog.phoneNumber
     });
   });
 }

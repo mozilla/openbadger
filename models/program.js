@@ -38,6 +38,16 @@ const ProgramSchema = new Schema({
     trim: true,
     match: regex.email
   },
+  startDate: {
+    type: Date
+  },
+  endDate: {
+    type: Date
+  },
+  phoneNumber: {
+    type: String,
+    trim: true,
+  },
 });
 
 const Program = db.model('Program', ProgramSchema);
