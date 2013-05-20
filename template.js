@@ -65,5 +65,11 @@ exports.buildEnvironment = function buildEnvironment(options) {
     return date.toISOString().split('T')[0];
   });
 
+  env.addFilter('selected', function (value, expected) {
+    if (value === expected)
+      return 'selected';
+    return '';
+  });
+
   return env;
 };

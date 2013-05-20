@@ -97,6 +97,22 @@ const BadgeSchema = new Schema({
     required: true,
     validate: maxLength('image', 256 * 1024)
   },
+  category: {
+    type: String,
+    trim: true,
+  },
+  timeToEarn: {
+    type: String,
+    trim: true,
+  },
+  ageRange: {
+    type: String,
+    trim: true
+  },
+  type: {
+    type: String,
+    trim: true
+  },
   behaviors: {
     type: [BehaviorSchema],
     unique: true

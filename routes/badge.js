@@ -1,3 +1,4 @@
+const _ = require('underscore');
 const fs = require('fs');
 const logger = require('../lib/logger');
 const Badge = require('../models/badge');
@@ -15,18 +16,26 @@ function handleTagInput(input) {
   );
 }
 
-exports.create = function create(req, res, next) {
-  const form = req.body;
-  const badge = new Badge({
+function handleBadgeForm(badge, form) {
+  return _.extend(badge, {
     name: form.name,
     program: form.program,
     description: form.description,
-    image: req.imageBuffer,
     criteria: { content: form.criteria },
     doNotList: !form.list,
-    tags: handleTagInput(form.tags)
+    tags: handleTagInput(form.tags),
+    category: form.category,
+    timeToEarn: form.timeToEarn,
+    ageRange: form.ageRange,
+    type: form.type,
   });
+}
 
+exports.create = function create(req, res, next) {
+  const form = req.body;
+  const imageBuffer = req.imageBuffer;
+  const badge = handleBadgeForm(new Badge, form);
+  badge.image = imageBuffer;
   badge.save(function (err, result) {
     if (err) return next(err);
     return res.redirect('/admin/badge/' + badge.shortname);
@@ -35,16 +44,9 @@ exports.create = function create(req, res, next) {
 
 exports.update = function update(req, res, next) {
   const form = req.body;
-  const badge = req.badge;
   const imageBuffer = req.imageBuffer;
+  const badge = handleBadgeForm(req.badge, form);
   const redirectTo = '/admin/badge/' + badge.shortname;
-  badge.name = form.name;
-  badge.description = form.description;
-  badge.criteria.content = form.criteria;
-  badge.program = form.program;
-  badge.doNotList = !form.list;
-  badge.tags = handleTagInput(form.tags);
-
   if (imageBuffer)
     badge.image = imageBuffer;
   badge.save(function (err) {
