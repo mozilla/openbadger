@@ -62,7 +62,7 @@ exports.buildEnvironment = function buildEnvironment(options) {
   });
 
   env.addFilter('dateInput', function (date) {
-    return date.toISOString().split('T')[0];
+    return date && date.toISOString().split('T')[0] || '';
   });
 
   env.addFilter('selected', function (value, expected) {
