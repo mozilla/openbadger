@@ -1,7 +1,8 @@
-var path = require('path');
-var markdown = require('markdown').markdown;
-var nunjucks = require('nunjucks');
-var util = require('util');
+const path = require('path');
+const markdown = require('markdown').markdown;
+const nunjucks = require('nunjucks');
+const util = require('util');
+const dataurl = require('dataurl');
 
 exports.buildEnvironment = function buildEnvironment(options) {
   var themeDir = options.themeDir;
@@ -42,7 +43,12 @@ exports.buildEnvironment = function buildEnvironment(options) {
       '<img src="%s" style="float: right">',
       badge.relativeUrl('image'));
   });
-
+  env.addFilter('dataurl', function (buffer, type) {
+    return dataurl.convert({
+        data: buffer || Buffer(0),
+        type: type
+      });
+  });
   env.addFilter('stupidSafe', function (html) {
     return (
       html
@@ -50,6 +56,7 @@ exports.buildEnvironment = function buildEnvironment(options) {
       .replace(/>/g, '&gt;')
     );
   });
+
   env.addFilter('list', function (list, prop, sep) {
     return list.map(util.prop(prop)).join(sep);
   });

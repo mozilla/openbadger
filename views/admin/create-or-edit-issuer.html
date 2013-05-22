@@ -6,6 +6,11 @@
   <legend>
     {% if editing %}
       Edit Issuer: {{ issuer.name }}
+      <p>
+        <image
+           src="{{ issuer.image | dataurl('image/png') }}"
+           style="max-height:200px">
+      </p>
     {% else %}
       New Issuer
     {% endif %}
@@ -66,128 +71,18 @@
     </span>
   </div>
 
-  <legend>Programs (<a href="#" id="js-add-program">Add</a>)</legend>
-
-  <div id="js-programs">
-  {% for program in issuer.programs %}
-    <div style="float: left; margin-right: 1em;">
-      <label> <p>Name</p>
-        <input
-           type="text"
-           name="existingProgram[{{program.id}}][name]"
-           value="{{ program.name }}">
-      </label>
-      <label> <p>Url (optional)</p>
-        <input
-           type="url"
-           name="existingProgram[{{program.id}}][url]"
-           value="{{ program.url }}">
-      </label>
-      <label> <p>Contact (optional)</p>
-        <input
-           type="email"
-           name="existingProgram[{{program.id}}][contact]"
-           value="{{ program.contact }}">
-      </label>
-    </div>
-
-    <div>
-      <label> <p>Phone Number</p>
-        <input
-           type="tel"
-           name="existingProgram[{{program.id}}][phoneNumber]"
-           value="{{ program.phoneNumber }}">
-      </label>
-
-      <label> <p>Start Date</p>
-        <input
-           type="date"
-           name="existingProgram[{{program.id}}][startDate]"
-           value="{{ program.startDate | dateInput }}">
-      </label>
-
-      <label> <p>End Date</p>
-        <input
-           type="date"
-           name="existingProgram[{{program.id}}][endDate]"
-           value="{{ program.endDate | dateInput }}">
-      </label>
-    </div>
-
-    <hr>
-  {% endfor %}
+  <div>
+    <label for="image">New Image</label>
+    <input
+       id="image"
+       type="file"
+       name="image"
+       accept="image/png">
   </div>
 
-  <input class="btn btn-primary" type="submit" value="Save Issuer">
+  <div>
+    <input class="btn btn-primary" type="submit" value="Save and Continue">
+  </div>
 </form>
-
-<script type="text/html" id="js-program">
-  <div style="float: left; margin-right: 1em;">
-    <label> <p>Name</p>
-      <input
-         type="text"
-         name="program[%%x%%][name]"
-         placeholder="Program Name">
-    </label>
-
-    <label> <p>Url (optional)</p>
-      <input
-         type="url"
-         name="program[%%x%%][url]"
-         placeholder="http://example.org/program">
-    </label>
-
-    <label> <p>Contact Email (optional)</p>
-      <input
-         type="email"
-         name="program[%%x%%][contact]"
-         placeholder="program-admin@example.org">
-    </label>
-  </div>
-
-  <div>
-    <label> <p>Phone Number</p>
-      <input
-         type="tel"
-         name="program[%%x%%][phoneNumber]"
-         placeholder="(555) 555-5555">
-    </label>
-
-    <label> <p>Start Date</p>
-      <input
-         type="date"
-         name="program[%%x%%][startDate]">
-    </label>
-
-    <label> <p>End Date</p>
-      <input
-         type="date"
-         name="program[%%x%%][endDate]">
-    </label>
-  <div>
-  <hr>
-</script>
-
-
-<script>
-  (function(){
-    var template = $('#js-program').html();
-    var count = 0;
-    function addProgram() {
-      var html = template.replace(/%%x%%/g, count++);
-      var $elem = $('<div></div>').html(html);
-      $('#js-programs').append($elem);
-    }
-
-
-    $('#js-add-program').on('click', function(e){
-      addProgram();
-      e.preventDefault();
-      return false;
-    });
-
-    addProgram();
-  })();
-</script>
 
 {% endblock %}

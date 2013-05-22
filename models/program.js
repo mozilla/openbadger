@@ -48,6 +48,9 @@ const ProgramSchema = new Schema({
     type: String,
     trim: true,
   },
+  image: {
+    type: Buffer,
+  }
 });
 
 const Program = db.model('Program', ProgramSchema);

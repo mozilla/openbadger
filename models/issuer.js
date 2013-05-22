@@ -58,6 +58,9 @@ const IssuerSchema = new Schema({
     type: String,
     trim: true,
   },
+  image: {
+    type: Buffer,
+  },
   jwtSecret: {
     type: String,
     trim: true,

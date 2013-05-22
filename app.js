@@ -126,12 +126,16 @@ app.patch('/admin/badge/:shortname/claims/:code', badge.releaseClaimCode);
 
 // Issuers
 // -------
-app.all('/admin/issuer/:issuerId*', issuer.findById);
+app.all('/admin/issuer/:issuerId*',  issuer.findById);
 
 app.get('/admin/issuer', render.newIssuerForm);
-app.post('/admin/issuer', issuer.create);
+app.post('/admin/issuer', [
+  issuer.getUploadedImage()
+], issuer.create);
 app.get('/admin/issuer/:issuerId', render.editIssuerForm);
-app.post('/admin/issuer/:issuerId', issuer.update);
+app.post('/admin/issuer/:issuerId', [
+  issuer.getUploadedImage()
+], issuer.update);
 
 // Creating new behaviors
 // ----------------------
