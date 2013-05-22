@@ -37,7 +37,7 @@ const ProgramSchema = new Schema({
     type: String,
     trim: true,
     match: regex.email
-  },
+  }
 });
 
 const Program = db.model('Program', ProgramSchema);
