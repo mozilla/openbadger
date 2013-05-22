@@ -25,9 +25,6 @@ const ProgramSchema = new Schema({
     required: true,
     unique: true
   },
-  description: {
-    type: String,
-  },
   issuer: {
     type: String,
     ref: 'Issuer',
@@ -40,16 +37,6 @@ const ProgramSchema = new Schema({
     type: String,
     trim: true,
     match: regex.email
-  },
-  startdate: {
-    type: Date
-  },
-  enddate: {
-    type: Date
-  },
-  image: {
-    type: Buffer,
-    validate: util.maxLength('image', 256 * 1024)
   }
 });
 
