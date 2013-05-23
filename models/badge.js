@@ -86,7 +86,7 @@ const BadgeSchema = new Schema({
   image: {
     type: Buffer,
     required: true,
-    validate: maxLength('image', 256 * 1024)
+    validate: util.maxLength('image', 256 * 1024)
   },
   category: {
     type: String,
