@@ -136,6 +136,16 @@ app.get('/admin/issuer/:issuerId', render.editIssuerForm);
 app.post('/admin/issuer/:issuerId', [
   issuer.getUploadedImage()
 ], issuer.update);
+app.get('/admin/issuer/:issuerId/program', render.newProgramForm);
+app.post('/admin/issuer/:issuerId/program', [
+  issuer.getUploadedImage()
+], issuer.newProgram);
+app.all('/admin/program/:programId*', issuer.findProgramById);
+app.get('/admin/program/:programId', render.editProgramForm);
+app.post('/admin/program/:programId', [
+  issuer.getUploadedImage()
+], issuer.updateProgram);
+
 
 // Creating new behaviors
 // ----------------------

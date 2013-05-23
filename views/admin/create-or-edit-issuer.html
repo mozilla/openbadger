@@ -4,6 +4,7 @@
 <form method="post" action="?" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <legend>
+    <h1>
     {% if editing %}
       Edit Issuer: {{ issuer.name }}
       <p>
@@ -14,6 +15,7 @@
     {% else %}
       New Issuer
     {% endif %}
+      </h1>
   </legend>
 
   <div>
@@ -80,6 +82,16 @@
        accept="image/png">
   </div>
 
+  <hr>
+  <div>
+    <h2>Programs</h2>
+    <ul>
+      {% for program in issuer.programs %}
+      <li><a href="/admin/program/{{ program.id }}">{{ program.name }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <hr>
   <div>
     <input class="btn btn-primary" type="submit" value="Save and Continue">
   </div>

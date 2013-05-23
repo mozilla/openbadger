@@ -30,6 +30,16 @@ exports.findById = function findById(req, res, next) {
     });
 };
 
+exports.findProgramById = function findProgramById(req, res, next) {
+  Program.findById(req.param('programId'))
+    .exec(function (err, program) {
+      if (err) return next(err);
+      if (!program)
+        return res.send(404);
+      req.program = program;
+      return next();
+    });
+};
 exports.findByAccess = function findByAccess(req, res, next) {
   Issuer.findByAccess(req.session.user)
     .populate('programs')
@@ -68,9 +78,9 @@ function makeIssuer(issuer, form, image) {
 };
 
 exports.create = function create(req, res, next) {
-  const post = req.body;
-  const accessList = handleAccessList(post.accessList);
-  const issuer = makeIssuer(new Issuer, post, req.image);
+  const form = req.body;
+  const accessList = handleAccessList(form.accessList);
+  const issuer = makeIssuer(new Issuer, form, req.image);
   issuer.accessList = accessList;
   issuer.save(function (err, results) {
     if (err) return next(err);
@@ -79,13 +89,64 @@ exports.create = function create(req, res, next) {
 };
 
 exports.update = function update(req, res, next) {
-  const post = req.body;
-  const accessList = handleAccessList(post.accessList);
-  const issuer = makeIssuer(req.issuer, post);
+  const form = req.body;
+  const accessList = handleAccessList(form.accessList);
+  const issuer = makeIssuer(req.issuer, form);
   issuer.accessList = accessList;
   if (req.image.length)
     issuer.image = req.image;
   issuer.save(function (err, results) {
+    if (err) return next(err);
+    return res.redirect(303, '/admin');
+  });
+};
+
+exports.newProgram = function newProgram(req, res, next) {
+  const form = req.body;
+  const issuer = req.issuer;
+  new Program({
+    name: form.name,
+    description: form.description,
+    startDate: form.startDate,
+    endDate: form.endDate,
+    url: form.url,
+    contact: form.contact,
+    phone: form.phone,
+    image: req.image,
+    shortname: util.format(
+      '%s-%s',
+      issuer.shortname,
+      util.slugify(form.name)
+    ),
+  }).save(function (err, program) {
+    if (err) return next(err);
+    issuer.programs.push(program._id);
+    issuer.save(function () {
+      if (err) return next(err);
+      return res.redirect(303, '/admin');
+    });
+  });
+};
+
+exports.updateProgram = function updateProgram(req, res, next) {
+  const form = req.body;
+  const issuer = req.issuer;
+  const program = req.program;
+  const image = req.image;
+
+  _.extend(program, {
+    name: form.name,
+    description: form.description,
+    startDate: form.startDate,
+    endDate: form.endDate,
+    url: form.url,
+    contact: form.contact,
+    phone: form.phone,
+  });
+  if (image.length)
+    program.image = image;
+
+  program.save(function (err) {
     if (err) return next(err);
     return res.redirect(303, '/admin');
   });
