@@ -85,6 +85,7 @@
   <hr>
   <div>
     <h2>Programs</h2>
+    <a href="/admin/issuer/{{ issuer.id}}/program">Add a New Program</a>
     <ul>
       {% for program in issuer.programs %}
       <li><a href="/admin/program/{{ program.id }}">{{ program.name }}</a></li>
