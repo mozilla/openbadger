@@ -33,10 +33,27 @@ const ProgramSchema = new Schema({
     type: String,
     trim: true,
   },
+  description: {
+    type: String,
+    trim: true,
+  },
   contact: {
     type: String,
     trim: true,
     match: regex.email
+  },
+  startDate: {
+    type: Date
+  },
+  endDate: {
+    type: Date
+  },
+  phone: {
+    type: String,
+    trim: true,
+  },
+  image: {
+    type: Buffer,
   }
 });
 
@@ -66,7 +83,8 @@ Program.prototype.makeJson = function makeIssuerJson() {
 };
 Program.prototype.relativeUrl = function relativeUrl(field) {
   const formats = {
-    json: '/program/meta/%s.json'
+    json: '/program/meta/%s.json',
+    image: '/program/image/%s',
   };
   return util.format(formats[field], this._id);
 };

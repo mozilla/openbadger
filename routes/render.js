@@ -1,4 +1,5 @@
 const Issuer = require('../models/issuer');
+const Program = require('../models/program');
 const Badge = require('../models/badge');
 const phrases = require('../lib/phrases');
 const logger = require('../lib/logger');
@@ -63,6 +64,27 @@ exports.newIssuerForm = function (req, res) {
   return res.render('admin/create-or-edit-issuer.html', {
     page: 'new-issuer',
     issuer: new Issuer,
+    user: req.session.user,
+    access: req.session.access,
+    csrf: req.session._csrf,
+  });
+};
+
+exports.newProgramForm = function (req, res) {
+  return res.render('admin/create-or-edit-program.html', {
+    page: 'new-program',
+    program: new Program,
+    user: req.session.user,
+    access: req.session.access,
+    csrf: req.session._csrf,
+  });
+};
+
+exports.editProgramForm = function (req, res) {
+  return res.render('admin/create-or-edit-program.html', {
+    page: 'edit-program',
+    editing: true,
+    program:  req.program,
     user: req.session.user,
     access: req.session.access,
     csrf: req.session._csrf,

@@ -126,12 +126,26 @@ app.patch('/admin/badge/:shortname/claims/:code', badge.releaseClaimCode);
 
 // Issuers
 // -------
-app.all('/admin/issuer/:issuerId*', issuer.findById);
+app.all('/admin/issuer/:issuerId*',  issuer.findById);
 
 app.get('/admin/issuer', render.newIssuerForm);
-app.post('/admin/issuer', issuer.create);
+app.post('/admin/issuer', [
+  issuer.getUploadedImage()
+], issuer.create);
 app.get('/admin/issuer/:issuerId', render.editIssuerForm);
-app.post('/admin/issuer/:issuerId', issuer.update);
+app.post('/admin/issuer/:issuerId', [
+  issuer.getUploadedImage()
+], issuer.update);
+app.get('/admin/issuer/:issuerId/program', render.newProgramForm);
+app.post('/admin/issuer/:issuerId/program', [
+  issuer.getUploadedImage()
+], issuer.newProgram);
+app.all('/admin/program/:programId*', issuer.findProgramById);
+app.get('/admin/program/:programId', render.editProgramForm);
+app.post('/admin/program/:programId', [
+  issuer.getUploadedImage()
+], issuer.updateProgram);
+
 
 // Creating new behaviors
 // ----------------------
@@ -222,6 +236,16 @@ app.get('/v2/issuers', api.issuers);
 app.get('/v2/programs', api.programs);
 
 app.get('/v2/program/:programShortName', api.program);
+app.get('/v2/issuer/:issuerShortName', api.issuer);
+
+// Resources
+app.get('/issuer/image/:issuerId', [
+  issuer.findById
+], issuer.image);
+app.get('/program/image/:programId', [
+  issuer.findProgramById
+], issuer.programImage);
+
 
 // Debug endpoints
 // ---------------

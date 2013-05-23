@@ -1,0 +1,101 @@
+{% extends "admin/base.html" %}
+
+{% block main %}
+<form method="post" action="?" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <legend>
+    {% if editing %}
+      Edit Program: {{ program.name }}
+      <p>
+        <image
+           src="{{ program.image | dataurl('image/png') }}"
+           style="max-height:200px">
+      </p>
+    {% else %}
+      New Program
+    {% endif %}
+  </legend>
+  <div>
+    <label for="name">Name</label>
+    <input
+       id="name"
+       type="text"
+       name="name"
+       value="{{ program.name | default('') }}"
+       placeholder="Youth Readers Program"
+       required>
+  </div>
+
+  <div>
+    <label for="description">Description</label>
+    <input
+       id="description"
+       type="text"
+       name="description"
+       value="{{ program.description | default('') }}"
+       placeholder="A short description">
+  </div>
+
+  <div>
+    <label for="startDate">Start Date</label>
+    <input
+       id="startDate"
+       type="date"
+       name="startDate"
+       value="{{ program.startDate | dateInput }}">
+  </div>
+
+  <div>
+    <label for="endDate">End Date</label>
+    <input
+       id="endDate"
+       type="date"
+       name="endDate"
+       value="{{ program.endDate | dateInput }}">
+  </div>
+
+  <div>
+    <label for="url">URL</label>
+    <input
+       id="url"
+       type="url"
+       name="url"
+       value="{{ program.url | default('') }}"
+       placeholder="http://example.org">
+  </div>
+
+  <div>
+    <label for="contact">Contact</label>
+    <input
+       id="contact"
+       type="email"
+       name="contact"
+       value="{{ program.contact | default('') }}"
+       placeholder="admin@example.org">
+  </div>
+
+  <div>
+    <label for="phone">Phone</label>
+    <input
+       id="phone"
+       type="tel"
+       name="phone"
+       value="{{ program.phone | default('') }}"
+       placeholder="(555) 555-5555">
+  </div>
+
+  <div>
+    <label for="image">New Image</label>
+    <input
+       id="image"
+       type="file"
+       name="image"
+       accept="image/png">
+  </div>
+
+  <div>
+    <input class="btn btn-primary" type="submit" value="Save Program">
+  </div>
+
+</form>
+{% endblock %}

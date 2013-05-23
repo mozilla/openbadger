@@ -25,7 +25,8 @@
     "markdown": "~0.4.0",
     "underscore": "~1.4.4",
     "connect-memcached": "0.0.3",
-    "nunjucks": "~0.1.8a"
+    "nunjucks": "~0.1.8a",
+    "dataurl": "~0.1.0"
   },
   "devDependencies": {
     "tap": "~0.3.1"

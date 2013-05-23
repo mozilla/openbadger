@@ -1,3 +1,5 @@
+const _ = require('underscore');
+const fs = require('fs');
 const Issuer = require('../models/issuer');
 const Program = require('../models/program');
 const async = require('async');
@@ -28,6 +30,16 @@ exports.findById = function findById(req, res, next) {
     });
 };
 
+exports.findProgramById = function findProgramById(req, res, next) {
+  Program.findById(req.param('programId'))
+    .exec(function (err, program) {
+      if (err) return next(err);
+      if (!program)
+        return res.send(404);
+      req.program = program;
+      return next();
+    });
+};
 exports.findByAccess = function findByAccess(req, res, next) {
   Issuer.findByAccess(req.session.user)
     .populate('programs')
@@ -38,81 +50,118 @@ exports.findByAccess = function findByAccess(req, res, next) {
     });
 };
 
-exports.create = function create(req, res, next) {
-  const post = req.body;
-  const accessList = handleAccessList(post.accessList);
+exports.getUploadedImage = function getUploadedImage(options) {
+  options = _.extend({field: 'image'}, options||{});
+  const field = options.field;
+  return function (req, res, next) {
+    console.dir(req.files);
+    const image = req.files[options.field];
+    return fs.readFile(image.path, function (err, buffer) {
+      if (err) return next(err);
+      req.image = buffer;
+      return next();
+    });
+  };
+};
 
-  const issuer = new Issuer({
-    name: post.name,
-    contact: post.contact,
-    url: post.url,
-    description: post.description,
-    accessList: accessList,
+
+function makeIssuer(issuer, form, image) {
+  _.extend(issuer, {
+    name: form.name,
+    contact: form.contact,
+    url: form.url,
+    description: form.description,
   });
-  const programs = handleNewPrograms(post.program, issuer);
-  const objects = ([issuer]).concat(programs);
-  issuer.programs = programs.map(prop('_id'));
-  saveNewObjects(objects, function (err, results) {
+  if (image)
+    issuer.image = image;
+  return issuer;
+};
+
+exports.create = function create(req, res, next) {
+  const form = req.body;
+  const accessList = handleAccessList(form.accessList);
+  const issuer = makeIssuer(new Issuer, form, req.image);
+  issuer.accessList = accessList;
+  issuer.save(function (err, results) {
     if (err) return next(err);
     return res.redirect(303, '/admin');
   });
 };
 
 exports.update = function update(req, res, next) {
-  const post = req.body;
-  const issuer = req.issuer;
-  const accessList = handleAccessList(post.accessList);
-  ['name',
-   'contact',
-   'url',
-   'description',
-  ].forEach(function (prop) {
-    issuer[prop] = post[prop];
-  });
-
+  const form = req.body;
+  const accessList = handleAccessList(form.accessList);
+  const issuer = makeIssuer(req.issuer, form);
   issuer.accessList = accessList;
-
-  const existing = handleExistingPrograms(post.existingProgram);
-  const programs = handleNewPrograms(post.program, issuer);
-  const objects = ([issuer]).concat(programs);
-
-  issuer.programs = issuer.programs.concat(programs);
-
-  async.parallel([
-    saveExistingPrograms.bind(null, existing),
-    saveNewObjects.bind(null, objects)
-  ], function done(err, results) {
+  if (req.image.length)
+    issuer.image = req.image;
+  issuer.save(function (err, results) {
     if (err) return next(err);
     return res.redirect(303, '/admin');
   });
 };
 
-function saveNewObjects(objects, callback) {
-  return async.map(objects, method('save'), callback);
-}
-
-function saveExistingPrograms(existing, callback) {
-  return async.map(
-    existing,
-    function saveProgram(obj, cb) {
-      const id = obj[0];
-      const props = obj[1];
-      return Program.findByIdAndUpdate(id, props, cb);
-    },
-    callback
-  );
-}
-
-function handleExistingPrograms(existing) {
-  existing = existing || {};
-  return Object.keys(existing).map(function (id) {
-    return [ id, {
-      name: existing[id].name,
-      url: existing[id].url,
-      contact: existing[id].contact,
-    }];
+exports.newProgram = function newProgram(req, res, next) {
+  const form = req.body;
+  const issuer = req.issuer;
+  new Program({
+    name: form.name,
+    description: form.description,
+    startDate: form.startDate,
+    endDate: form.endDate,
+    url: form.url,
+    contact: form.contact,
+    phone: form.phone,
+    image: req.image,
+    shortname: util.format(
+      '%s-%s',
+      issuer.shortname,
+      util.slugify(form.name)
+    ),
+  }).save(function (err, program) {
+    if (err) return next(err);
+    issuer.programs.push(program._id);
+    issuer.save(function () {
+      if (err) return next(err);
+      return res.redirect(303, '/admin');
+    });
   });
-}
+};
+
+exports.updateProgram = function updateProgram(req, res, next) {
+  const form = req.body;
+  const issuer = req.issuer;
+  const program = req.program;
+  const image = req.image;
+
+  _.extend(program, {
+    name: form.name,
+    description: form.description,
+    startDate: form.startDate,
+    endDate: form.endDate,
+    url: form.url,
+    contact: form.contact,
+    phone: form.phone,
+  });
+  if (image.length)
+    program.image = image;
+
+  program.save(function (err) {
+    if (err) return next(err);
+    return res.redirect(303, '/admin');
+  });
+};
+
+exports.image = function image(req, res, next) {
+  console.dir(req.issuer);
+  res.type('png');
+  return res.send(req.issuer.image);
+};
+exports.programImage = function image(req, res, next) {
+  console.dir(req.program);
+  res.type('png');
+  return res.send(req.program.image);
+};
 
 function handleAccessList(accessList) {
   return (
@@ -125,17 +174,4 @@ function handleAccessList(accessList) {
         return {email: str};
       })
   );
-}
-
-function handleNewPrograms(progs, issuer) {
-  return progs.filter(function (prog) {
-    return (prog.name || prog.url || prog.contact);
-  }).map(function (prog) {
-    return new Program({
-      name: prog.name,
-      url: prog.url,
-      contact: prog.contact,
-      issuer: issuer._id
-    });
-  });
 }

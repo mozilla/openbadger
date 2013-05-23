@@ -4,11 +4,18 @@
 <form method="post" action="?" enctype="multipart/form-data">
   <input type="hidden" name="csrf" value="{{ csrf }}">
   <legend>
+    <h1>
     {% if editing %}
       Edit Issuer: {{ issuer.name }}
+      <p>
+        <image
+           src="{{ issuer.image | dataurl('image/png') }}"
+           style="max-height:200px">
+      </p>
     {% else %}
       New Issuer
     {% endif %}
+      </h1>
   </legend>
 
   <div>
@@ -66,80 +73,28 @@
     </span>
   </div>
 
-
-  <legend>Programs (<a href="#" id="js-add-program">Add</a>)</legend>
-
-  <div id="js-programs">
-  {% for program in issuer.programs %}
-    <div>
-      <label> <p>Name</p>
-        <input
-           type="text"
-           name="existingProgram[{{program.id}}][name]"
-           value="{{ program.name }}">
-      </label>
-      <label> <p>Url (optional)</p>
-        <input
-           type="url"
-           name="existingProgram[{{program.id}}][url]"
-           value="{{ program.url }}">
-      </label>
-      <label> <p>Contact (optional)</p>
-        <input
-           type="email"
-           name="existingProgram[{{program.id}}][contact]"
-           value="{{ program.contact }}">
-      </label>
-      <hr>
-    </div>
-  {% endfor %}
+  <div>
+    <label for="image">New Image</label>
+    <input
+       id="image"
+       type="file"
+       name="image"
+       accept="image/png">
   </div>
 
-  <input class="btn btn-primary" type="submit" value="Save Issuer">
-</form>
-
-<script type="text/html" id="js-program">
-  <label> <p>Name</p>
-    <input
-       type="text"
-       name="program[%%x%%][name]"
-       placeholder="Program Name">
-  </label>
-  <label> <p>Url (optional)</p>
-    <input
-       type="url"
-       name="program[%%x%%][url]"
-       placeholder="http://example.org/program">
-  </label>
-  <label> <p>Contact (optional)</p>
-    <input
-       type="email"
-       name="program[%%x%%][contact]"
-       placeholder="program-admin@example.org">
-  </label>
   <hr>
-</script>
-
-
-<script>
-  (function(){
-    var template = $('#js-program').html();
-    var count = 0;
-    function addProgram() {
-      var html = template.replace(/%%x%%/g, count++);
-      var $elem = $('<div></div>').html(html);
-      $('#js-programs').append($elem);
-    }
-
-
-    $('#js-add-program').on('click', function(e){
-      addProgram();
-      e.preventDefault();
-      return false;
-    });
-
-    addProgram();
-  })();
-</script>
+  <div>
+    <h2>Programs</h2>
+    <ul>
+      {% for program in issuer.programs %}
+      <li><a href="/admin/program/{{ program.id }}">{{ program.name }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <hr>
+  <div>
+    <input class="btn btn-primary" type="submit" value="Save and Continue">
+  </div>
+</form>
 
 {% endblock %}

@@ -19,7 +19,7 @@
         <optgroup label="{{issuer.name | e}}">
           {% for program in issuer.programs %}
             <option
-               {% if badge.program == program.id %}
+               {% if badge.program.id == program.id %}
                  selected
                {% endif %}
                value="{{program.id}}">
@@ -85,6 +85,44 @@
       <span class="help-block">
         Tags for the badge. Individual tags should be comma separated.
       </span>
+    </div>
+
+    <div>
+      <label for="category">Category</label>
+      <select id="category" name="category">
+        <option value="science" {{ badge.category | selected('science') }}>Science</option>
+        <option value="technology" {{ badge.category | selected('technology') }}>Technology</option>
+        <option value="engineering" {{ badge.category | selected('engineering') }}>Engineering</option>
+        <option value="art" {{ badge.category | selected('art') }}>Art</option>
+        <option value="math" {{ badge.category | selected('math') }}>Math</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="timeToEarn">Time to Earn</label>
+      <select id="timeToEarn" name="timeToEarn">
+        <option value="short" {{ badge.timeToEarn | selected('short') }}>1-4 hours</option>
+        <option value="medium" {{ badge.timeToEarn | selected('medium') }}>1 day</option>
+        <option value="long" {{ badge.timeToEarn | selected('long') }}>1 week</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="ageRange">Age Range</label>
+      <select id="ageRange" name="ageRange">
+        <option value="0-13" {{ badge.ageRange | selected('0-13') }}>&lt;13</option>
+        <option value="13-18" {{ badge.ageRange | selected('13-18') }}>13-18</option>
+        <option value="19-24" {{ badge.ageRange | selected('19-24') }}>19-24</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="type">Badge Type</label>
+      <select id="type" name="type">
+        <option value="self-paced" {{ badge.type | selected('self-paced') }}>Self-paced activity</option>
+        <option value="in-person" {{ badge.type | selected('in-person') }}>In-person activity</option>
+        <option value="participation" {{ badge.type | selected('participation') }}>Participation</option>
+      </select>
     </div>
 
     <div>
