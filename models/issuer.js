@@ -152,5 +152,15 @@ Issuer.getAssertionObject = function getAssertionObject(callback) {
   });
 };
 
+Issuer.prototype.relativeUrl = function relativeUrl(field) {
+  const formats = {
+    image: '/issuer/image/%s',
+  };
+  return util.format(formats[field], this._id);
+};
+
+Issuer.prototype.absoluteUrl = function absoluteUrl(field) {
+  return env.qualifyUrl(this.relativeUrl(field));
+};
 
 module.exports = Issuer;

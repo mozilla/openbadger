@@ -273,18 +273,39 @@ exports.issuers = function issuers(req, res) {
     var result = { status: 'ok', issuers : {} };
     issuers.forEach(function(item) {
       result.issuers[item.shortname] = {
-        name: item.name, 
-        shortname: item.shortname, 
-        url: item.url 
+        name: item.name,
+        shortname: item.shortname,
+        url: item.url
       };
     });
     return res.json(200, result);
   });
 };
 
-/**
- * List the programs
- */
+exports.issuer = function issuer(req, res, next) {
+  const issuerShortName = req.params.issuerShortName;
+  const query = {shortname: issuerShortName};
+  Issuer.findOne(query, function(err, issuer) {
+    if (err)
+      return res.send(500, "There was an error retrieving the issuer");
+    if (!issuer)
+      return res.send(404);
+    const issuerData = [
+      'shortname',
+      'name',
+      'description',
+      'url',
+      'contact',
+    ].reduce(function (out, field) {
+      return (out[field] = issuer[field], out);
+    }, {});
+    issuerData.imageUrl = issuer.absoluteUrl('image');
+    return res.json(200, {
+      status: 'ok',
+      issuer: issuerData,
+    });
+  });
+};
 
 exports.programs = function programs(req, res) {
   Program.find({}, function(err, programs) {
@@ -300,30 +321,32 @@ exports.programs = function programs(req, res) {
 };
 
 
-/**
- * List a program
- */
 exports.program = function program(req, res) {
-  if (req.params.programShortName) {
-    var programShortName = req.params.programShortName;
-    Program.findOne({shortname: programShortName}, function(err, program) {
-      if (err) {
-        return res.send(500, "There was an error retrieving the program");
-      }
-      if (program) {
-        return res.json(200, {
-          status: 'ok',
-          program: {
-            name: program.name
-          }
-        });
-      } else {
-        return res.send(404, "Not Found");
-      }
+  const programShortName = req.params.programShortName;
+  const query = {shortname: programShortName};
+  Program.findOne(query, function(err, program) {
+    if (err)
+      return res.send(500, "There was an error retrieving the program");
+    if (!program)
+      return res.send(404);
+    const programData = [
+      'shortname',
+      'name',
+      'description',
+      'url',
+      'contact',
+      'startDate',
+      'endDate',
+      'phone',
+    ].reduce(function (out, field) {
+      return (out[field] = program[field], out);
+    }, {});
+    programData.imageUrl = program.absoluteUrl('image');
+    return res.json(200, {
+      status: 'ok',
+      program: programData,
     });
-  } else {
-    res.send(404);
-  };
+  });
 };
 
 /**

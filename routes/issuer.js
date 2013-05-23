@@ -152,6 +152,17 @@ exports.updateProgram = function updateProgram(req, res, next) {
   });
 };
 
+exports.image = function image(req, res, next) {
+  console.dir(req.issuer);
+  res.type('png');
+  return res.send(req.issuer.image);
+};
+exports.programImage = function image(req, res, next) {
+  console.dir(req.program);
+  res.type('png');
+  return res.send(req.program.image);
+};
+
 function handleAccessList(accessList) {
   return (
     accessList

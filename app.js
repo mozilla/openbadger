@@ -236,6 +236,16 @@ app.get('/v2/issuers', api.issuers);
 app.get('/v2/programs', api.programs);
 
 app.get('/v2/program/:programShortName', api.program);
+app.get('/v2/issuer/:issuerShortName', api.issuer);
+
+// Resources
+app.get('/issuer/image/:issuerId', [
+  issuer.findById
+], issuer.image);
+app.get('/program/image/:programId', [
+  issuer.findProgramById
+], issuer.programImage);
+
 
 // Debug endpoints
 // ---------------
