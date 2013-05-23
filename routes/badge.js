@@ -297,6 +297,8 @@ exports.findById = function findById(req, res, next) {
 
 exports.findByIssuers = function findByIssuers(req, res, next) {
   const issuers = req.issuers;
+  if (!issuers.length)
+    return next();
   const query = {
     '$or': issuers
       .reduce(function (arr, issuer) {
@@ -310,7 +312,15 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
     .exec(function (err, badges) {
       if (err) return next(err);
       req.badges = badges;
-      return next();
+      // #TODO: dry this out, see exports.findAll
+      const programs = badges
+        .filter(util.prop('program'))
+        .map(util.prop('program'));
+      const populateIssuers = util.method('populate', 'issuer');
+      async.map(programs, populateIssuers, function (err) {
+        if (err) return next(err);
+        return next();
+      });
     });
 };
 
@@ -320,17 +330,14 @@ exports.findAll = function findAll(req, res, next) {
     .exec(function (err, badges) {
       if (err) return next(err);
       req.badges = badges;
-      const populatePrograms = util.method('populate', 'program');
-      async.map(badges, populatePrograms, function (err) {
+      const programs = badges
+        .filter(util.prop('program'))
+        .map(util.prop('program'));
+      const populateIssuers = util.method('populate', 'issuer');
+      async.map(programs, populateIssuers, function (err) {
+        console.dir(badges);
         if (err) return next(err);
-        const programs = badges
-          .filter(util.prop('program'))
-          .map(util.prop('program'));
-        const populateIssuers = util.method('populate', 'issuer');
-        async.map(programs, populateIssuers, function () {
-          if (err) return next(err);
-          return next();
-        });
+        return next();
       });
     });
 };
