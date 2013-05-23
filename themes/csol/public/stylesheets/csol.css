@@ -217,3 +217,16 @@ table.badge-list th {
 table.badge-list tr:nth-child(even) {
   background-color: #eee;
 }
+.comma-list {
+  display: inline;
+  list-style: none;
+}
+.comma-list li {
+  display: inline;
+}
+.comma-list li:after {
+  content: ", ";
+}
+.comma-list li:last-child:after {
+    content: ""
+}
