@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% block main %}
+
+<table class="badge-list">
+<tbody>
+<tr>
+<th class="oper view"></th>
+<th class="orga">Organization</th>
+<th class="prog">Program</th>
+<th class="badg">Badge</th>
+<th class="oper all"></th>
+</tr>
+{% for badge in badges %}
+  <tr>
+    <td class="oper view">
+      <a class="badge-name" href="/admin/badge/{{ badge.shortname }}"><i class="icon-eye-open"></i></a>
+    </td>
+    <td class="orga">
+      <a href="/admin/issuer/{{ badge.program.issuer.id | e}}">{{ badge.program.issuer.name | e}}</a>
+    </td>
+    <td class="prog">
+      <a href="/admin/program/{{ badge.program.id | e}}">{{ badge.program.name | e}}</a>
+    </td>
+    <td class="badg">
+      <a href="/admin/badge/{{ badge.shortname | e}}">{{ badge.name }}</a>
+    </td>
+    <td class="oper all">
+      <div class="btn-group">
+        <a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="/admin/badge/{{ badge.shortname }}"><i class="icon-wrench"></i> Manage Triggers</a></li>
+          <li><a href="/admin/badge/{{ badge.shortname }}/edit/"><i class="icon-pencil"></i> Edit Details</a></li>
+          <li><a href="/admin/badge/{{ badge.shortname }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
+        </ul>
+      </div>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h2>Issuers</h2>
+<ul class="comma-list">
+{% for issuer in issuers %}
+<li><a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}
+
+{% block footer %}
+<script src="/js/badge-index.js"></script>
+{% endblock %}
