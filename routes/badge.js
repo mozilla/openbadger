@@ -335,7 +335,6 @@ exports.findAll = function findAll(req, res, next) {
         .map(util.prop('program'));
       const populateIssuers = util.method('populate', 'issuer');
       async.map(programs, populateIssuers, function (err) {
-        console.dir(badges);
         if (err) return next(err);
         return next();
       });

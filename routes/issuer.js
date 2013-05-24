@@ -106,6 +106,7 @@ exports.newProgram = function newProgram(req, res, next) {
   const issuer = req.issuer;
   new Program({
     name: form.name,
+    issuer: issuer.id,
     description: form.description,
     startDate: form.startDate,
     endDate: form.endDate,
