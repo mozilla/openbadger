@@ -10,20 +10,19 @@
 <th class="badg">Badges</th>
 <th class="oper all"></th>
 </tr>
-{{ badges }}
 {% for badge in badges %}
   <tr>
     <td class="oper view">
       <a class="badge-name" href="/admin/badge/{{ badge.shortname }}"><i class="icon-eye-open"></i></a>
     </td>
     <td class="orga">
-      <a href="/admin/issuer/{{ badge.program.issuer.id | e}}">{{ badge.program.issuer.name | e}}</a>
+      {{ badge.program.issuer.name | e}}
     </td>
     <td class="prog">
-      <a href="/admin/program/{{ badge.program.id | e}}">{{ badge.program.name | e}}</a>
+      {{ badge.program.name | e}}
     </td>
     <td class="badg">
-      <a href="/admin/badge/{{ badge.shortname | e}}">{{ badge.name }}</a>
+      <a href="/issue/{{ badge.id | e}}">{{ badge.name }}</a>
     </td>
     <td class="oper all">
       <div class="btn-group">
