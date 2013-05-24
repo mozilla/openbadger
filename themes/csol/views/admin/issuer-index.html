@@ -1,5 +1,6 @@
 {% extends "admin/base.html" %}
 {% block main %}
+{% if badges %}
 <h1>Issue Badges</h1>
 <table class="badge-list">
 <tbody>
@@ -8,7 +9,7 @@
 <th class="prog">Program</th>
 <th class="badg">Badge</th>
 </tr>
-{% if badges %}
+
 {% for badge in badges %}
   <tr>
     <td class="orga">
@@ -24,5 +25,8 @@
 {% endfor %}
 </tbody>
 </table>
+{% else %}
+<h1>No Badges to issue.</h1>
 {% endif %}
+
 {% endblock %}

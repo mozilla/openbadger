@@ -29,24 +29,44 @@
       {% endif %}
     </div>
   </div>
-  {% for badge in badges %}
-  <div class="media card">
-    <img class="img badge" src="{{ badge.relativeUrl('image')}}">
-    <div class="bd">
-      <hgroup>
-        <h1>{{ badge.name }}</h1>
-      </hgroup>
-      <dl class="dl-horizontal narrow-dt">
-        <dt>Description:</dt>
-        <dd>
-          {% if badge.criteria.content %}
-            {{ badge.criteria.content | markdown }}
-          {% else %}
-            {{ badge.description | stupidSafe }}
-          {% endif %}
-        </dd>
-      </dl>
-    </div>
-  </div>
-  {% endfor %}
+
+{% if badges %}
+<table class="badge-list">
+<tbody>
+<tr>
+<th class="imag"></th>
+<th class="orga">Organization</th>
+<th class="prog">Program</th>
+<th class="badg">Badge</th>
+<th class="desc">Description</th>
+</tr>
+
+{% for badge in badges %}
+  <tr>
+    <td class="imag">
+      <img class="img badge" src="{{ badge.relativeUrl('image')}}">
+    </td>
+    <td class="orga">
+      <p>{{ badge.program.issuer.name | e}}</p>
+    </td>
+    <td class="prog">
+      <p>{{ badge.program.name | e}}</p>
+    </td>
+    <td class="badg">
+      <p><a href="/issue/{{ badge.id | e}}">{{ badge.name }}</a></p>
+    </td>
+    <td class="desc">
+      {% if badge.criteria.content %}
+        {{ badge.criteria.content | markdown }}
+      {% else %}
+        {{ badge.description | stupidSafe }}
+      {% endif %}
+    </td>  
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% else %}
+<h1>No Badges to issue.</h1>
+{% endif %}
 {% endblock %}
