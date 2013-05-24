@@ -73,11 +73,28 @@ BadgeInstanceSchema.pre('validate', function userBadgeKeyDefault(next) {
   return next();
 });
 
+BadgeInstance.findByCategory = function (user, category, callback) {
+  BadgeInstance.find({user: user})
+    .populate('badge')
+    .exec(function (err, instances) {
+      if (err) return callback(err);
+      const valid = instances.filter(function (inst) {
+        return inst.badge && inst.badge.category === category;
+      });
+      return callback(null, valid);
+    });
+};
+
 BadgeInstance.userHasBadge = function userHasBadge(user, shortname, callback) {
-  const query = { userBadgeKey: user + '.' + shortname };
-  BadgeInstance.findOne(query, { user: 1 }, function (err, instance) {
+  const Badge = require('./badge');
+  Badge.findOne({shortname: shortname}, function (err, badge) {
     if (err) return callback(err);
-    return callback(null, !!instance);
+    if (!badge) return callback(null, false);
+    const query = { userBadgeKey: user + '.' + badge.id };
+    BadgeInstance.findOne(query, { user: 1 }, function (err, instance) {
+      if (err) return callback(err);
+      return callback(null, !!instance);
+    });
   });
 };
 
