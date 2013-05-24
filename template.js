@@ -45,9 +45,9 @@ exports.buildEnvironment = function buildEnvironment(options) {
   });
   env.addFilter('dataurl', function (buffer, type) {
     return dataurl.convert({
-        data: buffer || Buffer(0),
-        type: type
-      });
+      data: buffer || Buffer(0),
+      mimetype: type
+    });
   });
   env.addFilter('stupidSafe', function (html) {
     return (
