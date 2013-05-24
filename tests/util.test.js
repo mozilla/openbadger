@@ -99,6 +99,13 @@ test('util.whitelist', function (t) {
   t.end();
 });
 
+test('util.isEmail', function (t) {
+  t.same(util.isEmail('hi@example.org'), true);
+  t.same(util.isEmail('hi@Example.org'), true);
+  t.end();
+});
+
+
 test('util.negate', function (t) {
   function asyncTrue(cb) {
     cb(null, true);
