@@ -1,178 +1,191 @@
 /*general*/
-html, body {
+html,
+body {
   height: 100%;
- }
+}
 body {
   margin: 0px;
   padding: 0px;
- }
-ul, ol {
+}
+body .container > br {
+  display: none;
+}
+#main {
+  padding-top: 45px;
+  padding-bottom: 25px;
+}
+#main > h1:first-child,
+#main > h2:first-child,
+#main > h3:first-child,
+#main > h4:first-child,
+#main > p:first-child {
+  margin-top: 0px;
+  padding-top: 0px;
+}
+#main > div > h1:first-child,
+#main > div > h2:first-child,
+#main > div > h3:first-child,
+#main > div > h4:first-child,
+#main > div > p:first-child {
+  margin-top: 0px;
+  padding-top: 0px;
+}
+ul,
+ol {
   padding: 0 0 0 0;
   margin: 0 0 0 0;
 }
 .row,
 [class*="span"] {
-  margin-left:0px;
+  margin-left: 0px;
 }
-body .container > br {
-  display:none;
-}
-body > .container {
-  padding-bottom:25px;
-}
-.primary .container {
-  padding-top:45px;
-}
-
 /*navbar*/
+.navbar .nav {
+  float: none;
+}
+.navbar .nav > li > a {
+  border-left: none;
+  border-right: none;
+}
+.navbar .nav > li > a:hover,
+.navbar .nav > li > a:focus {
+  background-color: inherit;
+  border-left: none;
+  border-right: none;
+}
 .navbar .nav > li:nth-child(even) {
-  border-left:1px solid #c0c0c0;
-  border-right:1px solid #c0c0c0;
+  border-left: 1px solid #c0c0c0;
+  border-right: 1px solid #c0c0c0;
 }
-.navbar .nav > li:last-child {
-  border-right:none;
+.navbar .nav > .navbar .nav > li:last-child {
+  border-right: none;
 }
-.navbar .navbar-inner,
-.wrapper.secondary {
-  background-image:url('../img/chalkboard_bg.jpg');
+.navbar .nav .active a,
+.navbar .nav .active a:hover,
+.navbar .nav .active a:focus {
+  background-color: white;
+  box-shadow: none;
 }
 .navbar .navbar-inner {
+  background-image: url('../img/chalkboard_bg.jpg');
   -webkit-box-shadow: inset 0px -10px 20px 0px rgba(0, 0, 0, 0.25);
   -moz-box-shadow: inset 0px -10px 20px 0px rgba(0, 0, 0, 0.25);
   box-shadow: inset 0px -10px 20px 0px rgba(0, 0, 0, 0.25);
-  padding-top:1em;
+  padding-top: 1em;
 }
 .navbar .nav-wrap {
-  width:100%;
-  padding:0 0 0 0;
-  margin:0 0 0 0;
-  width:940px;
-  margin-bottom:-24px;
+  width: 100%;
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
+  width: 940px;
+  margin-bottom: -24px;
   -webkit-box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.25);
   -moz-box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.25);
   box-shadow: 0 0 8px 3px rgba(0, 0, 0, 0.25);
   background: white;
-}
-.navbar .nav .active,
-.navbar .nav > .active > a,
-.navbar .nav > .active > a:hover,
-.navbar .nav > .active > a:focus {
-  background-color:white;
-  box-shadow:none;
-}
-.navbar .nav-wrap {
   text-align: center;
 }
 .navbar .nav-wrap ul {
-  display:inline-block;
-  margin:0 0 0 0;
+  display: inline-block;
+  margin: 0 0 0 0;
 }
-.navbar .nav > li > a {
-  text-shadow:none;
-  color:#333333;
-  text-transform:uppercase;
-}
-.navbar .nav > li {
-  float:none;
+.navbar .nav-wrap ul > li {
+  float: none;
   display: inline-block;
 }
-.navbar .nav > li:last-child,
-footer li:last-child {
-  border-right:none;
+.navbar .nav-wrap ul > li > a {
+  text-shadow: none;
+  color: #333333;
+  text-transform: uppercase;
 }
-.navbar .nav > li > a:focus, 
-.navbar .nav > li > a:hover {
-  color:#c0c0c0;
+.navbar .nav-wrap ul > li > a:focus,
+.navbar .nav-wrap ul > li > a:hover {
+  color: #c0c0c0;
+}
+.navbar .nav-wrap ul > li:last-child {
+  border-right: none;
 }
 .navbar .brand {
   display: block;
-  width:671px;
-  height:220px;
-  background-image:url('../img/csol_logo.png');
+  width: 671px;
+  height: 220px;
+  background-image: url('../img/csol_logo.png');
   background-repeat: no-repeat;
-  margin:0 auto;
-  float:none;
+  margin: 0 auto;
+  float: none;
   text-indent: -9000px;
 }
-.navbar .nav {
-  float:none;
-}
-
 /*footer*/
-.footer, .footer a {
-  color:#fff;
-}
-.footer a:hover {
-  color:#c0c0c0;
-  text-decoration: none;
-}
 .footer {
   -webkit-box-shadow: inset 0px 10px 20px 0px rgba(0, 0, 0, 0.25);
   -moz-box-shadow: inset 0px 10px 20px 0px rgba(0, 0, 0, 0.25);
   box-shadow: inset 0px 10px 20px 0px rgba(0, 0, 0, 0.25);
 }
-.footer .lower {
-  border-top:1px solid white;
-  padding-top:20px;
-}
-.footer ul li {
-  display: inline;
-}
-.footer ul li {
-  display: inline-block;
+.footer a {
+  color: #fff;
 }
 .footer a.logo {
   text-indent: -9000px;
-  width:82px;
-  height:82px;
-  display:block;
+  width: 82px;
+  height: 82px;
+  display: block;
   background-position: center center;
   background-repeat: no-repeat;
 }
 .footer a.logo.chi {
-  background-image:url('../img/chi.png');
+  background-image: url('../img/chi.png');
 }
 .footer a.logo.mac {
-  background-image:url('../img/mac.png');
+  background-image: url('../img/mac.png');
 }
 .footer a.logo.moz {
-  background-image:url('../img/moz.png');
+  background-image: url('../img/moz.png');
 }
-.footer ul li > a,
-.footer ul li > span {
-  margin:10px;
+.footer a:hover {
+  color: #c0c0c0;
+  text-decoration: none;
 }
-.footer ul li:first-child a {
-  margin-left:0px;
-}
-.footer li:nth-child(even) {
-  border-left:1px solid #fff;
-  border-right:1px solid #fff;
-}
-.footer li:last-child {
-  border-right:none;
-}
-.footer .upper {
-  padding:1em 0;
+.footer .lower {
+  border-top: 1px solid white;
+  padding-top: 20px;
 }
 .footer .lower p {
   background-image: url('../img/csol_logo_sm.png');
-  padding-left:209px;
+  padding-left: 209px;
   background-repeat: no-repeat;
   background-position: top left;
-  width:400px;
-  min-height:131px;
-  margin-bottom:20px;
+  width: 400px;
+  min-height: 131px;
+  margin-bottom: 20px;
 }
 .footer .lower li {
-  border-left:none;
-  border-right:none;
+  border-left: none;
+  border-right: none;
+}
+.footer .upper {
+  padding: 1em 0;
+}
+.footer ul li {
+  display: inline-block;
+}
+.footer ul li > a,
+.footer ul li > span {
+  margin: 10px;
+}
+.footer ul li:first-child a {
+  margin-left: 0px;
+}
+.footer ul li.nth-child(even) {
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+}
+.footer ul li.last-child {
+  border-right: none;
 }
 /*sticky footer*/
-html, body {
-  height: 100%;
+.wrapper {
+  width: 100%;
 }
-.wrapper,
 .wrapper .inner-wrapper {
   width: 100%;
 }
@@ -186,8 +199,34 @@ html, body {
   padding: 0px 0px 250px 0px;
 }
 .wrapper.secondary {
+  color: #fff;
   height: 250px;
+  background-image: url('../img/chalkboard_bg.jpg');
 }
-.wrapper.primary {
-  background: #e9e9e9;
+/*OpenBadger Specific*/
+table.badge-list {
+  width:100%;
+}
+table.badge-list th {
+  text-align: left;
+}
+table.badge-list td,
+table.badge-list th {
+  padding:5px;
+}
+table.badge-list tr:nth-child(even) {
+  background-color: #eee;
+}
+.comma-list {
+  display: inline;
+  list-style: none;
+}
+.comma-list li {
+  display: inline;
+}
+.comma-list li:after {
+  content: ", ";
+}
+.comma-list li:last-child:after {
+    content: ""
 }
