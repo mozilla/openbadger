@@ -348,9 +348,18 @@ exports.findNonOffline = function findNonOffline(req, res, next) {
       {claimCodes: {'$size': 0 }}
     ]
   };
-  Badge.find(query, function (err, badges) {
-    if (err) return next(err);
-    req.badges = badges;
-    return next();
-  });
+  Badge.find(query)
+   .populate('program')
+    .exec(function (err, badges) {
+      if (err) return next(err);
+      req.badges = badges;
+      const programs = badges
+        .filter(util.prop('program'))
+        .map(util.prop('program'));
+      const populateIssuers = util.method('populate', 'issuer');
+      async.map(programs, populateIssuers, function (err) {
+        if (err) return next(err);
+        return next();
+      });
+    });
 };
