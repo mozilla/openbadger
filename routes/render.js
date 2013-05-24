@@ -112,10 +112,6 @@ exports.newBehaviorForm = function (req, res) {
   });
 };
 
-exports.index = function (req, res) {
-  console.dir(req.user);
-};
-
 exports.badgeIndex = function (req, res) {
   return res.render('admin/badge-index.html', {
     page: 'home',
@@ -143,12 +139,14 @@ exports.showBadge = function (req, res) {
 exports.criteria = function criteria(req, res) {
   return res.render('public/criteria.html', {
     badge: req.badge,
+    user: req.session.user,
   });
 }
 
 exports.all = function all(req, res) {
   return res.render('public/all.html', {
     badges: req.badges,
+    user: req.session.user,
   });
 };
 
@@ -157,6 +155,7 @@ exports.claim = function claim(req, res) {
     csrf: req.session._csrf,
     code: req.query.code,
     missing: req.query.missing,
+    user: req.session.user,
   });
 };
 
@@ -166,6 +165,7 @@ exports.confirmClaim = function confirmClaim(req, res) {
     code: req.body.code,
     claim: req.claim,
     badge: req.badge,
+    user: req.session.user,
   });
 };
 
