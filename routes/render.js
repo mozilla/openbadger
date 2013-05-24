@@ -140,6 +140,7 @@ exports.criteria = function criteria(req, res) {
   return res.render('public/criteria.html', {
     badge: req.badge,
     user: req.session.user,
+    csrf: req.session._csrf,
   });
 }
 
@@ -147,6 +148,7 @@ exports.all = function all(req, res) {
   return res.render('public/all.html', {
     badges: req.badges,
     user: req.session.user,
+    csrf: req.session._csrf,
   });
 };
 
