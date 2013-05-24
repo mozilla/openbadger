@@ -117,6 +117,10 @@ const BadgeSchema = new Schema({
     type: String,
     trim: true
   },
+  activityType: {
+    type: String,
+    trim: true
+  },
   behaviors: {
     type: [BehaviorSchema],
     unique: true

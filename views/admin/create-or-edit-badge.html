@@ -119,9 +119,17 @@
     <div>
       <label for="type">Badge Type</label>
       <select id="type" name="type">
-        <option value="self-paced" {{ badge.type | selected('self-paced') }}>Self-paced activity</option>
-        <option value="in-person" {{ badge.type | selected('in-person') }}>In-person activity</option>
+        <option value="skill" {{ badge.type | selected('skill') }}>Skill</option>
+        <option value="achievement" {{ badge.type | selected('achievement') }}>Achievement</option>
         <option value="participation" {{ badge.type | selected('participation') }}>Participation</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="type">Activity Type</label>
+      <select id="activityType" name="activityType">
+        <option value="offline" {{ badge.activityType | selected('offline') }}>Offline</option>
+        <option value="online" {{ badge.activityType | selected('online') }}>Online</option>
       </select>
     </div>
 
