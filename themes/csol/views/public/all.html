@@ -15,6 +15,18 @@
       <p>
         Head over to <a href="https://thimble.webmaker.org">Thimble</a>, pick a project and sign in to start earning!
       </p>
+      {% if not user %}
+<h1>
+  <a href="#" class="persona-button dark js-persona-login">
+    <span>Sign in with your Email</span>
+  </a>
+</h1>
+
+<form method="post" action="/login" class="js-persona-form">
+  <input type="hidden" name="assertion" value="" class="js-persona-input">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+</form>
+      {% endif %}
     </div>
   </div>
   {% for badge in badges %}
