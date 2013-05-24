@@ -98,3 +98,13 @@ test('util.whitelist', function (t) {
   t.same(list.exempt('AaaaaaaD'), true);
   t.end();
 });
+
+test('util.negate', function (t) {
+  function asyncTrue(cb) {
+    cb(null, true);
+  };
+  util.negate(asyncTrue)(function (err, result) {
+    t.same(result, false);
+    t.end();
+  });
+});

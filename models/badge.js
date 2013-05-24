@@ -6,6 +6,7 @@ const util = require('../lib/util');
 const Issuer = require('./issuer');
 const BadgeInstance = require('./badge-instance');
 const phraseGenerator = require('../lib/phrases');
+const async = require('async');
 const Schema = mongoose.Schema;
 
 const BehaviorSchema = new Schema({
@@ -82,6 +83,18 @@ const BadgeSchema = new Schema({
       type: String,
       trim: true
     }
+  },
+  categoryAward: {
+    type: Boolean,
+  },
+  categoryRequirement: {
+    type: Number,
+    default: 0
+  },
+  categoryWeight: {
+    type: Number,
+    required: true,
+    default: 0
   },
   image: {
     type: Buffer,
@@ -348,11 +361,18 @@ Badge.prototype.earnableBy = function earnableBy(user) {
   }, true);
 };
 
-Badge.prototype.award = function award(email, callback) {
+Badge.prototype.award = function award(options, callback) {
+  if (typeof options === 'string')
+    options = {user: options};
   const DUP_KEY_ERROR_CODE = 11000;
+  const checkForCategoryBadges =
+    !this.categoryAward && this.categoryWeight;
+  const email = options.user;
+  const category = this.category;
+  const weight = this.weight;
   const instance = new BadgeInstance({
     user: email,
-    badge: this.shortname,
+    badge: this.id,
   });
 
   // We don't want to fail with an error if the user already has the
@@ -364,13 +384,51 @@ Badge.prototype.award = function award(email, callback) {
         return callback();
       return callback(err);
     }
-    return callback(null, instance);
+    if (options.sendEmail) {
+      console.log('WRITE SEND EMAIL CODE');
+      // #TODO: add email code here
+    }
+    if (!checkForCategoryBadges)
+      return callback(null, instance, []);
+
+    async.waterfall([
+      function getCategoryBadges(callback) {
+        const query = {category: category, categoryAward: true};
+        Badge.find(query, callback);
+      },
+      function filterByScore(badges, callback) {
+        BadgeInstance.findByCategory(email, category, function (err, instances) {
+          if (err) return callback(err);
+          const score = instances.reduce(function (sum, inst) {
+            return (sum += inst.badge.categoryWeight, sum);
+          }, 0);
+          const eligible = badges.filter(function (badge) {
+            return score >= badge.categoryRequirement;
+          });
+          return callback(null, eligible);
+        });
+      },
+      function filterByOwned(badges, callback) {
+        async.filter(badges, function (badge, cb) {
+          const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
+          doesNotOwnBadge(email, badge.shortname, function (err, result) {
+            return cb(result);
+          });
+        }, function (results) { callback(null, results) });
+      },
+      function awardBadges(badges, callback) {
+        const newOpts = { user: email, sendEmail: true };
+        async.map(badges, util.method('award', newOpts), callback);
+      },
+    ], function (err, instances) {
+      if (err) return callback(err);
+      return callback(null, instances, instances);
+    });
   });
 };
 
 Badge.prototype.awardOrFind = function awardOrFind(email, callback) {
-  const BadgeInstance = require('./badge-instance');
-  const query = { userBadgeKey: [email, this.shortname].join('.') };
+  const query = { userBadgeKey: [email, this.id].join('.') };
   this.award(email, function (err, instance) {
     if (!instance) {
       BadgeInstance.findOne(query, function (err, instance) {
