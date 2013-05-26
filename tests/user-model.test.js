@@ -57,37 +57,6 @@ test.applyFixtures({
     });
   });
 
-  test('User#credit: updating a credit', function (t) {
-    var expect = fixtures['user'];
-    var email = expect.user;
-    User.credit(email, ['link', 'comment'], function (err, result, awarded, inProgress) {
-      t.notOk(err, 'should not have an error');
-      t.same(result.credit.link, expect.credit.link + 1);
-      t.same(result.credit.comment, 1);
-
-      t.same(awarded.length, 1);
-      t.same(awarded[0].badge, 'link-basic');
-
-      t.same(inProgress.length, 1);
-      t.same(inProgress[0].badge.shortname, 'link-advanced');
-
-      var count = inProgress[0].badge.behaviors[0].count;
-      var expectRemaining = count - result.credit.link;
-      t.same(inProgress[0].remaining, { link: expectRemaining });
-      t.end();
-    });
-  });
-
-  test('User#credit: crediting a new user entirely', function (t) {
-    var email = 'new-user@example.org';
-    User.credit(email, ['link', 'comment'], function (err, user, awarded, inProgress) {
-      t.same(user.credit.link, 1);
-      t.same(user.credit.comment, 1);
-      t.same(awarded[0].badge, 'comment');
-      t.end();
-    });
-  });
-
   test('User#getCreditsAndBadges: valid, existing user', function (t) {
     var user = fixtures['user'];
     var email = user.user;

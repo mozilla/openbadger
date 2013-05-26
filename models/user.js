@@ -36,52 +36,7 @@ var User = db.model('User', UserSchema);
  */
 
 User.credit = function credit(userEmail, behaviors, callback) {
-  behaviors = Array.isArray(behaviors) ? behaviors : [behaviors];
-  function updateUserCredit(callback) {
-    var query = { user: userEmail };
-    var options = { upsert: true };
-    var update = behaviors.reduce(function (obj, credit) {
-      obj['$inc']['credit.' + credit] = 1;
-      return obj;
-    }, {'$inc': {} });
-    User.findOneAndUpdate(query, update, options, callback);
-  }
-
-  function findPotentialBadges(callback) {
-    Badge.findByBehavior(behaviors, callback);
-  }
-
-  function awardBadge(badge, callback) {
-    badge.award(userEmail, callback);
-  }
-
-  async.parallel({
-    user: updateUserCredit,
-    badges: findPotentialBadges
-  }, function (err, results) {
-    if (err) return callback(err);
-    var badges = results.badges;
-    var user = results.user;
-
-    var earnable = [];
-    var inProgress = [];
-    badges.forEach(function (badge) {
-      if (badge.earnableBy(user))
-        return earnable.push(badge);
-
-      var remaining = badge.creditsUntilAward(user);
-      return inProgress.push({
-        badge: badge,
-        remaining: remaining,
-      });
-    });
-
-    async.map(earnable, awardBadge, function (err, results) {
-      if (err) return callback(err);
-      var awarded = results.filter(function (r) { return r });
-      callback(null, user, awarded, inProgress);
-    });
-  });
+  throw new Error("unimplemented - not needed for CSOL");
 };
 
 /**
