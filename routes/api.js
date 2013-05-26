@@ -22,6 +22,8 @@ function normalize(badge) {
   };
 }
 
+exports.jwtSecret = null;
+
 /**
  * Get listing of all badges
  */
@@ -362,8 +364,7 @@ exports.auth = function auth(options) {
     const param = req.method === "GET" ? req.query : req.body;
     const token = param.auth;
     const email = param.email;
-    const issuer = req.issuer;
-    const secret = issuer.jwtSecret;
+    const secret = exports.jwtSecret;
     const origin = env.origin();
     const isXHR = req.headers['x-requested-with'] === 'XMLHttpRequest';
     const now = Date.now()/1000|0;

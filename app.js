@@ -26,6 +26,8 @@ var templateEnv = template.buildEnvironment({
 
 templateEnv.express(app);
 
+api.jwtSecret = env.get('jwt_secret');
+
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
   app.use(express.favicon(__dirname + '/public/img/favicon.ico'));
