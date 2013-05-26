@@ -63,11 +63,10 @@ test.applyFixtures({
     });
   });
 
-  test('Issuer.findOne: works as expected, has default jwtSecret', function (t) {
+  test('Issuer.findOne: works as expected', function (t) {
     const expect = fixtures['issuer1'];
     Issuer.findOne({'_id': expect._id }, function (err, result) {
       t.same(expect.id, result.id, 'should be the expected issuer');
-      t.same(expect.jwtSecret.length, 64, 'should generate a random 64 character secret');
       t.same(expect.shortname, 'issuer-one', 'should generate shortname from slug of name');
       t.end();
     });
