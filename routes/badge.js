@@ -27,6 +27,7 @@ function handleBadgeForm(badge, form) {
     category: form.category,
     timeToEarn: form.timeToEarn,
     ageRange: form.ageRange,
+    activityType: form.activityType,
     type: form.type,
   });
 }
