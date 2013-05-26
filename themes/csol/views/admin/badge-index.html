@@ -1,6 +1,7 @@
 {% extends "admin/base.html" %}
 {% block main %}
 
+{% if badges.length %}
 <table class="badge-list">
 <tbody>
 <tr>
@@ -38,13 +39,19 @@
 {% endfor %}
 </tbody>
 </table>
-
+{% endif %}
+{% if issuers.length %}
 <h2>Issuers</h2>
 <ul class="comma-list">
 {% for issuer in issuers %}
 <li><a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a></li>
 {% endfor %}
 </ul>
+{% else %}
+<p>No Issuers found.</p>
+{% endif %}
+
+
 {% endblock %}
 
 {% block footer %}

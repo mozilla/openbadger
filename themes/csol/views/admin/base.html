@@ -41,6 +41,8 @@
                   <li {{ page | activize('new-behavior') }}>
                     <a href="/admin/behavior">New Behavior</a>
                   </li>
+                  {% endif %}
+                  {% if user %}
                   <li class="">
                     <a href="" class="js-logout-link">Logout</a>
                     <form method="post" action="/logout" class="logout-form js-logout-form">

@@ -1,20 +1,17 @@
 {% extends "admin/base.html" %}
 {% block main %}
+{% if badges %}
 <h1>Issue Badges</h1>
 <table class="badge-list">
 <tbody>
 <tr>
-<th class="oper view"></th>
 <th class="orga">Organization</th>
 <th class="prog">Program</th>
-<th class="badg">Badges</th>
-<th class="oper all"></th>
+<th class="badg">Badge</th>
 </tr>
+
 {% for badge in badges %}
   <tr>
-    <td class="oper view">
-      <a class="badge-name" href="/admin/badge/{{ badge.shortname }}"><i class="icon-eye-open"></i></a>
-    </td>
     <td class="orga">
       {{ badge.program.issuer.name | e}}
     </td>
@@ -24,18 +21,12 @@
     <td class="badg">
       <a href="/issue/{{ badge.id | e}}">{{ badge.name }}</a>
     </td>
-    <td class="oper all">
-      <div class="btn-group">
-        <a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          <li><a href="/admin/badge/{{ badge.shortname }}"><i class="icon-wrench"></i> Manage Triggers</a></li>
-          <li><a href="/admin/badge/{{ badge.shortname }}/edit/"><i class="icon-pencil"></i> Edit Details</a></li>
-          <li><a href="/admin/badge/{{ badge.shortname }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
-        </ul>
-      </div>
-    </td>
   </tr>
 {% endfor %}
 </tbody>
 </table>
+{% else %}
+<h1>No Badges to issue.</h1>
+{% endif %}
+
 {% endblock %}

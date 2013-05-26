@@ -81,7 +81,7 @@
        name="image"
        accept="image/png">
   </div>
-
+{% if editing %}
   <hr>
   <div>
     <h2>Programs</h2>
@@ -92,6 +92,7 @@
       {% endfor %}
     </ul>
   </div>
+{% endif %}
   <hr>
   <div>
     <input class="btn btn-primary" type="submit" value="Save and Continue">
