@@ -99,6 +99,43 @@
     </div>
 
     <div>
+      <label class="checkbox">
+        <input id="categoryAward" name="categoryAward" type="checkbox" {% if badge.categoryAward %}checked{% endif %}>
+        This is the unique STEAM badge for <span class="js-category">its category</span>.
+      </label>
+      <span class="help-block">
+        There can be only one STEAM badge for each category.
+      </span>
+    </div>
+
+    <div>
+      <label for="categoryRequirement">STEAM Badge Point Requirement</label>
+      <input
+          id="categoryRequirement"
+          type="number"
+          name="categoryRequirement"
+          value="{{ badge.categoryRequirement | default('0') }}">
+      <span class="help-block">
+        This is the total number of points from other badges in the
+        <span class="js-category">same</span> category needed to earn this badge.
+      </span>
+    </div>
+
+    <div>
+      <label for="categoryWeight">STEAM Badge Points</label>
+      <input
+          id="categoryWeight"
+          type="number"
+          name="categoryWeight"
+          value="{{ badge.categoryWeight | default('0') }}">
+      <span class="help-block">
+        This is the number of points earning this badge contributes
+        to earning the unique STEAM badge for 
+        <span class="js-category">its category</span>.
+      </span>
+    </div>
+
+    <div>
       <label for="timeToEarn">Time to Earn</label>
       <select id="timeToEarn" name="timeToEarn">
         <option value="short" {{ badge.timeToEarn | selected('short') }}>1-4 hours</option>
@@ -134,9 +171,9 @@
     </div>
 
     <div>
-      <label>
-        List in APIs?
+      <label class="checkbox">
         <input name="list" type="checkbox" {% if badge.doNotList == false %}checked{% endif %}>
+        List in APIs
       </label>
       <span class="help-block">
         Whether or not this badge should be shown when an API call is
