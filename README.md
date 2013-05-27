@@ -54,18 +54,19 @@ $ make     # will do `npm install` and then start server
 
 # Running the test suite
 
-The test suite looks at all of the same environment variables, however
-it makes sure that `NODE_ENV` is either "development" or "travis" (for
-TravisCI). You can use the following commands to run the entire suite:
+The test suite assumes mongodb is running on localhost and using the
+openbadger_test db.
+
+You can use the following commands to run the entire suite:
 
 ```bash
-$ make test         # normally you'd use this
-$ make verbose-test # if you want to see debugging
-$ make lint         # to lint the codebase
+$ bin/test.js          # normally you'd use this
+$ bin/test.js --debug  # if you want to see debugging
+$ make lint            # to lint the codebase
 ```
 
 You can also run the tests one-off by doing
-`node tests/<name-of-file>.js`. This is useful for when one file is
+`bin/test.js tests/<name-of-file>.js`. This is useful for when one file is
 giving you trouble and you don't want to run through the whole suite
 to debug just that one thing.
 
