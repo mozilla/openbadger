@@ -3,8 +3,20 @@
 const CHECKMARK = "\u2713";
 const OK_FINISH_REGEXP = /^ok$/;
 const FAIL_FINISH_REGEXP = /^fail[0-9\s]+$/;
+const SKIP_FINISH_REGEXP = /^skip[0-9\s]+$/;
+const CURRENT_TEST_START = {
+  name: "",
+  total: 0,
+  skipped: false,
+  failed: [],
+  ok: []
+};
 
 var colors = require("colors");
+
+function copy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
 
 function colorizeTapOutput(options) {
   var tc = options.tapConsumer;
@@ -13,12 +25,8 @@ function colorizeTapOutput(options) {
   var debug = options.debug;
   var passed = 0;
   var failed = 0;
-  var currentTest = {
-    name: "",
-    total: 0,
-    failed: [],
-    ok: []
-  };
+  var skipped = 0;
+  var currentTest = copy(CURRENT_TEST_START);
   var lastOutput = null;
 
   tc.on("bailout", function(info) {
@@ -31,8 +39,13 @@ function colorizeTapOutput(options) {
         log("DEBUG".magenta, JSON.stringify(c, null, 2).grey);
       currentTest.total++;
       if (c.ok) {
-        currentTest.ok.push(c);
-        passed++;
+        if (c.skip) {
+          currentTest.skipped = true;
+          skipped++;
+        } else {
+          currentTest.ok.push(c);
+          passed++;
+        }
       } else {
         if (c.timedOut)
           log("TIMEOUT".red, c.name.trim());
@@ -45,7 +58,8 @@ function colorizeTapOutput(options) {
       if (debug) log("DEBUG".magenta, c.grey);
       if (currentTest.total) {
         if (OK_FINISH_REGEXP.test(currentTest.name) ||
-            FAIL_FINISH_REGEXP.test(currentTest.name)) {
+            FAIL_FINISH_REGEXP.test(currentTest.name) ||
+            SKIP_FINISH_REGEXP.test(currentTest.name)) {
           if (currentTest.ok.length) {
             console.log("\nFinished testing ".grey +
                         currentTest.ok[0].name.trim() + ".\n".grey);
@@ -72,14 +86,13 @@ function colorizeTapOutput(options) {
               }
               log();
             });
+          } else if (currentTest.skipped) {
+            log("S".yellow, currentTest.name.grey);
           } else {
             log(CHECKMARK.green, currentTest.name.grey);
           }
         }
-        currentTest.name = "";
-        currentTest.total = 0;
-        currentTest.ok = [];
-        currentTest.failed = [];
+        currentTest = copy(CURRENT_TEST_START);
       }
       currentTest.name = c;
     }
@@ -87,7 +100,10 @@ function colorizeTapOutput(options) {
   tc.on("end", function () {
     var total = passed + failed;
     var count = passed + "/" + total;
-    log("Tests passed:", passed == total ? count.green : count.red);
+    log(passed == total ? count.green : count.red,
+        "tests passed,".grey,
+        (skipped ? skipped.toString().yellow : "none".grey),
+        "skipped.".grey);
     process.exit(failed);
   });
 }
