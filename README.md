@@ -2,6 +2,14 @@
 
 Badging.
 
+At this point, the v2.0 branch of this repository is primarily
+an administrative back-end for [CSOL-site][]. In the future,
+we'll likely create a v3.0 branch that brings in the best of the 
+v2.0 branch and the development branch (which was created for [Thimble][]).
+
+  [CSOL-site]: https://github.com/mozilla/CSOL-site/
+  [Thimble]: https://github.com/mozilla/webpagemaker
+
 # Prerequisites
 
 Make sure you have [redis](http://redis.io) and [mongo](http://mongodb.org/)
@@ -14,6 +22,7 @@ and mongo locally.
 
 ```bash
 export NODE_ENV="development"
+export THEME_DIR="themes/csol"
 export OPENBADGER_HOST="localhost"
 export OPENBADGER_PROTOCOL="http"
 export OPENBADGER_PORT=3000
