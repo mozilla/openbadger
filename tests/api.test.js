@@ -5,8 +5,7 @@ const jwt = require('jwt-simple');
 const db = require('../models');
 const api = require('../routes/api');
 
-test.applyFixtures({
-}, function(fx) {
+test.applyFixtures({}, function(fx) {
   test("auth fails when no jwt secret is configured", function(t) {
     api.jwtSecret = null;
     conmock({
