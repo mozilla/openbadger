@@ -70,7 +70,7 @@ function colorizeTapOutput(options) {
             log();
             currentTest.failed.forEach(function(c) {
               log("  " + c.name.trim(), "failure".grey);
-              if (c.found && c.wanted) {
+              if ('found' in c && 'wanted' in c) {
                 log("  found ".grey, JSON.stringify(c.found));
                 log("  wanted".grey, JSON.stringify(c.wanted));
               }
