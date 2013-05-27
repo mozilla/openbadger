@@ -1,5 +1,7 @@
 # openbadger
 
+[![Build Status](https://travis-ci.org/mozilla/openbadger.png)](https://travis-ci.org/mozilla/openbadger)
+
 Badging.
 
 At this point, the v2.0 branch of this repository is primarily
