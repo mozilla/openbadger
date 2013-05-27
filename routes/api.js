@@ -125,6 +125,43 @@ exports.user = function user(req, res) {
   });
 };
 
+exports.awardBadgeFromClaimCode = function(req, res, next) {
+  const code = req.body.code;
+  const email = req.body.email;
+
+  if (!code)
+    return res.json(400, {status: 'error', reason: 'missing claim code'});
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+
+  var badge = Badge.findByClaimCode(code, function(err, badge) {
+    if (err) return next(err);
+    if (!badge)
+      return res.json(404, {
+        status: 'error',
+        reason: 'unknown claim code',
+        code: code
+      });
+
+    var claimSuccess = badge.redeemClaimCode(code, email);
+    if (claimSuccess === false)
+      return res.json(409, {
+        status: 'error',
+        reason: util.format('claim code `%s` has already been used', code),
+        code: code
+      });
+
+    // TODO: We're redeeming the claim code before awarding the badge,
+    // which is unfortunate if awarding the badge fails for some reason;
+    // would be nice to make this transactional.
+    badge.save(function(err) {
+      if (err) return next(err);
+      req.badge = badge;
+      return exports.awardBadge(req, res, next);
+    });
+  });
+};
+
 exports.awardBadge = function awardBadge(req, res, next) {
   const badge = req.badge;
   const email = req.body.email;
