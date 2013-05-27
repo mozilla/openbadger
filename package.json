@@ -30,6 +30,8 @@
   },
   "devDependencies": {
     "tap": "~0.3.1",
+    "colors": "0.6.0",
+    "supertest": "0.6.0",
     "mime": "~1.2.5"
   },
   "engines": {
