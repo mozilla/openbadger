@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 const CHECKMARK = "\u2713";
+const OK_FINISH_REGEXP = /^ok$/;
+const FAIL_FINISH_REGEXP = /^fail[0-9\s]+$/;
 
 var colors = require("colors");
 
@@ -14,7 +16,8 @@ function colorizeTapOutput(options) {
   var currentTest = {
     name: "",
     total: 0,
-    failed: []
+    failed: [],
+    ok: []
   };
   var lastOutput = null;
 
@@ -26,8 +29,9 @@ function colorizeTapOutput(options) {
     if (typeof(c) == "object") {
       if (debug)
         log("DEBUG".magenta, JSON.stringify(c, null, 2).grey);
+      currentTest.total++;
       if (c.ok) {
-        currentTest.total++;
+        currentTest.ok.push(c);
         passed++;
       } else {
         if (c.timedOut)
@@ -40,10 +44,13 @@ function colorizeTapOutput(options) {
     } else {
       if (debug) log("DEBUG".magenta, c.grey);
       if (currentTest.total) {
-        if (currentTest.name &&
-            currentTest.name != "ok" &&
-            !currentTest.name.match(/^fail[0-9\s]+$/)) {
-
+        if (OK_FINISH_REGEXP.test(currentTest.name) ||
+            FAIL_FINISH_REGEXP.test(currentTest.name)) {
+          if (currentTest.ok.length) {
+            console.log("\nFinished testing ".grey +
+                        currentTest.ok[0].name.trim() + ".\n".grey);
+          }
+        } else if (currentTest.name) {
           if (currentTest.failed.length) {
             log("x".red, currentTest.name.grey);
             log();
@@ -68,9 +75,10 @@ function colorizeTapOutput(options) {
           } else {
             log(CHECKMARK.green, currentTest.name.grey);
           }
-          currentTest.name = "";
         }
+        currentTest.name = "";
         currentTest.total = 0;
+        currentTest.ok = [];
         currentTest.failed = [];
       }
       currentTest.name = c;
@@ -79,7 +87,7 @@ function colorizeTapOutput(options) {
   tc.on("end", function () {
     var total = passed + failed;
     var count = passed + "/" + total;
-    log("\nTests passed:", passed == total ? count.green : count.red);
+    log("Tests passed:", passed == total ? count.green : count.red);
     process.exit(failed);
   });
 }
