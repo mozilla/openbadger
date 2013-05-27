@@ -54,11 +54,8 @@ async.series([
     var testDir = path.resolve(__dirname, '..', 'tests');
     var tapPath = path.resolve(__dirname, '..', 'node_modules', '.bin',
                                'tap');
-    var tapArgs = ['--timeout=10', '--tap'];
+    var tapArgs = ['--timeout=10', '--tap', '--stderr'];
     var colorizePath = path.resolve(__dirname, 'colorize-tap-output.js');
-
-    if (cmdline.argv.debug)
-      tapArgs.push('--stderr');
 
     if (testFilenames.length) {
       tapArgs = tapArgs.concat(testFilenames);
