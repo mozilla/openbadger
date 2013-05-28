@@ -43,6 +43,13 @@ test.applyFixtures({
     issuer: 'issuer1',
   }),
 }, function (fixtures) {
+  test('Issuers without contacts can be saved', function (t) {
+    var issuer = new Issuer({name: 'Bop'});
+    issuer.save(function(err) {
+      t.same(err, null);
+      t.end();
+    });
+  });
 
   test('Find & populate programs', function (t) {
     const issuer = fixtures['issuer1'];

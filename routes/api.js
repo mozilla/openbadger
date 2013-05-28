@@ -16,9 +16,12 @@ function normalize(badge) {
     description: badge.description,
     prerequisites: badge.prerequisites,
     image: badge.absoluteUrl('image'),
-    behaviors: badge.behaviors.map(function (behavior) {
-      return { name: behavior.shortname, score: behavior.count };
-    })
+    criteria: badge.criteria && badge.criteria.content,
+    program: badge.program,
+    tags: badge.tags,
+    rubric: {
+      items: badge.getRubricItems()
+    }
   };
 }
 
@@ -44,7 +47,7 @@ exports.badges = function badges(req, res) {
 
 
 exports.badge = function badge(req, res) {
-  res.json({ status: 'ok', badge: normalize(req.badge) });
+  res.json(200, { status: 'ok', badge: normalize(req.badge) });
 };
 
 exports.recommendations = function recommendations(req, res, next) {
@@ -125,15 +128,9 @@ exports.user = function user(req, res) {
   });
 };
 
-exports.awardBadgeFromClaimCode = function(req, res, next) {
-  const code = req.body.code;
-  const email = req.body.email;
-
+function getUnclaimedBadgeFromCode(code, req, res, next, cb) {
   if (!code)
     return res.json(400, {status: 'error', reason: 'missing claim code'});
-  if (!email)
-    return res.json(400, {status: 'error', reason: 'missing email address'});
-
   var badge = Badge.findByClaimCode(code, function(err, badge) {
     if (err) return next(err);
     if (!badge)
@@ -143,13 +140,35 @@ exports.awardBadgeFromClaimCode = function(req, res, next) {
         code: code
       });
 
-    var claimSuccess = badge.redeemClaimCode(code, email);
-    if (claimSuccess === false)
+    if (badge.claimCodeIsClaimed(code))
       return res.json(409, {
         status: 'error',
         reason: util.format('claim code `%s` has already been used', code),
         code: code
       });
+
+    cb(badge);
+  });
+};
+
+exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
+  getUnclaimedBadgeFromCode(req.query.code, req, res, next, function(badge) {
+    return res.json(200, {
+      status: 'ok',
+      badge: normalize(badge)
+    });
+  });
+};
+
+exports.awardBadgeFromClaimCode = function(req, res, next) {
+  const code = req.body.code;
+  const email = req.body.email;
+
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+
+  getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
+    badge.redeemClaimCode(code, email);
 
     // TODO: We're redeeming the claim code before awarding the badge,
     // which is unfortunate if awarding the badge fails for some reason;

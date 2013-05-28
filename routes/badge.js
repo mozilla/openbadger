@@ -8,12 +8,29 @@ const async = require('async');
 
 function handleTagInput(input) {
   return (
-    input
+    (input || '')
       .trim()
       .split(',')
       .map(util.method('trim'))
       .filter(util.prop('length'))
   );
+}
+
+function handleModelSaveError(err, res, next) {
+  if (err.name == "ValidationError" && err.errors)
+    return res.type("text").send(
+      422,
+      "A validation error occurred on the following fields: " +
+      Object.keys(err.errors).sort().map(function(name) {
+        return name + " (" + err.errors[name].type + ")"
+      }).join(", ") + "."
+    );
+  return next(err);
+}
+
+function safeNumberCast(number, defaultValue) {
+  var val = parseFloat(number);
+  return isNaN(val) ? defaultValue : val;
 }
 
 function handleBadgeForm(badge, form) {
@@ -25,6 +42,9 @@ function handleBadgeForm(badge, form) {
     doNotList: !form.list,
     tags: handleTagInput(form.tags),
     category: form.category,
+    categoryAward: !!form.categoryAward,
+    categoryRequirement: safeNumberCast(form.categoryRequirement, 0),
+    categoryWeight: safeNumberCast(form.categoryWeight, 0),
     timeToEarn: form.timeToEarn,
     ageRange: form.ageRange,
     activityType: form.activityType,
@@ -38,7 +58,7 @@ exports.create = function create(req, res, next) {
   const badge = handleBadgeForm(new Badge, form);
   badge.image = imageBuffer;
   badge.save(function (err, result) {
-    if (err) return next(err);
+    if (err) return handleModelSaveError(err, res, next);
     return res.redirect('/admin/badge/' + badge.shortname);
   });
 };
@@ -51,7 +71,7 @@ exports.update = function update(req, res, next) {
   if (imageBuffer)
     badge.image = imageBuffer;
   badge.save(function (err) {
-    if (err) return next(err);
+    if (err) return handleModelSaveError(err, res, next);
     return res.redirect(redirectTo);
   });
 };
