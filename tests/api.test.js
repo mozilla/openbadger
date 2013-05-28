@@ -39,6 +39,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
             "criteria": "* person is awesome",
             "prerequisites": [],
             "tags": [],
+            "program": "program",
             "image":"https://example.org/badge/image/with-criteria.png",
             "rubric":{
               "items":[{"text":"person is awesome","required":true}]

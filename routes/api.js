@@ -17,6 +17,7 @@ function normalize(badge) {
     prerequisites: badge.prerequisites,
     image: badge.absoluteUrl('image'),
     criteria: badge.criteria && badge.criteria.content,
+    program: badge.program,
     tags: badge.tags,
     rubric: {
       items: badge.getRubricItems()

@@ -112,6 +112,7 @@ module.exports = {
     criteria: {
       content: "* person is awesome"
     },
+    program: 'program',
     image: IMAGE,
   }),
   'user': new User({
