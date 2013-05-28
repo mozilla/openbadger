@@ -17,6 +17,51 @@ function validBadge() {
 
 var fixtures = require('./badge-model.fixtures.js');
 test.applyFixtures(fixtures, function () {
+  test('Badge.parseRubricItems() works w/ bulleted lists', function(t) {
+    var criteria = [
+      '* lol',
+      '* oof (optional)',
+      'hi'
+    ].join('\n');
+
+    t.same(Badge.parseRubricItems(criteria), [
+      {
+        text: 'lol',
+        required: true
+      },
+      {
+        text: 'oof (optional)',
+        required: false
+      }
+    ]);
+    t.end();
+  });
+
+  test('Badge.parseRubricItems() works w/o bulleted lists', function(t) {
+    var criteria = [
+      'hi',
+      'there',
+      'dood'
+    ].join('\n');
+
+    t.same(Badge.parseRubricItems(criteria), [
+      {
+        text: 'Satisfies the following criteria:\nhi\nthere\ndood',
+        required: true
+      }
+    ]);
+    t.end();
+  });
+
+  test('Badge#getRubricItems', function(t) {
+    t.same(fixtures['with-criteria'].getRubricItems(), [
+      {
+        text: 'person is awesome',
+        required: true
+      }
+    ]);
+    t.end();
+  });
 
   test('Badge#makeJson', function (t) {
     env.temp({origin: 'https://example.org'}, function (done) {

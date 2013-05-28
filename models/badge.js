@@ -495,6 +495,33 @@ Badge.prototype.makeJson = function makeJson() {
   };
 };
 
+Badge.parseRubricItems = function(content) {
+  const OPTIONAL_REGEXP = /\(\s*optional\s*\)/;
+  var lines = content.split('\n');
+  var rubricItems = [];
+
+  lines.forEach(function(line) {
+    line = line.trim();
+    if (line.length && line[0] == '*') {
+      rubricItems.push({
+        text: line.slice(1).trim(),
+        required: !OPTIONAL_REGEXP.test(line)
+      });
+    }
+  });
+  if (rubricItems.length == 0)
+    rubricItems.push({
+      text: "Satisfies the following criteria:\n" + content,
+      required: true
+    });
+  return rubricItems;
+};
+
+Badge.prototype.getRubricItems = function() {
+  var source = this.criteria.content;
+  return Badge.parseRubricItems(this.criteria.content);
+};
+
 Badge.prototype.getRecommendations = function (email, callback) {
   if (typeof email == 'function')
     callback = email, email = null;
