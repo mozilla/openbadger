@@ -6,6 +6,9 @@ const util = require('../lib/util');
 
 const authOpts = {};
 
+if (!opts)
+  throw new Error("mongodb environment variables not found");
+
 if (opts.pass){
   authOpts.pass = opts.pass;
 }
