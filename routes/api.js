@@ -16,6 +16,9 @@ function normalize(badge) {
     description: badge.description,
     prerequisites: badge.prerequisites,
     image: badge.absoluteUrl('image'),
+    rubric: {
+      items: badge.getRubricItems()
+    },
     behaviors: badge.behaviors.map(function (behavior) {
       return { name: behavior.shortname, score: behavior.count };
     })
@@ -44,7 +47,7 @@ exports.badges = function badges(req, res) {
 
 
 exports.badge = function badge(req, res) {
-  res.json({ status: 'ok', badge: normalize(req.badge) });
+  res.json(200, { status: 'ok', badge: normalize(req.badge) });
 };
 
 exports.recommendations = function recommendations(req, res, next) {

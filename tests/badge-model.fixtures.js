@@ -105,6 +105,15 @@ module.exports = {
     image: IMAGE,
     claimCodes: []
   }),
+  'with-criteria': new Badge({
+    name: 'Badge with criteria',
+    shortname: 'with-criteria',
+    description: 'For doing random stuff',
+    criteria: {
+      content: "* person is awesome"
+    },
+    image: IMAGE,
+  }),
   'user': new User({
     user: 'brian@example.org',
     credit: {}
