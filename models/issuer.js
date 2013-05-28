@@ -43,7 +43,6 @@ const IssuerSchema = new Schema({
   contact: {
     type: String,
     trim: true,
-    required: true,
     match: regex.email
   },
   url: {
