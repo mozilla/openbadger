@@ -22,6 +22,10 @@ const USAGE = [
 
 var cmdline = require('optimist')
   .usage(USAGE.join('\n'))
+  .options('f', {
+    alias: 'filter',
+    desc: 'filter test files by regexp'
+  })
   .options('d', {
     alias: 'debug',
     type: 'boolean',
@@ -56,12 +60,18 @@ async.series([
                                'tap');
     var tapArgs = ['--timeout=10', '--tap', '--stderr'];
     var colorizePath = path.resolve(__dirname, 'colorize-tap-output.js');
+    var filter = function passThrough(f) { return true; };
 
     if (testFilenames.length) {
       tapArgs = tapArgs.concat(testFilenames);
     } else {
+      if (cmdline.argv.filter)
+        filter = (function createRegexpFilter(regexp) {
+          return function(f) { return regexp.test(f); }
+        })(new RegExp(cmdline.argv.filter));
       fs.readdirSync(testDir)
         .filter(function(f) { return /\.test\.js$/.test(f) })
+        .filter(filter)
         .forEach(function(f) {
           var absPath = path.resolve(testDir, f);
           var relPath = path.relative(process.cwd(), absPath);

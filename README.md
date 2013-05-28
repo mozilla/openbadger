@@ -76,10 +76,16 @@ $ bin/test.js --debug  # if you want to see debugging
 $ make lint            # to lint the codebase
 ```
 
-You can also run the tests one-off by doing
-`bin/test.js tests/<name-of-file>.js`. This is useful for when one file is
-giving you trouble and you don't want to run through the whole suite
-to debug just that one thing.
+You can also run just a few of the tests:
+
+```bash
+$ bin/test.js tests/api.test.js  # run only one test file
+$ bin/test.js -f bad             # run all test files w/ 'bad' in their name
+```
+
+This is useful for when one file (or area of code) is giving you trouble
+and you don't want to run through the whole suite to debug just that one
+thing.
 
 # CloudFoundry configuration
 
