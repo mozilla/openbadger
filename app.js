@@ -207,6 +207,10 @@ app.get('/v2/badge/:shortname/recommendations', [
   findBadgeByParamShortname
 ], api.recommendations);
 
+app.get('/v2/unclaimed', [
+  api.auth()
+], api.getUnclaimedBadgeInfoFromCode);
+
 app.post('/v2/claim', [
   api.auth()
 ], api.awardBadgeFromClaimCode);
