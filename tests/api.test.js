@@ -36,12 +36,13 @@ test.applyFixtures(badgeFixtures, function(fx) {
           badge: {
             "name":"Badge with criteria",
             "description":"For doing random stuff",
-            "prerequisites":[],
+            "criteria": "* person is awesome",
+            "prerequisites": [],
+            "tags": [],
             "image":"https://example.org/badge/image/with-criteria.png",
             "rubric":{
               "items":[{"text":"person is awesome","required":true}]
-            },
-            "behaviors":[]
+            }
           }
         });
         t.end();

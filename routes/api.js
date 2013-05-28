@@ -16,12 +16,11 @@ function normalize(badge) {
     description: badge.description,
     prerequisites: badge.prerequisites,
     image: badge.absoluteUrl('image'),
+    criteria: badge.criteria && badge.criteria.content,
+    tags: badge.tags,
     rubric: {
       items: badge.getRubricItems()
-    },
-    behaviors: badge.behaviors.map(function (behavior) {
-      return { name: behavior.shortname, score: behavior.count };
-    })
+    }
   };
 }
 
