@@ -6,6 +6,62 @@ const db = require('../models');
 const badge = require('../routes/badge');
 
 test.applyFixtures(badgeFixtures, function(fx) {
+  test('badge update route works w/ string ageRange', function(t) {
+    conmock({
+      handler: badge.update,
+      request: {
+        badge: fx['comment'],
+        body: {
+          name: "LOL",
+          description: "OOF",
+          ageRange: '13-18'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 301);
+      t.same(fx['comment'].ageRange.toObject(), ['13-18']);
+      t.end();
+    });
+  });
+
+  test('badge update route works w/ no ageRange', function(t) {
+    conmock({
+      handler: badge.update,
+      request: {
+        badge: fx['comment'],
+        body: {
+          name: "LOL",
+          description: "OOF"
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 301);
+      t.same(fx['comment'].ageRange, undefined);
+      t.end();
+    });
+  });
+
+  test('badge update route works w/ array ageRange', function(t) {
+    conmock({
+      handler: badge.update,
+      request: {
+        badge: fx['comment'],
+        body: {
+          name: "LOL",
+          description: "OOF",
+          ageRange: ['13-18', '19-24']
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 301);
+      t.same(fx['comment'].ageRange.toObject(), ['13-18', '19-24']);
+      t.end();
+    });
+  });
+
   test('badge create route handles validation errors', function(t) {
     conmock({
       handler: badge.create,

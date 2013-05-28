@@ -73,7 +73,8 @@ exports.buildEnvironment = function buildEnvironment(options) {
   });
 
   env.addFilter('selected', function (value, expected) {
-    if (value === expected)
+    if ((value === expected) ||
+        (Array.isArray(value) && ~value.indexOf(expected)))
       return 'selected';
     return '';
   });

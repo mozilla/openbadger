@@ -109,10 +109,10 @@ const BadgeSchema = new Schema({
     type: String,
     trim: true,
   },
-  ageRange: {
+  ageRange: [{
     type: String,
     trim: true
-  },
+  }],
   type: {
     type: String,
     trim: true

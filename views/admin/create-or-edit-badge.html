@@ -146,11 +146,14 @@
 
     <div>
       <label for="ageRange">Age Range</label>
-      <select id="ageRange" name="ageRange">
+      <select id="ageRange" name="ageRange" multiple>
         <option value="0-13" {{ badge.ageRange | selected('0-13') }}>&lt;13</option>
         <option value="13-18" {{ badge.ageRange | selected('13-18') }}>13-18</option>
         <option value="19-24" {{ badge.ageRange | selected('19-24') }}>19-24</option>
       </select>
+      <span class="help-block">
+        Hold down the control key (command on Macs) to select multiple options.
+      </span>
     </div>
 
     <div>

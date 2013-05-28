@@ -13,6 +13,20 @@ function handle(err, res) {
   }
 }
 
+test("'selected' filter works w/ string values", function(t) {
+  var env = buildEnv({});
+  t.equal(env.filters['selected']('a', 'a'), "selected");
+  t.equal(env.filters['selected']('b', 'a'), "");
+  t.end();
+});
+
+test("'selected' filter works w/ array values", function(t) {
+  var env = buildEnv({});
+  t.equal(env.filters['selected'](['a', 'b'], 'b'), "selected");
+  t.equal(env.filters['selected'](['a', 'c'], 'b'), "");
+  t.end();
+});
+
 test("app should serve non-theme static files", function(t) {
   var app = express();
   var env = buildEnv({staticMiddleware: express.static});
