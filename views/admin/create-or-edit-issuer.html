@@ -30,14 +30,14 @@
   </div>
 
   <div>
-    <label for="contact">Contact</label>
+    <label for="contact">Contact (optional)</label>
     <input
        id="contact"
        type="email"
        name="contact"
        value="{{ issuer.contact | default('') }}"
        placeholder="admin@example.org"
-       required>
+       >
   </div>
 
   <div>
@@ -74,7 +74,7 @@
   </div>
 
   <div>
-    <label for="image">New Image</label>
+    <label for="image">New Image (optional)</label>
     <input
        id="image"
        type="file"
