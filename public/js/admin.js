@@ -1,6 +1,10 @@
 $(function() {
-  $('#create_trigger').click(function() {
-    $('#no_triggers').hide(); //get rid of the none message 
-    $('#triggers').append('<li>A trigger</li>');
-  });
+  $("#category").change(function updateDynamicCategoryText() {
+    $(".js-category").text($(this).val());
+  }).trigger("change");
+
+  $("#categoryAward").change(function showOrHideRelevantFields() {
+    $("#categoryWeight").parent().toggle(!this.checked);
+    $("#categoryRequirement").parent().toggle(this.checked);
+  }).trigger("change");
 });

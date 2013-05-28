@@ -6,7 +6,37 @@ const Badge = require('../models/badge');
 const db = require('../models');
 const api = require('../routes/api');
 
+function ensureAlreadyClaimedError(t) {
+  return function(err, mockRes, req) {
+    if (err) throw err;
+    t.equal(mockRes.status, 409);
+    t.same(mockRes.body, {
+      status: 'error',
+      reason: "claim code `already-claimed` has already been used",
+      code: 'already-claimed'
+    });
+    t.end();
+  };
+}
+
 test.applyFixtures(badgeFixtures, function(fx) {
+  test('api provies unclaimed badge info given claim code', function(t) {
+    conmock({
+      handler: api.getUnclaimedBadgeInfoFromCode,
+      request: {
+        query: {
+          code: 'will-claim'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body.status, 'ok');
+      t.equal(mockRes.body.badge.name, 'Offline badge');
+      t.end();
+    });
+  });
+
   test('api awards badges w/ claim codes', function(t) {
     conmock({
       handler: api.awardBadgeFromClaimCode,
@@ -30,7 +60,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
-  test('api rejects used claim codes', function(t) {
+  test('api POST rejects used claim codes', function(t) {
     conmock({
       handler: api.awardBadgeFromClaimCode,
       request: {
@@ -39,16 +69,18 @@ test.applyFixtures(badgeFixtures, function(fx) {
           code: 'already-claimed'
         }
       }
-    }, function(err, mockRes, req) {
-      if (err) throw err;
-      t.equal(mockRes.status, 409);
-      t.same(mockRes.body, {
-        status: 'error',
-        reason: "claim code `already-claimed` has already been used",
-        code: 'already-claimed'
-      });
-      t.end();
-    });
+    }, ensureAlreadyClaimedError(t));
+  });
+
+  test('api GET rejects used claim codes', function(t) {
+    conmock({
+      handler: api.getUnclaimedBadgeInfoFromCode,
+      request: {
+        query: {
+          code: 'already-claimed'
+        }
+      }
+    }, ensureAlreadyClaimedError(t));
   });
 
   test('api rejects unknown claim codes', function(t) {
