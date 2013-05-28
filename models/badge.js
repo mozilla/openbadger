@@ -518,8 +518,9 @@ Badge.parseRubricItems = function(content) {
 };
 
 Badge.prototype.getRubricItems = function() {
-  var source = this.criteria.content;
-  return Badge.parseRubricItems(this.criteria.content);
+  return this.criteria.content
+         ? Badge.parseRubricItems(this.criteria.content)
+         : [];
 };
 
 Badge.prototype.getRecommendations = function (email, callback) {

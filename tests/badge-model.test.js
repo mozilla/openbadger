@@ -53,13 +53,18 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
-  test('Badge#getRubricItems', function(t) {
+  test('Badge#getRubricItems works w/ criteria', function(t) {
     t.same(fixtures['with-criteria'].getRubricItems(), [
       {
         text: 'person is awesome',
         required: true
       }
     ]);
+    t.end();
+  });
+
+  test('Badge#getRubricItems works w/o criteria', function(t) {
+    t.same(fixtures['random-badge'].getRubricItems(), []);
     t.end();
   });
 
