@@ -71,8 +71,7 @@ const BadgeSchema = new Schema({
   description: {
     type: String,
     trim: true,
-    required: true,
-    validate: util.maxLength('description', 128)
+    required: true
   },
   criteria: {
     content: {
