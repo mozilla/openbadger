@@ -194,6 +194,7 @@ function inArray(array, thing) {
   return array.indexOf(thing) > -1;
 }
 
+// TODO: Isn't this what _.uniq() does? -AV
 function dedupe(array) {
   const matches = {};
   const results = [];
