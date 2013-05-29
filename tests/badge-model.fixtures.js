@@ -68,6 +68,7 @@ module.exports = {
     name: 'Offline badge',
     shortname: 'offline-badge',
     description: 'For doing stuff offline',
+    program: 'program',
     image: IMAGE,
     claimCodes: [
       { code: 'already-claimed', claimedBy: 'brian@example.org' },
@@ -122,7 +123,6 @@ module.exports = {
   }),
   'instance': new BadgeInstance({
     user: 'brian@example.org',
-    hash: 'hash',
     badge: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
     seen: true
   })

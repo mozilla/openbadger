@@ -484,7 +484,7 @@ Badge.prototype.relativeUrl = function relativeUrl(field) {
   const formats = {
     criteria: '/badge/criteria/%s',
     image: '/badge/image/%s.png',
-    json: '/badge/meta/%s.json'
+    json: '/badge/meta/%s'
   };
   return util.format(formats[field], this.shortname);
 };

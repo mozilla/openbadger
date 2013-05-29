@@ -136,8 +136,11 @@ exports.define = function defineRoutes(app) {
     findBadgeByParamShortname
   ], badge.image);
   app.get('/badge/assertion/:hash', badge.assertion);
+  app.get('/badge/meta/:shortname', [
+    findBadgeByParamShortname
+  ], badge.meta);
   app.get('/badge/criteria/:shortname', [
-     findBadgeByParamShortname
+    findBadgeByParamShortname
   ], render.criteria);
 
   app.get('/claim', render.claim);

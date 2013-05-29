@@ -152,6 +152,14 @@ exports.assertion = function assertion(req, res) {
   });
 };
 
+exports.meta = function meta(req, res) {
+  req.badge.populate('program', function(err) {
+    if (err)
+      return res.send(500, err);
+    res.send(200, req.badge.makeJson());
+  });
+};
+
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
   const badge = req.badge;
   const form = req.body;

@@ -57,10 +57,16 @@ test.applyFixtures(fixtures, function () {
 
             request(srv)
               .get(badgeUrl)
-              .end(function(err, res) {
-                t.skip("TODO: Verify badge URL exists and doesn't 404.");
-
+              .expect(200, function(err, res) {
                 if (err) throw err;
+                t.equal(res.body.name, 'Offline badge');
+                t.ok(/^data:image\/png;base64,/.test(res.body.image));
+
+                var criteriaUrl = res.body.criteria;
+                var issuerUrl = res.body.issuer;
+
+                t.skip("TODO: ensure criteriaUrl and issuerUrl exist");
+
                 srv.close();
                 t.end();
               });
