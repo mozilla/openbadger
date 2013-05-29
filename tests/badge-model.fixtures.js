@@ -10,7 +10,7 @@ const IMAGE = test.asset('sample.png');
 
 module.exports = {
   'issuer': new Issuer({
-    id: 'issuer',
+    _id: 'issuer',
     name: 'Badge Authority',
     contact: 'brian@example.org',
     programs: [

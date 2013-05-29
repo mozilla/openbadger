@@ -83,7 +83,7 @@ Program.prototype.makeJson = function makeIssuerJson() {
 };
 Program.prototype.relativeUrl = function relativeUrl(field) {
   const formats = {
-    json: '/program/meta/%s.json',
+    json: '/program/meta/%s',
     image: '/program/image/%s',
   };
   return util.format(formats[field], this._id);

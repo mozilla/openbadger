@@ -153,6 +153,14 @@ exports.updateProgram = function updateProgram(req, res, next) {
   });
 };
 
+exports.meta = function meta(req, res, next) {
+  req.program.populate('issuer', function(err) {
+    if (err)
+      return res.send(500, err);
+    res.send(req.program.makeJson());
+  });
+};
+
 exports.image = function image(req, res, next) {
   console.dir(req.issuer);
   res.type('png');

@@ -19,6 +19,17 @@ test.applyFixtures(fixtures, function () {
     var srv = http.createServer(app);
 
     app.use(express.bodyParser());
+    app.use(function(req, res, next) {
+      req.session = {};
+      res.render = function(template, context) {
+        return res.send({
+          type: 'fakeRender',
+          template: template,
+          context: context
+        });
+      };
+      next();
+    });
 
     routes.define(app);
 
@@ -65,10 +76,26 @@ test.applyFixtures(fixtures, function () {
                 var criteriaUrl = res.body.criteria;
                 var issuerUrl = res.body.issuer;
 
-                t.skip("TODO: ensure criteriaUrl and issuerUrl exist");
+                request(srv)
+                  .get(issuerUrl)
+                  .expect(200, function(err, res) {
+                    if (err) throw err;
+                    t.same(res.body, {
+                      name: 'Badge Authority',
+                      org: 'Some Program',
+                      contact: 'brian@example.org',
+                      url: 'http://example.org/program'
+                    });
 
-                srv.close();
-                t.end();
+                    request(srv)
+                      .get(criteriaUrl)
+                      .expect(200, function(err, res) {
+                        t.equal(res.body.type, 'fakeRender');
+                        t.equal(res.body.template, 'public/criteria.html');
+                        srv.close();
+                        t.end();
+                      });
+                  });
               });
           });
 
