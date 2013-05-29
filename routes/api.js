@@ -159,39 +159,7 @@ function getUnclaimedBadgeFromCode(code, req, res, next, cb) {
   });
 };
 
-exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
-  getUnclaimedBadgeFromCode(req.query.code, req, res, next, function(badge) {
-    return res.json(200, {
-      status: 'ok',
-      badge: normalize(badge)
-    });
-  });
-};
-
-exports.awardBadgeFromClaimCode = function(req, res, next) {
-  const code = req.body.code;
-  const email = req.body.email;
-
-  if (!email)
-    return res.json(400, {status: 'error', reason: 'missing email address'});
-
-  getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
-    badge.redeemClaimCode(code, email);
-
-    // TODO: We're redeeming the claim code before awarding the badge,
-    // which is unfortunate if awarding the badge fails for some reason;
-    // would be nice to make this transactional.
-    badge.save(function(err) {
-      if (err) return next(err);
-      req.badge = badge;
-      return exports.awardBadge(req, res, next);
-    });
-  });
-};
-
-exports.awardBadge = function awardBadge(req, res, next) {
-  const badge = req.badge;
-  const email = req.body.email;
+function tryAwardingBadge(badge, email, res, successCb) {
   if (!badge)
     return res.json(404, {status: 'error', reason: 'badge not found'});
   if (!email)
@@ -212,11 +180,47 @@ exports.awardBadge = function awardBadge(req, res, next) {
         reason: util.format('user `%s` already has badge', email),
         user: email,
       });
-    return res.json(200, {
+    var success = res.send.bind(res, 200, {
       status: 'ok',
       url: instance.absoluteUrl('assertion'),
     });
+    if (successCb) successCb(success); else success();
   });
+}
+
+exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
+  getUnclaimedBadgeFromCode(req.query.code, req, res, next, function(badge) {
+    return res.json(200, {
+      status: 'ok',
+      badge: normalize(badge)
+    });
+  });
+};
+
+exports.awardBadgeFromClaimCode = function(req, res, next) {
+  const code = req.body.code;
+  const email = req.body.email;
+
+  if (!email)
+    return res.json(400, {status: 'error', reason: 'missing email address'});
+
+  getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
+    tryAwardingBadge(badge, email, res, function(success) {
+      badge.redeemClaimCode(code, email);
+      badge.save(function(err) {
+        if (err)
+          // Well, this is unfortunate, since we've already given them
+          // the badge... Not sure what else we can do here, but at least
+          // this error condition is highly unlikely.
+          return next(err);
+        success();
+      });
+    });
+  });
+};
+
+exports.awardBadge = function awardBadge(req, res, next) {
+  tryAwardingBadge(req.badge, req.body.email, res);
 };
 
 exports.removeBadge = function removeBadge(req, res, next) {

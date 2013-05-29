@@ -112,6 +112,30 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api rejects unused claim codes for pre-earned badges', function(t) {
+    conmock({
+      handler: api.awardBadgeFromClaimCode,
+      request: {
+        body: {
+          email: 'foo@bar.org',
+          code: 'never-claim'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 409);
+      t.equal(mockRes.body.status, 'error');
+      t.equal(mockRes.body.reason, 'user `foo@bar.org` already has badge');
+      Badge.findOne({_id: fx['offline-badge']._id}, function(err, badge) {
+        if (err) throw err;
+        t.ok(badge);
+        t.equal(badge.getClaimCode('never-claim').claimedBy, undefined,
+                "claim code should not be used up");
+        t.end();
+      });
+    });
+  });
+
   test('api POST rejects used claim codes', function(t) {
     conmock({
       handler: api.awardBadgeFromClaimCode,
