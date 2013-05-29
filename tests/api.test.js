@@ -21,6 +21,26 @@ function ensureAlreadyClaimedError(t) {
 }
 
 test.applyFixtures(badgeFixtures, function(fx) {
+  test('api provides user info', function(t) {
+    conmock({
+      handler: api.user,
+      request: {
+        query: {
+          email: 'brian@example.org'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      var badge = mockRes.body.badges['link-basic'];
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body.status, 'ok');
+      t.equal(typeof(badge.issuedOn), 'number');
+      t.equal(typeof(badge.isRead), 'boolean');
+      t.equal(typeof(badge.assertionUrl), 'string');
+      t.end();
+    });
+  });
+
   test('api provides expected badge info', function(t) {
     env.temp({origin: 'https://example.org'}, function(done) {
       conmock({

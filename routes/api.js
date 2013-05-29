@@ -1,4 +1,5 @@
 const _ = require('underscore');
+const async = require('async');
 const jwt = require('jwt-simple');
 const urlutil = require('url');
 const env = require('../lib/environment');
@@ -117,14 +118,21 @@ exports.user = function user(req, res) {
     if (err)
       return res.send(500, { status: 'error', error: err });
     result.behaviors = user.behaviors;
-    user.badges.forEach(function (instance) {
-      result.badges[instance.badge] = {
-        assertionUrl: instance.absoluteUrl('assertion'),
-        isRead: instance.seen,
-        issuedOn: instance.issuedOnUnix(),
-      };
+    async.forEach(user.badges, function(instance, cb) {
+      instance.populate('badge', function(err) {
+        if (err) return cb(err);
+        result.badges[instance.badge.shortname] = {
+          assertionUrl: instance.absoluteUrl('assertion'),
+          isRead: instance.seen,
+          issuedOn: instance.issuedOnUnix(),
+        };
+        cb();
+      });
+    }, function(err) {
+      if (err) 
+        return res.send(500, { status: 'error', error: err });
+      return res.send(200, result);
     });
-    return res.send(200, result);
   });
 };
 
