@@ -2,6 +2,7 @@ const _ = require('underscore');
 const fs = require('fs');
 const logger = require('../lib/logger');
 const Badge = require('../models/badge');
+const phrases = require('../lib/phrases');
 const BadgeInstance = require('../models/badge-instance');
 const util = require('../lib/util');
 const async = require('async');
@@ -161,13 +162,24 @@ exports.meta = function meta(req, res) {
 };
 
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
+  var codes = [];
+  var count;
   const badge = req.badge;
   const form = req.body;
-  const options = {
-    codes: form.codes
+
+  if (form.codes) {
+    codes = form.codes
       .split('\n')
       .map(util.method('trim'))
-      .filter(util.prop('length')),
+      .filter(util.prop('length'));
+  } else if (form.quantity) {
+    count = parseInt(form.quantity);
+    if (count > 0)
+      codes = phrases(count);
+  }
+
+  const options = {
+    codes: codes,
     multi: !!form.multi
   };
   badge.addClaimCodes(options, function(err) {
