@@ -79,7 +79,7 @@ BadgeInstance.findByCategory = function (user, category, callback) {
     .exec(function (err, instances) {
       if (err) return callback(err);
       const valid = instances.filter(function (inst) {
-        return inst.badge && inst.badge.category === category;
+        return inst.badge && ~inst.badge.categories.indexOf(category);
       });
       return callback(null, valid);
     });

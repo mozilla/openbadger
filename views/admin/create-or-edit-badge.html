@@ -88,54 +88,6 @@
     </div>
 
     <div>
-      <label for="category">Category</label>
-      <select id="category" name="category">
-        <option value="science" {{ badge.category | selected('science') }}>Science</option>
-        <option value="technology" {{ badge.category | selected('technology') }}>Technology</option>
-        <option value="engineering" {{ badge.category | selected('engineering') }}>Engineering</option>
-        <option value="art" {{ badge.category | selected('art') }}>Art</option>
-        <option value="math" {{ badge.category | selected('math') }}>Math</option>
-      </select>
-    </div>
-
-    <div>
-      <label class="checkbox">
-        <input id="categoryAward" name="categoryAward" type="checkbox" {% if badge.categoryAward %}checked{% endif %}>
-        This is the unique STEAM badge for <span class="js-category">its category</span>.
-      </label>
-      <span class="help-block">
-        There can be only one STEAM badge for each category.
-      </span>
-    </div>
-
-    <div>
-      <label for="categoryRequirement">STEAM Badge Point Requirement</label>
-      <input
-          id="categoryRequirement"
-          type="number"
-          name="categoryRequirement"
-          value="{{ badge.categoryRequirement | default('0') }}">
-      <span class="help-block">
-        This is the total number of points from other badges in the
-        <span class="js-category">same</span> category needed to earn this badge.
-      </span>
-    </div>
-
-    <div>
-      <label for="categoryWeight">STEAM Badge Points</label>
-      <input
-          id="categoryWeight"
-          type="number"
-          name="categoryWeight"
-          value="{{ badge.categoryWeight | default('0') }}">
-      <span class="help-block">
-        This is the number of points earning this badge contributes
-        to earning the unique STEAM badge for 
-        <span class="js-category">its category</span>.
-      </span>
-    </div>
-
-    <div>
       <label for="timeToEarn">Time to Earn</label>
       <select id="timeToEarn" name="timeToEarn">
         <option value="short" {{ badge.timeToEarn | selected('short') }}>1-4 hours</option>
@@ -197,6 +149,67 @@
         known to man.
         {% if editing %} Leave blank to keep old image. {% endif %}
       </span>
+    </div>
+
+    <h5>STEAM Badging Details</h5>
+
+    <div>
+      <label for="categoryAward">This is a special STEAM badge award for&hellip;</label>
+      <select id="categoryAward" name="categoryAward" class="input-xlarge">
+        <option value="">Nothing &mdash; it's not a STEAM badge</option>
+        <option value="science" {{ badge.categoryAward | selected('science') }}>Science</option>
+        <option value="technology" {{ badge.categoryAward | selected('technology') }}>Technology</option>
+        <option value="engineering" {{ badge.categoryAward | selected('engineering') }}>Engineering</option>
+        <option value="art" {{ badge.categoryAward | selected('art') }}>Art</option>
+        <option value="math" {{ badge.categoryAward | selected('math') }}>Math</option>
+      </select>
+      <span class="help-block">
+        If you're uncertain about this field, you should leave it set to <strong>Nothing</strong>.
+      </span>
+    </div>
+
+    <div class="js-category-award-only">
+    <div>
+      <label for="categoryRequirement">STEAM Badge Point Requirement</label>
+      <input
+          id="categoryRequirement"
+          type="number"
+          name="categoryRequirement"
+          value="{{ badge.categoryRequirement | default('0') }}">
+      <span class="help-block">
+        This is the total number of points from other badges with the
+        <span class="js-category-award">same</span> category needed to earn this badge.
+      </span>
+    </div>
+    </div>
+
+    <div class="js-non-category-award-only">
+    <div>
+      <label for="categories">This badge contributes points towards special STEAM badges in&hellip;</label>
+      <select id="categories" name="categories" multiple>
+        <option value="science" {{ badge.categories | selected('science') }}>Science</option>
+        <option value="technology" {{ badge.categories | selected('technology') }}>Technology</option>
+        <option value="engineering" {{ badge.categories | selected('engineering') }}>Engineering</option>
+        <option value="art" {{ badge.categories | selected('art') }}>Art</option>
+        <option value="math" {{ badge.categories | selected('math') }}>Math</option>
+      </select>
+      <span class="help-block">
+        Hold down the control key (command on Macs) to select multiple options.
+      </span>
+    </div>
+
+    <div>
+      <label for="categoryWeight">STEAM Badge Point Contribution</label>
+      <input
+          id="categoryWeight"
+          type="number"
+          name="categoryWeight"
+          value="{{ badge.categoryWeight | default('0') }}">
+      <span class="help-block">
+        This is the number of points earning this badge contributes
+        to earning a special STEAM badge in any of its categories.
+      </span>
+    </div>
     </div>
 
     <div class="form-actions">

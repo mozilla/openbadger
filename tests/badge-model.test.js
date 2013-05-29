@@ -110,6 +110,40 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge#save: category info is normalized for awards', function(t) {
+    var badge = validBadge();
+    badge.shortname += "_cataward";
+    badge.name += " cataward";
+    badge.categoryAward = "foo";
+    badge.categories = ["lol"];
+    badge.categoryWeight = 50;
+    badge.categoryRequirement = 5;
+    badge.save(function(err, badge) {
+      if (err) throw err;
+      t.same(badge.categories.toObject(), []);
+      t.equal(badge.categoryWeight, 0);
+      t.equal(badge.categoryRequirement, 5);
+      t.end();
+    });
+  });
+
+  test('Badge#save: category info is normalized for non-awards', function(t) {
+    var badge = validBadge();
+    badge.shortname += "_nonaward";
+    badge.name += " nonaward";
+    badge.categoryAward = "";
+    badge.categories = ["lol"];
+    badge.categoryWeight = 50;
+    badge.categoryRequirement = 5;
+    badge.save(function(err, badge) {
+      if (err) throw err;
+      t.same(badge.categories.toObject(), ["lol"]);
+      t.equal(badge.categoryWeight, 50);
+      t.equal(badge.categoryRequirement, 0);
+      t.end();
+    });
+  });
+
   test('Badge#validate: image too big', function (t) {
     var errorKeys;
     var badge = validBadge();

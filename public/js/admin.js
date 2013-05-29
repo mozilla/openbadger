@@ -1,10 +1,7 @@
 $(function() {
-  $("#category").change(function updateDynamicCategoryText() {
-    $(".js-category").text($(this).val());
-  }).trigger("change");
-
-  $("#categoryAward").change(function showOrHideRelevantFields() {
-    $("#categoryWeight").parent().toggle(!this.checked);
-    $("#categoryRequirement").parent().toggle(this.checked);
+  $("#categoryAward").change(function updateDynamicCategoryAwardText() {
+    $(".js-category-award").text($(this).val());
+    $(".js-category-award-only").toggle(!!$(this).val());
+    $(".js-non-category-award-only").toggle(!$(this).val());
   }).trigger("change");
 });

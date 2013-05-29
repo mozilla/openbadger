@@ -85,7 +85,8 @@ const BadgeSchema = new Schema({
     }
   },
   categoryAward: {
-    type: Boolean,
+    type: String,
+    trim: true
   },
   categoryRequirement: {
     type: Number,
@@ -101,10 +102,7 @@ const BadgeSchema = new Schema({
     required: true,
     validate: util.maxLength('image', 256 * 1024)
   },
-  category: {
-    type: String,
-    trim: true,
-  },
+  categories: [{type: String, trim: true}],
   timeToEarn: {
     type: String,
     trim: true,
@@ -143,6 +141,15 @@ function setShortNameDefault(next) {
   next();
 }
 BadgeSchema.pre('validate', setShortNameDefault);
+BadgeSchema.pre('validate', function normalizeCategoryInfo(next) {
+  if (this.categoryAward) {
+    this.categories = [];
+    this.categoryWeight = 0;
+  } else {
+    this.categoryRequirement = 0;
+  }
+  next();
+});
 
 // Model methods
 // -------------
@@ -196,6 +203,7 @@ function inArray(array, thing) {
   return array.indexOf(thing) > -1;
 }
 
+// TODO: Isn't this what _.uniq() does? -AV
 function dedupe(array) {
   const matches = {};
   const results = [];
@@ -372,7 +380,7 @@ Badge.prototype.award = function award(options, callback) {
   const checkForCategoryBadges =
     !this.categoryAward && this.categoryWeight;
   const email = options.user;
-  const category = this.category;
+  const categories = this.categories;
   const weight = this.weight;
   const instance = new BadgeInstance({
     user: email,
@@ -395,36 +403,38 @@ Badge.prototype.award = function award(options, callback) {
     if (!checkForCategoryBadges)
       return callback(null, instance, []);
 
-    async.waterfall([
-      function getCategoryBadges(callback) {
-        const query = {category: category, categoryAward: true};
-        Badge.find(query, callback);
-      },
-      function filterByScore(badges, callback) {
-        BadgeInstance.findByCategory(email, category, function (err, instances) {
-          if (err) return callback(err);
-          const score = instances.reduce(function (sum, inst) {
-            return (sum += inst.badge.categoryWeight, sum);
-          }, 0);
-          const eligible = badges.filter(function (badge) {
-            return score >= badge.categoryRequirement;
+    async.concatSeries(categories, function(category, catCb) {
+      async.waterfall([
+        function getCategoryBadges(callback) {
+          const query = {categoryAward: category};
+          Badge.find(query, callback);
+        },
+        function filterByScore(badges, callback) {
+          BadgeInstance.findByCategory(email, category, function (err, instances) {
+            if (err) return callback(err);
+            const score = instances.reduce(function (sum, inst) {
+              return (sum += inst.badge.categoryWeight, sum);
+            }, 0);
+            const eligible = badges.filter(function (badge) {
+              return score >= badge.categoryRequirement;
+            });
+            return callback(null, eligible);
           });
-          return callback(null, eligible);
-        });
-      },
-      function filterByOwned(badges, callback) {
-        async.filter(badges, function (badge, cb) {
-          const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
-          doesNotOwnBadge(email, badge.shortname, function (err, result) {
-            return cb(result);
-          });
-        }, function (results) { callback(null, results) });
-      },
-      function awardBadges(badges, callback) {
-        const newOpts = { user: email, sendEmail: true };
-        async.map(badges, util.method('award', newOpts), callback);
-      },
-    ], function (err, instances) {
+        },
+        function filterByOwned(badges, callback) {
+          async.filter(badges, function (badge, cb) {
+            const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
+            doesNotOwnBadge(email, badge.shortname, function (err, result) {
+              return cb(result);
+            });
+          }, function (results) { callback(null, results) });
+        },
+        function awardBadges(badges, callback) {
+          const newOpts = { user: email, sendEmail: true };
+          async.map(badges, util.method('award', newOpts), callback);
+        },
+      ], catCb);
+    }, function(err, instances) {
       if (err) return callback(err);
       return callback(null, instances, instances);
     });
