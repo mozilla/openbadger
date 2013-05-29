@@ -1,3 +1,4 @@
+const util = require('util');
 const test = require('./');
 const conmock = require('./conmock');
 const badgeFixtures = require('./badge-model.fixtures');
@@ -6,6 +7,63 @@ const db = require('../models');
 const badge = require('../routes/badge');
 
 test.applyFixtures(badgeFixtures, function(fx) {
+  test('adding no claim codes does nothing', function(t) {
+    var b = fx['link-basic'];
+    t.equal(b.claimCodes.length, 0);
+    conmock({
+      handler: badge.addClaimCodes,
+      request: {
+        badge: b,
+        body: {
+          quantity: 'lol',
+          multi: 'on'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 301);
+      t.equal(b.claimCodes.length, 0);
+      t.end();
+    });
+  });
+
+  test('adding claim codes works w/ quantity', function(t) {
+    var b = fx['link-basic'];
+    t.equal(b.claimCodes.length, 0);
+    conmock({
+      handler: badge.addClaimCodes,
+      request: {
+        badge: b,
+        body: {
+          quantity: '3'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 301);
+      t.equal(b.claimCodes.length, 3);
+      t.end();
+    });
+  });
+
+  test('adding claim codes works w/ codes', function(t) {
+    var b = fx['comment'];
+    conmock({
+      handler: badge.addClaimCodes,
+      request: {
+        badge: b,
+        body: {
+          codes: 'blarg\nflarg\n\n\narg'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 301);
+      t.same(b.claimCodes.map(util.prop('code')), ['blarg', 'flarg', 'arg']);
+      t.end();
+    });
+  });
+
   test('assertion route finds badge instances by id', function(t) {
     conmock({
       handler: badge.assertion,
