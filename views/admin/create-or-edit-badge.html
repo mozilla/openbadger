@@ -90,9 +90,11 @@
     <div>
       <label for="timeToEarn">Time to Earn</label>
       <select id="timeToEarn" name="timeToEarn">
-        <option value="short" {{ badge.timeToEarn | selected('short') }}>1-4 hours</option>
-        <option value="medium" {{ badge.timeToEarn | selected('medium') }}>1 day</option>
-        <option value="long" {{ badge.timeToEarn | selected('long') }}>1 week</option>
+        <option value="hours" {{ badge.timeToEarn | selected('hours') }}>hours</option>
+        <option value="days" {{ badge.timeToEarn | selected('days') }}>days</option>
+        <option value="weeks" {{ badge.timeToEarn | selected('weeks') }}>weeks</option>
+        <option value="months" {{ badge.timeToEarn | selected('months') }}>months</option>
+        <option value="years" {{ badge.timeToEarn | selected('years') }}>longer</option>
       </select>
     </div>
 
