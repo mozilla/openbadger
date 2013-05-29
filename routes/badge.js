@@ -161,6 +161,13 @@ exports.meta = function meta(req, res) {
   });
 };
 
+exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
+  var codes = req.badge.claimCodes
+    .filter(function(c) { return !c.claimedBy && !c.multi; })
+    .map(util.prop('code'));
+  return res.type('text').send(200, codes.join('\n'));
+};
+
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
   var codes = [];
   var count;

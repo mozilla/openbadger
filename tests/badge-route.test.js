@@ -7,6 +7,21 @@ const db = require('../models');
 const badge = require('../routes/badge');
 
 test.applyFixtures(badgeFixtures, function(fx) {
+  test('getting open claim codes as txt works', function(t) {
+    conmock({
+      handler: badge.getUnclaimedCodesTxt,
+      request: {
+        badge: fx['offline-badge'],
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.headers['Content-Type'], 'text/plain');
+      t.equal(mockRes.body, 'never-claim\nwill-claim\nremove-claim');
+      t.end();
+    });
+  });
+
   test('adding no claim codes does nothing', function(t) {
     var b = fx['link-basic'];
     t.equal(b.claimCodes.length, 0);
