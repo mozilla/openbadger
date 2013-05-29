@@ -412,9 +412,17 @@ exports.program = function program(req, res) {
       return (out[field] = program[field], out);
     }, {});
     programData.imageUrl = program.absoluteUrl('image');
-    return res.json(200, {
-      status: 'ok',
-      program: programData,
+    programData.earnableBadges = {};
+    Badge.find({program: program._id}, function(err, badges) {
+      if (err)
+        return res.send(500, "There was an error retrieving earnable badges");
+      badges.forEach(function(badge) {
+        programData.earnableBadges[badge.shortname] = normalize(badge);
+      });
+      return res.json(200, {
+        status: 'ok',
+        program: programData,
+      });
     });
   });
 };

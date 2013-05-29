@@ -218,6 +218,26 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api provides program info w/ earnable badges', function(t) {
+    conmock({
+      handler: api.program,
+      request: {
+        params: {
+          programShortName: 'some-program'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body.status, 'ok');
+      t.equal(mockRes.body.program.name, "Some Program");
+      var program = mockRes.body.program;
+      t.ok('offline-badge' in program.earnableBadges);
+      t.equal(program.earnableBadges['offline-badge'].name, 'Offline badge');
+      t.end();
+    });
+  });
+
   test('shutting down #', function (t) {
     db.close(); t.end();
   });
