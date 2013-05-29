@@ -172,20 +172,6 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  test('Badge#validate: description too long', function (t) {
-    var errorKeys;
-    var length = 128;
-    var badge = validBadge();
-    badge.description = test.randomstring(length + 1);
-    badge.validate(function (err, results) {
-      t.ok(err, 'should have errors');
-      errorKeys = Object.keys(err.errors);
-      t.same(errorKeys, ['description'], 'should only have one error');
-      t.same(err.errors['description'].type, 'maxLength', 'should be a maxLength error');
-      t.end();
-    });
-  });
-
   test('Badge.findByBehavior: finding badges by behavior', function (t) {
     var behavior = 'link';
     Badge.findByBehavior(behavior, function (err, badges) {
