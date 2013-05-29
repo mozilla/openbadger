@@ -141,6 +141,15 @@ function setShortNameDefault(next) {
   next();
 }
 BadgeSchema.pre('validate', setShortNameDefault);
+BadgeSchema.pre('validate', function normalizeCategoryInfo(next) {
+  if (this.categoryAward) {
+    this.categories = [];
+    this.categoryWeight = 0;
+  } else {
+    this.categoryRequirement = 0;
+  }
+  next();
+});
 
 // Model methods
 // -------------
