@@ -6,6 +6,21 @@ const db = require('../models');
 const badge = require('../routes/badge');
 
 test.applyFixtures(badgeFixtures, function(fx) {
+  test('assertion route finds badge instances by hash', function(t) {
+    conmock({
+      handler: badge.assertion,
+      request: {
+        params: {hash: 'hash'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.headers['Content-Type'], 'application/json');
+      t.same(JSON.parse(mockRes.body), {assertion: "yep"});
+      t.end();
+    });
+  });
+
   test('badge update route works w/ string ageRange', function(t) {
     conmock({
       handler: badge.update,
