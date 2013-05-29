@@ -25,6 +25,7 @@ module.exports = {
     url: 'http://example.org/program',
   }),
   'link-basic': new Badge({
+    _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
     name: 'Link Badge, basic',
     shortname: 'link-basic',
     description: 'For doing links.',
@@ -122,8 +123,7 @@ module.exports = {
   'instance': new BadgeInstance({
     user: 'brian@example.org',
     hash: 'hash',
-    badge: 'link-basic',
-    assertion: '{ "assertion" : "yep" }',
+    badge: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
     seen: true
   })
 };

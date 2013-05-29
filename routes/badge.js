@@ -137,14 +137,18 @@ exports.image = function image(req, res) {
 };
 
 exports.assertion = function assertion(req, res) {
-  var assertionHash = req.param('hash');
-  BadgeInstance.findOne({ hash: assertionHash }, function (err, instance) {
+  var assertionId = req.param('hash');
+  BadgeInstance.findOne({ _id: assertionId }, function (err, instance) {
     if (err)
       return res.send(500, err);
     if (!instance)
       return res.send(404);
-    res.type('json');
-    return res.send(200, instance.assertion);
+    instance.populate('badge', function(err) {
+      if (err)
+        return res.send(500, err);
+      res.type('json');
+      return res.send(200, instance.makeAssertion());
+    });
   });
 };
 

@@ -26,11 +26,6 @@ const BadgeInstanceSchema = new Schema({
     type: String,
     ref: 'Badge',
   },
-  assertion: {
-    type: String,
-    trim: true,
-    required: false,
-  },
   issuedOn: {
     type: Date,
     trim: true,
@@ -45,10 +40,6 @@ const BadgeInstanceSchema = new Schema({
     type: Boolean,
     required: true,
     default: false
-  },
-  hash: {
-    type: String,
-    required: false,
   },
   userBadgeKey: {
     type: String,
