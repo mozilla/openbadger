@@ -5,49 +5,75 @@ const db = require('../models');
 const Badge = require('../models/badge');
 const BadgeInstance = require('../models/badge-instance');
 
-const USER = 'user@example.org';
+const USER_1 = 'user1@example.org';
+const USER_2 = 'user2@example.org';
 
 test.applyFixtures({
-  'category-badge': new Badge({
-    name: 'category badge',
-    description: 'category',
-    category: 'science',
-    categoryAward: true,
+  'science-badge': new Badge({
+    _id: 'bba3989d4825d81b5587f96b7d8ba6941d590af5',
+    name: 'science badge',
+    description: 'this is THE science badge!',
+    categoryAward: 'science',
     categoryRequirement: 5,
+    image: Buffer(1),
+  }),
+  'art-badge': new Badge({
+    _id: 'bba3989d4825d81b5587f96b7d8ba6941d590af6',
+    name: 'art badge',
+    description: 'this is THE art badge!',
+    categoryAward: 'art',
+    categoryRequirement: 6,
     image: Buffer(1),
   }),
   'tiny-badge': new Badge({
     name: 'tiny badge',
     description: 'tiny',
-    category: 'science',
+    categories: ['science', 'art'],
     categoryWeight: 1,
     image: Buffer(1),
   }),
   'small-badge': new Badge({
     name: 'small badge',
     description: 'small',
-    category: 'science',
+    categories: ['science'],
     categoryWeight: 2,
     image: Buffer(1),
   }),
   'large-badge': new Badge({
     name: 'large badge',
     description: 'large',
-    category: 'science',
+    categories: ['science', 'art'],
     categoryWeight: 5,
     image: Buffer(1),
   }),
 }, function (fx) {
-  test('awarding stuff', function (t) {
-    const smallBadge = fx['small-badge'];
-    const largeBadge = fx['large-badge'];
-    const tinyBadge = fx['tiny-badge'];
-    const categoryBadge = fx['category-badge'];
-    smallBadge.award(USER, function (err, inst, auto) {
+  const smallBadge = fx['small-badge'];
+  const largeBadge = fx['large-badge'];
+  const tinyBadge = fx['tiny-badge'];
+
+  test('staggered awarding', function (t) {
+    smallBadge.award(USER_1, function (err, inst, auto) {
       t.same(auto.length, 0);
-      largeBadge.award(USER, function (err, inst, auto) {
+      largeBadge.award(USER_1, function (err, inst, auto) {
         t.same(auto.length, 1);
-        tinyBadge.award(USER, function (err, inst, auto) {
+        t.same(auto[0].badge, fx['science-badge']._id);
+        tinyBadge.award(USER_1, function (err, inst, auto) {
+          t.same(auto.length, 1);
+          t.same(auto[0].badge, fx['art-badge']._id);
+          t.end();
+        });
+      });
+    });
+  });
+
+  test('simultaneous awarding', function (t) {
+    tinyBadge.award(USER_2, function (err, inst, auto) {
+      t.same(auto.length, 0);
+      largeBadge.award(USER_2, function (err, inst, auto) {
+        t.same(auto.length, 2);
+        t.same(auto[0].badge, fx['science-badge']._id);
+        t.same(auto[1].badge, fx['art-badge']._id);
+        smallBadge.award(USER_2, function (err, inst, auto) {
           t.same(auto.length, 0);
           t.end();
         });
