@@ -32,6 +32,7 @@
     "tap": "~0.3.1",
     "colors": "0.6.0",
     "supertest": "0.6.0",
+    "prompt": "0.2.9",
     "mime": "~1.2.5"
   },
   "engines": {
