@@ -8,13 +8,11 @@ bike
 bird
 boat
 book
-boy
 cake
 car
 cat
 chair
 chicken
-child
 clock
 cloud
 corn
@@ -32,8 +30,6 @@ flower
 friend
 frog
 giant
-girl
-hand
 horse
 house
 kitten
