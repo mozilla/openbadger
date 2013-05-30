@@ -61,6 +61,8 @@ test.applyFixtures(badgeFixtures, function(fx) {
             "tags": [],
             "program": "program",
             "image":"https://example.org/badge/image/with-criteria.png",
+            "ageRange": [],
+            "categories": [],
             "rubric":{
               "items":[{"text":"person is awesome","required":true}]
             }

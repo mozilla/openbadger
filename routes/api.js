@@ -20,6 +20,13 @@ function normalize(badge) {
     criteria: badge.criteria && badge.criteria.content,
     program: badge.program,
     tags: badge.tags,
+    categoryAward: badge.categoryAward,
+    categoryRequirement: badge.categoryRequirement || undefined,
+    categoryWeight: badge.categoryWeight || undefined,
+    categories: badge.categories,
+    ageRange: badge.ageRange,
+    type: badge.type,
+    activityType: badge.activityType,
     rubric: {
       items: badge.getRubricItems()
     }
