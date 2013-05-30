@@ -125,6 +125,8 @@ exports.user = function user(req, res) {
           assertionUrl: instance.absoluteUrl('assertion'),
           isRead: instance.seen,
           issuedOn: instance.issuedOnUnix(),
+          name: instance.badge.name,
+          image: instance.badge.absoluteUrl('image')
         };
         cb();
       });
