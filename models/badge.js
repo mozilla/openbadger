@@ -202,20 +202,6 @@ function inArray(array, thing) {
   return array.indexOf(thing) > -1;
 }
 
-// TODO: Isn't this what _.uniq() does? -AV
-function dedupe(array) {
-  const matches = {};
-  const results = [];
-  var idx = array.length;
-  var word;
-  while (idx--) {
-    word = array[idx];
-    if (!matches[word])
-      matches[word] = results.unshift(word);
-  }
-  return results;
-}
-
 /**
  * Add a bunch of claim codes and saves the badge. Will make sure the
  * codes are universally unique before adding them.
@@ -239,7 +225,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
   // remove duplicates
   const codes = (options.alreadyClean
     ? options.codes
-    : dedupe(options.codes));
+    : _.uniq(options.codes));
   const limit = options.limit || Infinity;
 
   const accepted = [];
