@@ -41,6 +41,48 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api returns 404 when no user badge info', function(t) {
+    conmock({
+      handler: api.userBadge,
+      request: {
+        query: {
+          email: 'brian@example.org'
+        },
+        params: {
+          shortname: 'LOLOLOL'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 404);
+      t.end();
+    });
+  });
+
+  test('api provides user badge info', function(t) {
+    conmock({
+      handler: api.userBadge,
+      request: {
+        query: {
+          email: 'brian@example.org'
+        },
+        params: {
+          shortname: 'link-basic'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      var badge = mockRes.body.badge;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body.status, 'ok');
+      t.equal(typeof(badge.issuedOn), 'number');
+      t.equal(typeof(badge.isRead), 'boolean');
+      t.equal(typeof(badge.assertionUrl), 'string');
+      t.equal(badge.badgeClass.name, 'Link Badge, basic');
+      t.end();
+    });
+  });
+
   test('api provides expected badge info', function(t) {
     env.temp({origin: 'https://example.org'}, function(done) {
       conmock({

@@ -105,14 +105,9 @@ exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
   });
 };
 
-
-/**
- * Get listing of user's credits and badges
- */
-
-exports.user = function user(req, res) {
-  // #TODO: implement auth
+function getCreditsAndBadgesForUser(req, res, cb) {
   var email = req.query.email;
+
   if (!email)
     return res.send(400, {
       status: 'missing-parameter',
@@ -120,7 +115,8 @@ exports.user = function user(req, res) {
       message: 'You need to pass in a valid email address'
     });
 
-  var result = { status: 'ok', behaviors: {}, badges: {} };
+  var result = { behaviors: {}, badges: {} };
+
   User.getCreditsAndBadges(email, function (err, user) {
     if (err)
       return res.send(500, { status: 'error', error: err });
@@ -128,20 +124,70 @@ exports.user = function user(req, res) {
     async.forEach(user.badges, function(instance, cb) {
       instance.populate('badge', function(err) {
         if (err) return cb(err);
-        result.badges[instance.badge.shortname] = {
-          assertionUrl: instance.absoluteUrl('assertion'),
-          isRead: instance.seen,
-          issuedOn: instance.issuedOnUnix(),
-          name: instance.badge.name,
-          image: instance.badge.absoluteUrl('image')
-        };
+        result.badges[instance.badge.shortname] = instance;
         cb();
       });
     }, function(err) {
       if (err) 
         return res.send(500, { status: 'error', error: err });
-      return res.send(200, result);
+      cb(result);
     });
+  });
+}
+
+/**
+ * Get information on a specific user badge
+ */
+
+exports.userBadge = function userBadge(req, res) {
+  const shortname = req.param('shortname');
+
+  // This is a terribly inefficient way of doing things, but
+  // it seems to be the only way, given our current schema. -AV
+  getCreditsAndBadgesForUser(req, res, function(info) {
+    var instance = info.badges[shortname];
+    if (!instance)
+      return res.send(404);
+
+    return res.send(200, {
+      status: 'ok',
+      badge: {
+        isRead: instance.seen,
+        issuedOn: instance.issuedOnUnix(),
+        assertionUrl: instance.absoluteUrl('assertion'),
+        badgeClass: normalize(instance.badge)
+      }
+    });
+  });
+};
+
+/**
+ * Get listing of user's credits and badges
+ */
+
+exports.user = function user(req, res) {
+  // #TODO: implement auth
+  //        ... but isn't auth done by the api.auth() middleware? -AV
+
+  getCreditsAndBadgesForUser(req, res, function(info) {
+    var result = {
+      status: 'ok',
+      behaviors: info.behaviors,
+      badges: {}
+    };
+
+    Object.keys(info.badges).forEach(function(shortname) {
+      var instance = info.badges[shortname];
+      result.badges[shortname] = {
+        assertionUrl: instance.absoluteUrl('assertion'),
+        isRead: instance.seen,
+        issuedOn: instance.issuedOnUnix(),
+        name: instance.badge.name,
+        image: instance.badge.absoluteUrl('image')
+      };
+    });
+
+    return res.send(200, result);
   });
 };
 
