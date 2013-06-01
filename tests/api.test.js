@@ -78,8 +78,10 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(typeof(badge.issuedOn), 'number');
       t.equal(typeof(badge.isRead), 'boolean');
       t.equal(typeof(badge.assertionUrl), 'string');
+      t.equal(badge.badgeClass.program.name, "Some Program");
+      t.equal(badge.badgeClass.program.issuer.name, "Badge Authority");
       t.equal(badge.badgeClass.name, 'Link Badge, basic');
-      t.end();
+       t.end();
     });
   });
 
@@ -101,7 +103,16 @@ test.applyFixtures(badgeFixtures, function(fx) {
             "criteria": "* person is awesome",
             "prerequisites": [],
             "tags": [],
-            "program": "program",
+            "program": {
+              shortname: "some-program",
+              name: "Some Program",
+              issuer: {
+                name: "Badge Authority",
+                url: "http://badgeauthority.org"
+              },
+              url: "http://example.org/program",
+              imageUrl: "https://example.org/program/image/program"
+            },
             "image":"https://example.org/badge/image/with-criteria.png",
             "ageRange": [],
             "categories": [],

@@ -11,14 +11,13 @@ const Program = require('../models/program');
 const Issuer = require('../models/issuer');
 const mongoose = require('mongoose');
 
-function normalize(badge) {
-  return {
+function normalizeBadge(badge) {
+  var badgeData = {
     name: badge.name,
     description: badge.description,
     prerequisites: badge.prerequisites,
     image: badge.absoluteUrl('image'),
     criteria: badge.criteria && badge.criteria.content,
-    program: badge.program,
     tags: badge.tags,
     categoryAward: badge.categoryAward,
     categoryRequirement: badge.categoryRequirement || undefined,
@@ -31,6 +30,48 @@ function normalize(badge) {
       items: badge.getRubricItems()
     }
   };
+
+  if (badge.program && typeof(badge.program) == "object")
+    badgeData.program = normalizeProgram(badge.program);
+  else
+    badgeData.program = badge.program;
+
+  return badgeData;
+}
+
+function inflateBadge(badge, cb) {
+  badge.populate('program', function(err) {
+    if (err) return cb(err);
+    badge.program.populate('issuer', function(err) {
+      if (err) return cb(err);
+      cb(null, badge);
+    });
+  });
+}
+
+function normalizeProgram(program) {
+  if (!(program.issuer && typeof(program.issuer) == "object"))
+    throw new Error("expected populated program issuer");
+
+  var programData = [
+    'shortname',
+    'name',
+    'description',
+    'url',
+    'contact',
+    'startDate',
+    'endDate',
+    'phone',
+  ].reduce(function (out, field) {
+    return (out[field] = program[field], out);
+  }, {});
+  programData.imageUrl = program.absoluteUrl('image');
+  programData.issuer = {
+    name: program.issuer.name,
+    url: program.issuer.url
+  };
+
+  return programData;
 }
 
 exports.jwtSecret = null;
@@ -47,15 +88,18 @@ exports.badges = function badges(req, res) {
     badges.filter(function (badge) {
       return !badge.doNotList;
     }).forEach(function (badge) {
-      result.badges[badge.shortname] = normalize(badge);
+      result.badges[badge.shortname] = normalizeBadge(badge);
     });
     return res.send(200, result);
   });
 };
 
-
 exports.badge = function badge(req, res) {
-  res.json(200, { status: 'ok', badge: normalize(req.badge) });
+  inflateBadge(req.badge, function(err) {
+    if (err)
+      return res.json(500, { status: 'error', error: err });
+    res.json(200, { status: 'ok', badge: normalizeBadge(req.badge) });
+  });
 };
 
 exports.recommendations = function recommendations(req, res, next) {
@@ -149,14 +193,18 @@ exports.userBadge = function userBadge(req, res) {
     if (!instance)
       return res.send(404);
 
-    return res.send(200, {
-      status: 'ok',
-      badge: {
-        isRead: instance.seen,
-        issuedOn: instance.issuedOnUnix(),
-        assertionUrl: instance.absoluteUrl('assertion'),
-        badgeClass: normalize(instance.badge)
-      }
+    inflateBadge(instance.badge, function(err) {
+      if (err)
+        return res.send(500, {status: 'error', error: err});
+      return res.send(200, {
+        status: 'ok',
+        badge: {
+          isRead: instance.seen,
+          issuedOn: instance.issuedOnUnix(),
+          assertionUrl: instance.absoluteUrl('assertion'),
+          badgeClass: normalizeBadge(instance.badge)
+        }
+      });
     });
   });
 };
@@ -249,7 +297,7 @@ exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
   getUnclaimedBadgeFromCode(req.query.code, req, res, next, function(badge) {
     return res.json(200, {
       status: 'ok',
-      badge: normalize(badge)
+      badge: normalizeBadge(badge)
     });
   });
 };
@@ -447,7 +495,6 @@ exports.programs = function programs(req, res) {
   });
 };
 
-
 exports.program = function program(req, res) {
   const programShortName = req.params.programShortName;
   const query = {shortname: programShortName};
@@ -456,37 +503,21 @@ exports.program = function program(req, res) {
       return res.send(500, "There was an error retrieving the program");
     if (!program)
       return res.send(404);
-    const programData = [
-      'shortname',
-      'name',
-      'description',
-      'url',
-      'contact',
-      'startDate',
-      'endDate',
-      'phone',
-    ].reduce(function (out, field) {
-      return (out[field] = program[field], out);
-    }, {});
-    programData.imageUrl = program.absoluteUrl('image');
-    programData.earnableBadges = {};
-    Badge.find({program: program._id}, function(err, badges) {
+    program.populate('issuer', function(err) {
       if (err)
-        return res.send(500, "There was an error retrieving earnable badges");
-      badges.forEach(function(badge) {
-        programData.earnableBadges[badge.shortname] = normalize(badge);
-      });
-      program.populate('issuer', function(err) {
+        return res.send(500, "There was an error retrieving issuer info");
+      var programData = normalizeProgram(program);
+      programData.earnableBadges = {};
+      Badge.find({program: program._id}, function(err, badges) {
         if (err)
-          return res.send(500, "There was an error retrieving issuer info");
-        programData.issuer = {
-          name: program.issuer.name,
-          url: program.issuer.url
-        };
+          return res.send(500, "There was an error getting earnable badges");
+        badges.forEach(function(badge) {
+          programData.earnableBadges[badge.shortname] = normalizeBadge(badge);
+        });
         return res.json(200, {
           status: 'ok',
           program: programData,
-        });        
+        });
       });
     });
   });
