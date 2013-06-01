@@ -50,14 +50,14 @@ Many of the endpoints return information about badge types. Here's an example of
   "image": "https://wiki.mozilla.org/images/b/bb/Merit-badge.png",
   "prerequisites": ["some-other-badge"],
   "program": {
-    shortname: "some-program",
-    name: "Some Program",
-    issuer: {
-      name: "Badge Authority",
-      url: "http://badgeauthority.org"
+    "shortname": "some-program",
+    "name": "Some Program",
+    "issuer": {
+      "name": "Badge Authority",
+      "url": "http://badgeauthority.org"
     },
-    url: "http://example.org/program",
-    imageUrl: "https://example.org/program/image/program"
+    "url": "http://example.org/program",
+    "imageUrl": "https://example.org/program/image/program"
   },
   "tags": ["13-18", "S", "T", "online"],
   "ageRange": ["0-13", "13-18"],
@@ -165,14 +165,14 @@ This endpoint returns `200 OK`:
     "image": "https://wiki.mozilla.org/images/b/bb/Merit-badge.png",
     "prerequisites": ["some-other-badge"],
     "program": {
-      shortname: "some-program",
-      name: "Some Program",
-      issuer: {
-        name: "Badge Authority",
-        url: "http://badgeauthority.org"
+      "shortname": "some-program",
+      "name": "Some Program",
+      "issuer": {
+        "name": "Badge Authority",
+        "url": "http://badgeauthority.org"
       },
-      url: "http://example.org/program",
-      imageUrl: "https://example.org/program/image/program"
+      "url": "http://example.org/program",
+      "imageUrl": "https://example.org/program/image/program"
     },
     "tags": ["13-18", "S", "T", "online"],
     "rubric": {
@@ -254,14 +254,14 @@ This endpoint returns `200 OK`:
       "prerequisites": [],
       "image": "/badge/image/link-basic.png",
       "program": {
-        shortname: "some-program",
-        name: "Some Program",
-        issuer: {
-          name: "Badge Authority",
-          url: "http://badgeauthority.org"
+        "shortname": "some-program",
+        "name": "Some Program",
+        "issuer": {
+          "name": "Badge Authority",
+          "url": "http://badgeauthority.org"
         },
-        url: "http://example.org/program",
-        imageUrl: "https://example.org/program/image/program"
+        "url": "http://example.org/program",
+        "imageUrl": "https://example.org/program/image/program"
       },
       "tags": [
         "linking",
