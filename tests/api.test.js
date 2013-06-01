@@ -278,6 +278,10 @@ test.applyFixtures(badgeFixtures, function(fx) {
       var program = mockRes.body.program;
       t.ok('offline-badge' in program.earnableBadges);
       t.equal(program.earnableBadges['offline-badge'].name, 'Offline badge');
+      t.same(program.issuer, {
+        name: "Badge Authority",
+        url: "http://badgeauthority.org"
+      });
       t.end();
     });
   });

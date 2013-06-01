@@ -13,6 +13,7 @@ module.exports = {
     _id: 'issuer',
     name: 'Badge Authority',
     contact: 'brian@example.org',
+    url: 'http://badgeauthority.org',
     programs: [
       {name: 'Org 1'},
       {name: 'Org 2'},

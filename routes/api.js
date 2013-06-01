@@ -476,9 +476,17 @@ exports.program = function program(req, res) {
       badges.forEach(function(badge) {
         programData.earnableBadges[badge.shortname] = normalize(badge);
       });
-      return res.json(200, {
-        status: 'ok',
-        program: programData,
+      program.populate('issuer', function(err) {
+        if (err)
+          return res.send(500, "There was an error retrieving issuer info");
+        programData.issuer = {
+          name: program.issuer.name,
+          url: program.issuer.url
+        };
+        return res.json(200, {
+          status: 'ok',
+          program: programData,
+        });        
       });
     });
   });
