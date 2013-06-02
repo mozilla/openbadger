@@ -519,16 +519,23 @@ Badge.prototype.getRubricItems = function() {
 };
 
 Badge.prototype.getRecommendations = function (email, callback) {
+  const thisShortname = this.shortname;
   if (typeof email == 'function')
     callback = email, email = null;
   const query = {
-    '$or': this.tags.map(util.objWrap('tags'))
+    '$or': this.categories.map(util.objWrap('categories'))
   };
-  return Badge.find(query, function (err, badges) {
+  Badge.find(query, function (err, badges) {
+    badges = badges.filter(function (badge) {
+      return !(badge.shortname == thisShortname);
+    });
     if (!email)
       return callback(err, badges);
 
-    return BadgeInstance.find({user: email})
+    // Get all of the badge instances for the email address that was
+    // passed in and remove any badge classes that the user already has
+    // so we don't recommend them redundant badges.
+    BadgeInstance.find({user: email})
       .populate('badge')
       .exec(function (err, instances) {
         if (err)
@@ -538,7 +545,7 @@ Badge.prototype.getRecommendations = function (email, callback) {
           return (inst.badge && inst.badge.shortname);
         }).filter(Boolean);
 
-        return callback(null, badges.filter(function (badge) {
+        callback(null, badges.filter(function (badge) {
           return !(_.contains(earned, badge.shortname));
         }));
       });

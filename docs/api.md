@@ -381,29 +381,31 @@ Claim a badge via claim code.
 * `409`: User already has the badge.
 
 
-## GET `/v2/user/recommendations`
-Get a list of recommended "next badges" for a user to earn based on the badges that user has already earned.
+## GET `/v2/badge/:shortname/recommendations`
+Get a list of recommended "next badges" based on the categories of another badge.
 
 ### Request Parameters
-* **email**: Email address for the user.
-
-### Response Codes
-* `200 OK`: Everything's good, should get back recommendations. Note that if there are no recommendations to give, the `badges` array will be empty.
-* `404 Not Found`: The user with the specified email address could not be found.
-* `400 Bad Request`: Missing or invalid parameters.
-
+* **limit**: Limit the amount of badges returned by the API. Defaults to `10`, pass in `0` for unlimited.
+* **email**: (Optional) Email address for a user, will filter out any badges already earned by the user.
 
 ### Response Parameters
 * **status**: Status of the request. If the request is good, contains with the literal string `"ok"`. If the request is bad for any reason, contains the literal string `"error"`.
+
 * **badges**: Array of badge objects. Properties for each object are:
-  * **url**: URL for the hosted JSON definition of the badge.
-  * **name**: Name of the badge.
-  * **description**: Description of the badge.
-  * **image**: URL for the image of the badge.
-  * **criteria**: URL for the criteria of the badge.
-  * **issuer**: URL for the JSON file that describes the issuer.
-  * **alignment**: Array of alignment objects (may be empty).
-  * **tags**: Array of tags for the badge (may be empty).
+   * **name**
+   * **description**
+   * **prerequisites**
+   * **image**
+   * **criteria**
+   * **tags**
+   * **categoryAward**
+   * **categoryRequirement**
+   * **categoryWeight**
+   * **categories**
+   * **ageRange**
+   * **type**
+   * **activityType**
+   * **rubric**
 
 ## GET `/v2/issuers`
 Get information about all existing issuers.

@@ -126,5 +126,47 @@ module.exports = {
     user: 'brian@example.org',
     badge: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
     seen: true
-  })
+  }),
+  'science1': new Badge({
+    name: 'science1',
+    shortname: 'science1',
+    description: 'science1',
+    image: IMAGE,
+    categories: ['science']
+  }),
+  'science2': new Badge({
+    name: 'science2',
+    shortname: 'science2',
+    description: 'science2',
+    image: IMAGE,
+    categories: ['science']
+  }),
+  'science3': new Badge({
+    name: 'science3',
+    shortname: 'science3',
+    description: 'science3',
+    image: IMAGE,
+    categories: ['science']
+  }),
+  'science-math1': new Badge({
+    name: 'science-math1',
+    shortname: 'science-math1',
+    description: 'science-math1',
+    image: IMAGE,
+    categories: ['science', 'math']
+  }),
+  'science-math2': new Badge({
+    name: 'science-math2',
+    shortname: 'science-math2',
+    description: 'science-math2',
+    image: IMAGE,
+    categories: ['science', 'math']
+  }),
+  'science-math3': new Badge({
+    name: 'science-math3',
+    shortname: 'science-math3',
+    description: 'science-math3',
+    image: IMAGE,
+    categories: ['science', 'math']
+  }),
 };

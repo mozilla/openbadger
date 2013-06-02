@@ -1,6 +1,7 @@
 const test = require('./');
 const conmock = require('./conmock');
 const badgeFixtures = require('./badge-model.fixtures');
+const util = require('../lib/util');
 
 const Badge = require('../models/badge');
 const db = require('../models');
@@ -296,6 +297,37 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.end();
     });
   });
+
+  test('api can give badge recommendations', function(t) {
+    conmock({
+      handler: api.recommendations,
+      request: {
+        badge: fx['science1']
+      }
+    }, function(err, mockRes, req) {
+      const badges = mockRes.body.badges;
+      t.ok(badges.length > 1, 'should have at least one badge');
+      t.ok(badges.every(function (b) {
+        return b.name.indexOf('science') == 0;
+      }), 'all badges should start with science');
+      t.end();
+    });
+  });
+
+  test('api can give badge recommendations with a limit', function(t) {
+    conmock({
+      handler: api.recommendations,
+      request: {
+        badge: fx['science1'],
+        query: { limit: '2' },
+      }
+    }, function(err, mockRes, req) {
+      const badges = mockRes.body.badges;
+      t.ok(badges.length == 2, 'should have exactly two badges');
+      t.end();
+    });
+  });
+
 
   test('shutting down #', function (t) {
     db.close(); t.end();
