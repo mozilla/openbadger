@@ -129,6 +129,16 @@ exports.recommendations = function recommendations(req, res, next) {
   });
 };
 
+exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
+  Badge
+    .find({})
+    .limit(10)
+    .exec(function (err, badges) {
+      if (err) return res.json(500, { status: 'error', error: err });
+      return res.json(200, { status: 'okay', badges: badges.map(normalizeBadge) });
+    });
+};
+
 exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
   const badge = req.badge;
   const queryOpts = req.query;
