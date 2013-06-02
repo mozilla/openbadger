@@ -26,6 +26,7 @@
     "underscore": "~1.4.4",
     "connect-memcached": "0.0.3",
     "nunjucks": "~0.1.8a",
+    "newrelic": "~0.9.19",
     "dataurl": "~0.1.0"
   },
   "devDependencies": {

@@ -1,3 +1,6 @@
+if ( process.env.NEW_RELIC_HOME ) {
+  require( 'newrelic' );
+}
 var express = require('express');
 var http = require('http');
 var util = require('util');
