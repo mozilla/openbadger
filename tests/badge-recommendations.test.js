@@ -46,14 +46,13 @@ test.applyFixtures({
   test('Recommendation, no user', function (t) {
     const pureScience = fx['pure-science'];
     pureScience.getRecommendations(function (err, badges) {
-      const shortnames = badges
-        .map(util.prop('shortname'));
-      const hasMath = shortnames
-        .some(has('pure-math'));
-      const hasSelf = shortnames
-        .some(has('pure-science'));
+      const shortnames = badges.map(util.prop('shortname'));
+      const hasMath = shortnames.some(has('pure-math'));
+      const hasSelf = shortnames.some(has('pure-science'));
+      const hasScienceAndMath = shortnames.some(has('science-and-math'));
       t.same(hasMath, false, 'should not have math');
       t.same(hasSelf, false, 'should not have self');
+      t.same(hasScienceAndMath, true, 'should have science-and-math');
       t.end();
     });
   });
