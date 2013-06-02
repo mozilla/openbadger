@@ -174,9 +174,13 @@ exports.define = function defineRoutes(app) {
     findBadgeByParamShortname
   ], api.badge);
 
+  // 'similar' aliased to 'recommendations'
+  app.get('/v2/badge/:shortname/similar', [
+    findBadgeByParamShortname
+  ], api.similarBadges);
   app.get('/v2/badge/:shortname/recommendations', [
     findBadgeByParamShortname
-  ], api.recommendations);
+  ], api.similarBadges);
 
   app.get('/v2/unclaimed', [
     api.auth()

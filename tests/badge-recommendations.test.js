@@ -45,7 +45,7 @@ test.applyFixtures({
 
   test('Recommendation, no user', function (t) {
     const pureScience = fx['pure-science'];
-    pureScience.getRecommendations(function (err, badges) {
+    pureScience.getSimilar(function (err, badges) {
       const shortnames = badges.map(util.prop('shortname'));
       const hasMath = shortnames.some(has('pure-math'));
       const hasSelf = shortnames.some(has('pure-science'));
@@ -59,7 +59,7 @@ test.applyFixtures({
 
   test('Recommendation, with user', function (t) {
     const pureScience = fx['pure-science'];
-    pureScience.getRecommendations(TESTUSER, function (err, badges) {
+    pureScience.getSimilar(TESTUSER, function (err, badges) {
       const names = badges.map(util.prop('shortname'));
       const hasMath = badges.some(has('pure-math'));
       const hasEarned = badges.some(has('earned'));

@@ -518,7 +518,7 @@ Badge.prototype.getRubricItems = function() {
          : [];
 };
 
-Badge.prototype.getRecommendations = function (email, callback) {
+Badge.prototype.getSimilar = function (email, callback) {
   const thisShortname = this.shortname;
   if (typeof email == 'function')
     callback = email, email = null;

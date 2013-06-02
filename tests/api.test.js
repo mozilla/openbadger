@@ -300,7 +300,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
 
   test('api can give badge recommendations', function(t) {
     conmock({
-      handler: api.recommendations,
+      handler: api.similarBadges,
       request: {
         badge: fx['science1']
       }
@@ -316,7 +316,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
 
   test('api can give badge recommendations with a limit', function(t) {
     conmock({
-      handler: api.recommendations,
+      handler: api.similarBadges,
       request: {
         badge: fx['science1'],
         query: { limit: '2' },

@@ -110,12 +110,12 @@ function parseLimit(userLimit) {
   return userLimit;
 }
 
-exports.recommendations = function recommendations(req, res, next) {
+exports.similarBadges = function similarBadges(req, res, next) {
   const badge = req.badge;
   const email = req.query.email;
   const limit = parseLimit(req.query.limit, 10);
 
-  badge.getRecommendations(email, function (err, badges) {
+  badge.getSimilar(email, function (err, badges) {
     if (err)
       return res.json(500, { status: 'error', error: err });
 
