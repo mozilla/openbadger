@@ -102,14 +102,29 @@ exports.badge = function badge(req, res) {
   });
 };
 
+function parseLimit(userLimit) {
+  const DEFAULT_LIMIT = 10;
+  const limit = parseInt(userLimit, 10);
+  if (isNaN(userLimit))
+    return DEFAULT_LIMIT;
+  return userLimit;
+}
+
 exports.recommendations = function recommendations(req, res, next) {
   const badge = req.badge;
-  badge.getRecommendations(req.query.email, function (err, badges) {
+  const email = req.query.email;
+  const limit = parseLimit(req.query.limit, 10);
+
+  badge.getRecommendations(email, function (err, badges) {
     if (err)
       return res.json(500, { status: 'error', error: err });
+
+    if (limit > 0)
+      badges = badges.slice(0, limit);
+
     return res.json(200, {
       status: 'okay',
-      badges: badges.map(normalize)
+      badges: badges.map(normalizeBadge)
     });
   });
 };
@@ -172,7 +187,7 @@ function getCreditsAndBadgesForUser(req, res, cb) {
         cb();
       });
     }, function(err) {
-      if (err) 
+      if (err)
         return res.send(500, { status: 'error', error: err });
       cb(result);
     });
