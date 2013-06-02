@@ -190,6 +190,10 @@ exports.define = function defineRoutes(app) {
     api.auth()
   ], api.user);
 
+  app.get('/v2/user/recommendations', [
+    api.auth()
+  ], api.badgeRecommendations);
+
   app.get('/v2/user/badge/:shortname', [
     api.auth()
   ], api.userBadge);
