@@ -45,6 +45,22 @@
       <br style="clear: both">
       <dt>Criteria (<a href="/badge/criteria/{{ badge.shortname }}">Preview</a>)</dt>
       <dd><textarea class="badge-criteria" disabled>{{ badge.criteria.content }}</textarea></dd>
+
+      {% set rubricItems = badge.getRubricItems() %}
+      {% if rubricItems.length %}
+      <dt>Rubric (parsed from criteria)<dt>
+      <dd>
+        <ul>
+          {% for item in rubricItems %}
+          {% if item.required %}
+            <li>{{ item.text | stupidSafe }} (required)</li>
+          {% else %}
+            <li class="muted">{{ item.text | stupidSafe }}</li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+      </dd>
+      {% endif %}
     </dl>
 
   </div><!--end trigger list span-->
