@@ -73,6 +73,12 @@ function colorizeTapOutput(options) {
               if ('found' in c && 'wanted' in c) {
                 log("  found ".grey, JSON.stringify(c.found));
                 log("  wanted".grey, JSON.stringify(c.wanted));
+                if (c.diff) {
+                  log("  diff".grey);
+                  c.diff.split('\n').forEach(function(line) {
+                    log("    " + line);
+                  });
+                }
               }
               if (c.stack) {
                 log("\n  Traceback (most recent call first):".grey);
