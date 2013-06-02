@@ -522,7 +522,8 @@ Badge.prototype.getRecommendations = function (email, callback) {
   if (typeof email == 'function')
     callback = email, email = null;
   const query = {
-    '$or': this.tags.map(util.objWrap('tags'))
+    '$not': { shortname: this.shortname },
+    '$or': this.categories.map(util.objWrap('categories'))
   };
   return Badge.find(query, function (err, badges) {
     if (!email)
