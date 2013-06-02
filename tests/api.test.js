@@ -328,6 +328,16 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('**badge recommendation stub**', function (t) {
+    conmock({
+      handler: api.badgeRecommendations,
+      request: {}
+    }, function(err, mockRes, req) {
+      t.ok(mockRes.body.badges.length);
+      t.end();
+    });
+  });
+
 
   test('shutting down #', function (t) {
     db.close(); t.end();
