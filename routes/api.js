@@ -586,6 +586,7 @@ exports.auth = function auth(options) {
       msg = 'Token has expired';
       return respondWithError(res, msg);
     }
+    req.authUser = email;
     return next();
   };
 };
