@@ -105,18 +105,22 @@ const BadgeSchema = new Schema({
   timeToEarn: {
     type: String,
     trim: true,
+    'enum': ['hours', 'days', 'weeks', 'months', 'years'],
   },
   ageRange: [{
     type: String,
-    trim: true
+    trim: true,
+    'enum': ['0-13', '13-18', '19-24'],
   }],
   type: {
     type: String,
-    trim: true
+    trim: true,
+    'enum': ['skill', 'achievement', 'participation'],
   },
   activityType: {
     type: String,
-    trim: true
+    trim: true,
+    'enum': ['offline', 'online'],
   },
   behaviors: {
     type: [BehaviorSchema],
@@ -517,6 +521,13 @@ Badge.prototype.getRubricItems = function() {
          ? Badge.parseRubricItems(this.criteria.content)
          : [];
 };
+
+Badge.getRecommendations = function (opts, callback) {
+  opts = _.defaults(opts||{}, {
+    email: null, // required
+    underage: false
+  });
+}
 
 Badge.prototype.getSimilar = function (email, callback) {
   const thisShortname = this.shortname;
