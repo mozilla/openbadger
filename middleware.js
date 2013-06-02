@@ -18,7 +18,11 @@ function getSessionStore(env) {
   }
   const RedisStore = require('connect-redis')(express);
   redisOpts.db = env.get('redis_session_db');
-  return new RedisStore(redisOpts);
+  var store = new RedisStore(redisOpts);
+  store.client.on('error', function(err) {
+    console.error("REDIS ERROR", err);
+  });
+  return store;
 }
 
 exports.session = function () {
