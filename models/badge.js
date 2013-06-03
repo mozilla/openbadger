@@ -550,6 +550,7 @@ function isProgramActive(program) {
 Badge.getRecommendations = function (opts, callback) {
   const prop = util.prop;
   const method = util.method;
+
   const email = opts.email;
   const limit = opts.limit || Infinity;
   const userAgeRange = opts.ageRange;
@@ -580,9 +581,9 @@ Badge.getRecommendations = function (opts, callback) {
         .uniq()
         .value();
 
-      const earnedCategoryLevel = instances
-        .filter(util.prop('badge', 'categoryAward'))
-        .map(util.prop('badge', 'categoryAward'));
+      const completedCategories = instances
+        .filter(prop('badge', 'categoryAward'))
+        .map(prop('badge', 'categoryAward'));
 
       const query = {_id: { '$nin': earnedBadgeIds }};
 
@@ -601,7 +602,7 @@ Badge.getRecommendations = function (opts, callback) {
             const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
             const noneFromEarnedCategories =
-              !_.intersection(b.categories, earnedCategoryLevel).length;
+              !_.intersection(b.categories, completedCategories).length;
             const onlyOnTrack =
               _.intersection(b.categories, onTrackCategories).length;
             return (true
@@ -614,6 +615,9 @@ Badge.getRecommendations = function (opts, callback) {
                    );
           });
 
+        // We want to have something to recommend, so we check to see if
+        // we've filtered out everything and if we have, resort to
+        // shuffling up all the badges and use that.
         const result = (filtered.length
                         ? filtered
                         : _.shuffle(allBadges))
