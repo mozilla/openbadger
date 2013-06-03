@@ -130,13 +130,15 @@ exports.similarBadges = function similarBadges(req, res, next) {
 };
 
 exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
-  Badge
-    .find({})
-    .limit(10)
-    .exec(function (err, badges) {
-      if (err) return res.json(500, { status: 'error', error: err });
-      return res.json(200, { status: 'ok', badges: badges.map(normalizeBadge) });
+  Badge.getRecommendations({
+    email: req.authUser || req.query.email
+  }, function (err, badges) {
+    if (err) return res.json(500, {status: 'error', error: err });
+    return res.json(200, {
+      status: 'okay',
+      badges: badges.map(normalizeBadge),
     });
+  });
 };
 
 exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
