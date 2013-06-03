@@ -130,13 +130,15 @@ exports.similarBadges = function similarBadges(req, res, next) {
 };
 
 exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
-  Badge
-    .find({})
-    .limit(10)
-    .exec(function (err, badges) {
-      if (err) return res.json(500, { status: 'error', error: err });
-      return res.json(200, { status: 'ok', badges: badges.map(normalizeBadge) });
+  Badge.getRecommendations({
+    email: req.authUser || req.query.email
+  }, function (err, badges) {
+    if (err) return res.json(500, {status: 'error', error: err });
+    return res.json(200, {
+      status: 'okay',
+      badges: badges.map(normalizeBadge),
     });
+  });
 };
 
 exports.badgeClaimCodes = function badgeClaimCodes(req, res, next) {
@@ -241,7 +243,7 @@ exports.userBadge = function userBadge(req, res) {
 exports.user = function user(req, res) {
   // #TODO: implement auth
   //        ... but isn't auth done by the api.auth() middleware? -AV
-
+  //        yeah this todo is probably old - BJB
   getCreditsAndBadgesForUser(req, res, function(info) {
     var result = {
       status: 'ok',
@@ -586,6 +588,7 @@ exports.auth = function auth(options) {
       msg = 'Token has expired';
       return respondWithError(res, msg);
     }
+    req.authUser = email;
     return next();
   };
 };

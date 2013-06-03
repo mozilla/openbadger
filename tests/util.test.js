@@ -115,3 +115,16 @@ test('util.negate', function (t) {
     t.end();
   });
 });
+
+test('util.prop', function (t) {
+  const prop = util.prop;
+  const arr = [
+    { shallow: 1, deep: { one: { two: 2 }}},
+    { shallow: 1, deep: { one: { two: 2 }}},
+    { shallow: 1, deep: { one: { two: 2 }}},
+  ];
+  t.same(arr.map(prop('shallow')), [1, 1, 1]);
+  t.same(arr.map(prop('deep', 'one', 'two')), [2, 2, 2]);
+  t.same(arr.map(prop('does', 'not', 'exist')), [undefined, undefined, undefined]);
+  t.end();
+});

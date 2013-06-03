@@ -105,18 +105,22 @@ const BadgeSchema = new Schema({
   timeToEarn: {
     type: String,
     trim: true,
+    'enum': ['hours', 'days', 'weeks', 'months', 'years'],
   },
   ageRange: [{
     type: String,
-    trim: true
+    trim: true,
+    'enum': ['0-13', '13-18', '19-24'],
   }],
   type: {
     type: String,
-    trim: true
+    trim: true,
+    'enum': ['skill', 'achievement', 'participation'],
   },
   activityType: {
     type: String,
-    trim: true
+    trim: true,
+    'enum': ['offline', 'online'],
   },
   behaviors: {
     type: [BehaviorSchema],
@@ -388,6 +392,10 @@ Badge.prototype.award = function award(options, callback) {
     if (!checkForCategoryBadges)
       return callback(null, instance, []);
 
+    // The following section is for awarding category-level badges. We
+    // have to determine whether the badge that was just awarded
+    // combined with the badges the user already has is enough to award
+    // the category level badge.
     async.concatSeries(categories, function(category, catCb) {
       async.waterfall([
         function getCategoryBadges(callback) {
@@ -516,6 +524,71 @@ Badge.prototype.getRubricItems = function() {
   return this.criteria.content
          ? Badge.parseRubricItems(this.criteria.content)
          : [];
+};
+
+Badge.getRecommendations = function (opts, callback) {
+  const prop = util.prop;
+
+  // #TODO:
+  //   * Only recommend age appropriate badges.
+  //
+  //   * Deal with offline badges: right now we are not recommending
+  //     them because getting access to the program start date is
+  //     annoying, and we don't want to recommend badges that haven't
+  //     started yet
+  //
+  //   * Be smarter about recommending badges that will complete a
+  //     category level badge.
+  //
+  //   * Be smarter about falling back when a filter reduces the
+  //     recommendation set to zero items. For example, in the case
+  //     where a user hasn't earned any badges yet, we are going to fall
+  //     back completely to `allBadges`, but we should probably still
+  //     filter out participation badges.
+
+  BadgeInstance
+    .find({user: opts.email})
+    .populate('badge')
+    .exec(function (err, instances) {
+      const earnedBadgeIds = instances.map(prop('badge', '_id'));
+
+      const onTrackCategories = _.chain(instances)
+        .map(prop('badge', 'categories'))
+        .flatten()
+        .uniq()
+        .value();
+
+      const earnedCategoryLevel = instances
+        .filter(util.prop('badge', 'categoryAward'))
+        .map(util.prop('badge', 'categoryAward'));
+
+      const query = {
+        _id: { '$nin': earnedBadgeIds },
+        'activityType': {'$ne': 'offline' }
+      };
+
+      Badge.find(query, function (err, allBadges) {
+        if (err) return callback(err);
+        const filtered = allBadges
+          .filter(function (b) {
+            const noParticipation = b.type !== 'participation';
+            const noCategoryBadges = !b.categoryAward;
+            const noneFromEarnedCategories =
+              !_.intersection(b.categories, earnedCategoryLevel).length;
+            const onlyOnTrack =
+              _.intersection(b.categories, onTrackCategories).length;
+            return (true
+                    && noCategoryBadges
+                    && noParticipation
+                    && noneFromEarnedCategories
+                    && onlyOnTrack
+                   );
+          });
+        return callback(null, filtered.length
+                        ? filtered
+                        : _.shuffle(allBadges));
+      });
+    });
 };
 
 Badge.prototype.getSimilar = function (email, callback) {
