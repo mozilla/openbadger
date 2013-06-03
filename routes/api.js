@@ -241,7 +241,7 @@ exports.userBadge = function userBadge(req, res) {
 exports.user = function user(req, res) {
   // #TODO: implement auth
   //        ... but isn't auth done by the api.auth() middleware? -AV
-
+  //        yeah this todo is probably old - BJB
   getCreditsAndBadgesForUser(req, res, function(info) {
     var result = {
       status: 'ok',

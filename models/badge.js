@@ -527,11 +527,70 @@ Badge.prototype.getRubricItems = function() {
 };
 
 Badge.getRecommendations = function (opts, callback) {
-  opts = _.defaults(opts||{}, {
-    email: null, // required
-    underage: false
-  });
-}
+  const prop = util.prop;
+
+  // #TODO:
+  //   * Only recommend age appropriate badges.
+  //
+  //   * Deal with offline badges: right now we are not recommending
+  //     them because getting access to the program start date is
+  //     annoying, and we don't want to recommend badges that haven't
+  //     started yet
+  //
+  //   * Be smarter about recommending badges that will complete a
+  //     category level badge.
+  //
+  //   * Be smarter about falling back when a filter reduces the
+  //     recommendation set to zero items. For example, in the case
+  //     where a user hasn't earned any badges yet, we are going to fall
+  //     back completely to `allBadges`, but we should probably still
+  //     filter out participation badges.
+
+  BadgeInstance
+    .find({user: opts.email})
+    .populate('badge')
+    .exec(function (err, instances) {
+      const earnedBadgeIds = instances.map(prop('badge', '_id'));
+
+      const onTrackCategories = _.chain(instances)
+        .map(prop('badge', 'categories'))
+        .flatten()
+        .uniq()
+        .value();
+
+      const earnedCategoryLevel = instances
+        .filter(util.prop('badge', 'categoryAward'))
+        .map(util.prop('badge', 'categoryAward'));
+
+      const query = {
+        _id: { '$nin': earnedBadgeIds },
+        'activityType': {'$ne': 'offline' }
+      };
+
+      Badge.find(query, function (err, allBadges) {
+        if (err) return callback(err);
+        const filtered = allBadges
+          .filter(function (b) {
+            const noOffTrack;
+            const noParticipation = b.type !== 'participation';
+            const noCategoryBadges = !b.categoryAward;
+            const noneFromEarnedCategories =
+              !_.intersection(b.categories, earnedCategoryLevel).length;
+            const onlyOnTrack =
+              _.intersection(b.categories, onTrackCategories).length;
+            return (true
+                    && noCategoryBadges
+                    && noParticipation
+                    && noneFromEarnedCategories
+                    && onlyOnTrack
+                   );
+          });
+        return callback(null, filtered.length
+                        ? filtered
+                        : _.shuffle(allBadges));
+      });
+    });
+};
 
 Badge.prototype.getSimilar = function (email, callback) {
   const thisShortname = this.shortname;
