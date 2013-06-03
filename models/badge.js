@@ -549,8 +549,14 @@ function isProgramActive(program) {
 
 Badge.getRecommendations = function (opts, callback) {
   const prop = util.prop;
+  const method = util.method;
   const email = opts.email;
+  const limit = opts.limit || Infinity;
   const userAgeRange = opts.ageRange;
+
+  function onlineBias(badge) {
+    return badge.activityType == 'offline' ? 1 : 0;
+  }
 
   // #TODO:
   //   * Be smarter about recommending badges that will complete a
@@ -608,15 +614,27 @@ Badge.getRecommendations = function (opts, callback) {
                    );
           });
 
-        const result =
-          (filtered.length
-           ? filtered
-           : _.shuffle(allBadges))
-          .sort(function onlineBias(b) {
-            return b.activityType == 'offline' ? 1 : 0;
-          });
+        const result = (filtered.length
+                        ? filtered
+                        : _.shuffle(allBadges))
+          .sort(onlineBias)
+          .filter(prop('program'))
+          .slice(0, limit);
 
-        return callback(null, result);
+        // For the API endpoint we need to have fully populated badge
+        // classes, including program and issuer, so we want to filter
+        // out any badges that aren't associated with programs, then any
+        // badges that have programs that aren't associated with issuers
+        return async.map(
+          result.map(prop('program')),
+          method('populate', 'issuer'),
+          function (err) {
+            return callback(
+              err, (err ? null : result.filter(prop('issuer')))
+            );
+          }
+        );
+
       }
     });
 };

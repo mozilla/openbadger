@@ -5,6 +5,7 @@ const User = require('../models/user');
 const Badge = require('../models/badge');
 const BadgeInstance = require('../models/badge-instance');
 const Program = require('../models/program');
+const Issuer = require('../models/issuer');
 const util = require('../lib/util');
 
 const TESTUSER = 'brian@example.org';
@@ -20,16 +21,25 @@ function createBadge(id, obj) {
     activityType: 'online',
     ageRange: ALL_AGES,
     image: Buffer(1),
-    program: '',
+    program: 'in-progress',
     categoryAward: '',
     type: 'skill',
   }));
 }
 
 test.applyFixtures({
+  // Issuer
+  'issuer': new Issuer({
+    _id: 'issuer',
+    shortname: 'issuer',
+    name: 'Issuer',
+    programs: ['not-yet', 'in-progress', 'ended']
+  }),
+
   // Programs
   'not-yet-program': new Program({
     _id: 'not-yet',
+    issuer: 'issuer',
     shortname: 'not-yet',
     startDate: new Date('2013-06-15'),
     endDate: new Date('2013-07-15'),
@@ -37,6 +47,7 @@ test.applyFixtures({
   }),
   'in-progress-program': new Program({
     _id: 'in-progress',
+    issuer: 'issuer',
     shortname: 'in-progress',
     startDate: new Date('2013-06-01'),
     endDate: new Date('2013-07-15'),
@@ -44,6 +55,7 @@ test.applyFixtures({
   }),
   'ended-program': new Program({
     _id: 'ended',
+    issuer: 'issuer',
     shortname: 'ended',
     startDate: new Date('2013-05-15'),
     endDate: new Date('2013-06-01'),
@@ -151,6 +163,9 @@ test.applyFixtures({
       ageRange: Badge.ADULT
     }, function (err, badges) {
       const names = badges.map(prop('shortname'));
+
+      t.same(badges[0].program.issuer._id, fx['issuer']._id,
+             'should have populated issuer');
 
       // misc
       t.equal(contains(names, 'pure-science'), true,
