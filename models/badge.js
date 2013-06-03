@@ -534,15 +534,25 @@ Badge.prototype.getRubricItems = function() {
          : [];
 };
 
+// #TODO: maybe make this a Program model function?
+function isProgramActive(program) {
+  const now = Date.now();
+  if (!program || (!program.endDate && !program.startDate))
+    return true;
+  if (!program.endDate)
+    return now >= program.startDate;
+  if (!program.startDate)
+    return program.startDate <= now;
+  return (now <= program.endDate &&
+          now >= program.startDate);
+}
+
 Badge.getRecommendations = function (opts, callback) {
   const prop = util.prop;
   const email = opts.email;
   const userAgeRange = opts.ageRange;
 
   // #TODO:
-  //   * Deal with offline badges: we recommend them last, but we aren't
-  //   * dealing with programs yet.
-  //
   //   * Be smarter about recommending badges that will complete a
   //     category level badge.
   //
@@ -572,11 +582,15 @@ Badge.getRecommendations = function (opts, callback) {
 
       const exclude = { image: 0 };
 
-      Badge.find(query, exclude, function (err, allBadges) {
+      Badge.find(query, exclude)
+        .populate('program')
+        .exec(filterRecommendations);
+      function filterRecommendations(err, allBadges) {
         if (err) return callback(err);
 
         const filtered = allBadges
           .filter(function (b) {
+            const programIsActive = isProgramActive(b.program);
             const noAgeInappropriate = _.contains(b.ageRange, userAgeRange);
             const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
@@ -590,19 +604,20 @@ Badge.getRecommendations = function (opts, callback) {
                     && noneFromEarnedCategories
                     && onlyOnTrack
                     && noAgeInappropriate
+                    && programIsActive
                    );
           });
 
         const result =
           (filtered.length
-            ? filtered
-            : _.shuffle(allBadges))
+           ? filtered
+           : _.shuffle(allBadges))
           .sort(function onlineBias(b) {
             return b.activityType == 'offline' ? 1 : 0;
           });
 
         return callback(null, result);
-      });
+      }
     });
 };
 
