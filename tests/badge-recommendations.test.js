@@ -200,6 +200,8 @@ test.applyFixtures({
               'should contain pure-science badge');
       t.equal(contains(names, 'adult-science'), true,
               'should contain adult-science badge');
+      t.equal(lastElem(names), 'offline-science',
+              'should recommend offline badges last');
       console.dir(names);
       t.end();
     });
@@ -214,9 +216,13 @@ test.applyFixtures({
 
 const prop = util.prop;
 
+function lastElem(arr) {
+  return arr[arr.length-1];
+}
+
 function contains(arr, name) {
   return arr.some(has(name));
-};
+}
 
 function has(name) {
   return function (n) {

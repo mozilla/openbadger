@@ -540,10 +540,8 @@ Badge.getRecommendations = function (opts, callback) {
   const userAgeRange = opts.ageRange;
 
   // #TODO:
-  //   * Deal with offline badges: right now we are not recommending
-  //     them because getting access to the program start date is
-  //     annoying, and we don't want to recommend badges that haven't
-  //     started yet
+  //   * Deal with offline badges: we recommend them last, but we aren't
+  //   * dealing with programs yet.
   //
   //   * Be smarter about recommending badges that will complete a
   //     category level badge.
@@ -570,19 +568,16 @@ Badge.getRecommendations = function (opts, callback) {
         .filter(util.prop('badge', 'categoryAward'))
         .map(util.prop('badge', 'categoryAward'));
 
-      const query = {
-        _id: { '$nin': earnedBadgeIds },
-        'activityType': {'$ne': 'offline' }
-      };
+      const query = {_id: { '$nin': earnedBadgeIds }};
 
       const exclude = { image: 0 };
 
       Badge.find(query, exclude, function (err, allBadges) {
         if (err) return callback(err);
+
         const filtered = allBadges
           .filter(function (b) {
             const noAgeInappropriate = _.contains(b.ageRange, userAgeRange);
-            console.log(b.name, b.ageRange, noAgeInappropriate);
             const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
             const noneFromEarnedCategories =
@@ -597,9 +592,16 @@ Badge.getRecommendations = function (opts, callback) {
                     && noAgeInappropriate
                    );
           });
-        return callback(null, filtered.length
-                        ? filtered
-                        : _.shuffle(allBadges));
+
+        const result =
+          (filtered.length
+            ? filtered
+            : _.shuffle(allBadges))
+          .sort(function onlineBias(b) {
+            return b.activityType == 'offline' ? 1 : 0;
+          });
+
+        return callback(null, result);
       });
     });
 };
