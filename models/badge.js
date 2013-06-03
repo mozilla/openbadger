@@ -392,6 +392,10 @@ Badge.prototype.award = function award(options, callback) {
     if (!checkForCategoryBadges)
       return callback(null, instance, []);
 
+    // The following section is for awarding category-level badges. We
+    // have to determine whether the badge that was just awarded
+    // combined with the badges the user already has is enough to award
+    // the category level badge.
     async.concatSeries(categories, function(category, catCb) {
       async.waterfall([
         function getCategoryBadges(callback) {
