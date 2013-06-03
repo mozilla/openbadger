@@ -617,26 +617,23 @@ Badge.getRecommendations = function (opts, callback) {
 
         // We want to have something to recommend, so we check to see if
         // we've filtered out everything and if we have, resort to
-        // shuffling up all the badges and use that.
+        // shuffling up all the badges and use that. Also, for the API
+        // endpoint we need to have fully populated badge classes,
+        // including program and issuer, so we filter out any badges
+        // that don't have an issuer associated with its program.
         const result = (filtered.length
                         ? filtered
                         : _.shuffle(allBadges))
           .sort(onlineBias)
-          .filter(prop('program'))
+          .filter(prop('program', 'issuer'))
           .slice(0, limit);
 
-        // For the API endpoint we need to have fully populated badge
-        // classes, including program and issuer, so we want to filter
-        // out any badges that aren't associated with programs, then any
-        // badges that have programs that aren't associated with issuers
         return async.map(
           result.map(prop('program')),
           method('populate', 'issuer'),
           function (err) {
             if (err) return callback(err);
-            return callback(
-              null, result.filter(prop('program', 'issuer'))
-            );
+            return callback(null, result);
           }
         );
 
