@@ -252,7 +252,7 @@ function issueAndEmail(badge) {
       // #TODO: SHOULD PUT EMAIL CODE HERE
       if (!instance)
         return callback(null, {email: email, status: 'dupe'});
-      return callback(null, {email: email, status: 'okay'});
+      return callback(null, {email: email, status: 'ok'});
     });
   };
 }
