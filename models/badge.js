@@ -571,7 +571,6 @@ Badge.getRecommendations = function (opts, callback) {
         if (err) return callback(err);
         const filtered = allBadges
           .filter(function (b) {
-            const noOffTrack;
             const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
             const noneFromEarnedCategories =
