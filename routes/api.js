@@ -123,7 +123,7 @@ exports.similarBadges = function similarBadges(req, res, next) {
       badges = badges.slice(0, limit);
 
     return res.json(200, {
-      status: 'okay',
+      status: 'ok',
       badges: badges.map(normalizeBadge)
     });
   });
@@ -135,7 +135,7 @@ exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
     .limit(10)
     .exec(function (err, badges) {
       if (err) return res.json(500, { status: 'error', error: err });
-      return res.json(200, { status: 'okay', badges: badges.map(normalizeBadge) });
+      return res.json(200, { status: 'ok', badges: badges.map(normalizeBadge) });
     });
 };
 
