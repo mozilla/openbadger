@@ -101,7 +101,7 @@ test.applyFixtures({
     type: 'skill',
     activityType: 'online',
     categoryAward: '',
-    ageRange: ['18-24'],
+    ageRange: ['19-24'],
     image: Buffer(1),
   }),
   'pure-knitting': new Badge({
