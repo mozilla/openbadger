@@ -629,8 +629,9 @@ Badge.getRecommendations = function (opts, callback) {
           result.map(prop('program')),
           method('populate', 'issuer'),
           function (err) {
+            if (err) return callback(err);
             return callback(
-              err, (err ? null : result.filter(prop('issuer')))
+              null, result.filter(prop('program', 'issuer'))
             );
           }
         );
