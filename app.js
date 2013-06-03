@@ -8,6 +8,7 @@ var util = require('util');
 var middleware = require('./middleware');
 var template = require('./template');
 var routes = require('./routes');
+var healthCheck = require('./routes/health-check');
 var render = require('./routes/render');
 var debug = require('./routes/debug');
 var api = require('./routes/api');
@@ -15,6 +16,14 @@ var api = require('./routes/api');
 var app = express();
 var logger = app.logger = require('./lib/logger');
 var env = app.env = require('./lib/environment');
+var sessionStore = middleware.getSessionStore(env);
+var healthChecker = healthCheck({
+  auth: express.basicAuth('health_check', env.get('secret')),
+  checks: {
+    database: healthCheck.checker(require('./models').healthCheck),
+    sessionStorage: healthCheck.sessionStorageChecker(sessionStore)
+  }
+});
 var templateEnv = template.buildEnvironment({
   themeDir: process.env.THEME_DIR,
   staticMiddleware: express.static
@@ -31,10 +40,14 @@ app.configure(function () {
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(middleware.cookieParser());
-  app.use(middleware.session());
+  app.use(middleware.session(sessionStore));
   app.use(middleware.flash());
 
-  routes.applyMiddleware(app, middleware);
+  app.use(middleware.csrf({whitelist: routes.whitelists.CSRF.concat([
+    '/health_check'
+  ])}));
+  app.use(middleware.cors({whitelist: routes.whitelists.CORS}));
+  app.use(middleware.noCache({whitelist: routes.whitelists.NO_CACHE}));
 
   app.use(app.router);
 
@@ -52,6 +65,7 @@ app.configure('production', function () {
 });
 
 routes.define(app);
+app.get('/health_check', healthChecker);
 
 // Debug endpoints
 // ---------------
@@ -69,5 +83,15 @@ if (!module.parent) {
   var port = env.get('port', process.env.PORT);
   server.listen(port, function () {
     app.logger.info("Express server listening on port " + port);
+    app.logger.info("Performing health check.");
+
+    healthChecker.runChecks(function(results) {
+      if (results.status != "OK") {
+        console.error("Health check failed:", results);
+        console.error("Please resolve the problem and restart the server.");
+        process.exit(1);
+      }
+      console.log("Health check indicates all systems are functional.");
+    });
   });
 }

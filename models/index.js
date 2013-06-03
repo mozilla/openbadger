@@ -19,6 +19,10 @@ const connection = module.exports = Object.create(
   mongoose.createConnection(opts.host, opts.db, opts.port, authOpts)
 );
 connection.generateId = generateId;
+connection.healthCheck = function(cb) {
+  var Issuer = require('./issuer');
+  Issuer.findOne({}, cb);
+};
 
 function sha1(input) {
   return crypto.createHash('sha1').update(input).digest('hex');

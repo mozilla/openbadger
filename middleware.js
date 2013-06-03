@@ -9,7 +9,7 @@ exports.cookieParser = function () {
   return express.cookieParser(secret);
 };
 
-function getSessionStore(env) {
+exports.getSessionStore = function getSessionStore(env) {
   const redisOpts = env.get('redis');
   const memcachedOpts = env.get('memcached');
   if (memcachedOpts) {
@@ -23,12 +23,12 @@ function getSessionStore(env) {
     console.error("REDIS ERROR", err);
   });
   return store;
-}
+};
 
-exports.session = function () {
+exports.session = function (sessionStore) {
   return express.session({
     key: 'openbadger.sid',
-    store: getSessionStore(env),
+    store: sessionStore,
     secret: env.get('secret'),
   });
 };

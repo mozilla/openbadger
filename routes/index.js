@@ -11,13 +11,9 @@ const whitelists = exports.whitelists = {
   ASSERTION: '/badge/assertion/*'
 };
 
-exports.applyMiddleware = function useMiddleware(app, middleware) {
-  app.use(middleware.csrf({whitelist: [whitelists.API]}));
-  app.use(middleware.cors({whitelist: [whitelists.API]}));
-  app.use(middleware.noCache({
-    whitelist: [whitelists.ASSERTION]
-  }));
-};
+whitelists.CSRF = [whitelists.API];
+whitelists.CORS = [whitelists.API];
+whitelists.NO_CACHE = [whitelists.ASSERTION];
 
 exports.define = function defineRoutes(app) {
   /** Routes */
