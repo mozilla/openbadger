@@ -6,6 +6,7 @@ const BadgeInstance = require('../models/badge-instance');
 const util = require('../lib/util');
 
 const TESTUSER = 'brian@example.org';
+const ALL_AGES = [Badge.KID, Badge.TEEN, Badge.ADULT];
 
 test.applyFixtures({
   'city-science': new Badge({
@@ -14,6 +15,7 @@ test.applyFixtures({
     name: 'City Science Badge',
     description: 'For earning a bunch of science badges',
     categoryAward: 'science',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'city-math': new Badge({
@@ -23,6 +25,7 @@ test.applyFixtures({
     name: 'City Math Badge',
     description: 'For earning a bunch of math badges',
     categoryAward: 'math',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'participation-science': new Badge({
@@ -33,6 +36,7 @@ test.applyFixtures({
     type: 'participation',
     activityType: 'online',
     categoryAward: '',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'offline-science': new Badge({
@@ -42,6 +46,7 @@ test.applyFixtures({
     description: 'For participating in offline science',
     type: 'achievement',
     activityType: 'offline',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'pure-science': new Badge({
@@ -52,6 +57,7 @@ test.applyFixtures({
     type: 'skill',
     activityType: 'online',
     categoryAward: '',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'pure-math': new Badge({
@@ -62,6 +68,40 @@ test.applyFixtures({
     type: 'skill',
     activityType: 'online',
     categoryAward: '',
+    ageRange: ALL_AGES,
+    image: Buffer(1),
+  }),
+  'kid-science': new Badge({
+    shortname: 'kid-science',
+    categories: ['science'],
+    name: 'Kid Science',
+    description: 'for sciencing (for kids)',
+    type: 'skill',
+    activityType: 'online',
+    categoryAward: '',
+    ageRange: ['0-13'],
+    image: Buffer(1),
+  }),
+  'teen-science': new Badge({
+    shortname: 'teen-science',
+    categories: ['science'],
+    name: 'Teen Science',
+    description: 'for sciencing (for teens)',
+    type: 'skill',
+    activityType: 'online',
+    categoryAward: '',
+    ageRange: ['13-18'],
+    image: Buffer(1),
+  }),
+  'adult-science': new Badge({
+    shortname: 'adult-science',
+    categories: ['science'],
+    name: 'Adult Science',
+    description: 'for sciencing (for teens)',
+    type: 'skill',
+    activityType: 'online',
+    categoryAward: '',
+    ageRange: ['18-24'],
     image: Buffer(1),
   }),
   'pure-knitting': new Badge({
@@ -71,6 +111,7 @@ test.applyFixtures({
     description: 'for knitting',
     type: 'skill',
     activityType: 'online',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'science-and-math': new Badge({
@@ -81,6 +122,7 @@ test.applyFixtures({
     activityType: 'online',
     description: 'for sciencing and mathing',
     categoryAward: '',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'earned-badge': new Badge({
@@ -92,6 +134,7 @@ test.applyFixtures({
     activityType: 'online',
     description: 'should not come up',
     categoryAward: '',
+    ageRange: ALL_AGES,
     image: Buffer(1),
   }),
   'earned-badge-instance': new BadgeInstance({
@@ -134,7 +177,7 @@ test.applyFixtures({
   test('recommended badges', function (t) {
     Badge.getRecommendations({
       email: TESTUSER,
-      age: 27
+      ageRange: Badge.ADULT
     }, function (err, badges) {
       const names = badges.map(prop('shortname'));
       t.equal(contains(names, 'participation-science'), false,
@@ -149,6 +192,14 @@ test.applyFixtures({
               'no math badges, already earned category badge');
       t.equal(contains(names, 'pure-knitting'), false,
               'no badges that are off-track');
+      t.equal(contains(names, 'kid-science'), false,
+              'no age-inappropriate badges');
+      t.equal(contains(names, 'teen-science'), false,
+              'no age-inappropriate badges');
+      t.equal(contains(names, 'pure-science'), true,
+              'should contain pure-science badge');
+      t.equal(contains(names, 'adult-science'), true,
+              'should contain adult-science badge');
       console.dir(names);
       t.end();
     });

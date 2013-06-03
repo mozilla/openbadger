@@ -9,6 +9,10 @@ const phraseGenerator = require('../lib/phrases');
 const async = require('async');
 const Schema = mongoose.Schema;
 
+const KID = '0-13';
+const TEEN = '13-18';
+const ADULT = '19-24';
+
 const BehaviorSchema = new Schema({
   shortname: {
     type: String,
@@ -110,7 +114,7 @@ const BadgeSchema = new Schema({
   ageRange: [{
     type: String,
     trim: true,
-    'enum': ['0-13', '13-18', '19-24'],
+    'enum': [KID, TEEN, ADULT],
   }],
   type: {
     type: String,
@@ -134,6 +138,10 @@ const BadgeSchema = new Schema({
   },
 });
 const Badge = db.model('Badge', BadgeSchema);
+
+Badge.KID = KID;
+Badge.TEEN = TEEN;
+Badge.ADULT = ADULT;
 
 // Validators & Defaulters
 // -----------------------
@@ -528,10 +536,10 @@ Badge.prototype.getRubricItems = function() {
 
 Badge.getRecommendations = function (opts, callback) {
   const prop = util.prop;
+  const email = opts.email;
+  const userAgeRange = opts.ageRange;
 
   // #TODO:
-  //   * Only recommend age appropriate badges.
-  //
   //   * Deal with offline badges: right now we are not recommending
   //     them because getting access to the program start date is
   //     annoying, and we don't want to recommend badges that haven't
@@ -547,7 +555,7 @@ Badge.getRecommendations = function (opts, callback) {
   //     filter out participation badges.
 
   BadgeInstance
-    .find({user: opts.email})
+    .find({user: email})
     .populate('badge')
     .exec(function (err, instances) {
       const earnedBadgeIds = instances.map(prop('badge', '_id'));
@@ -567,10 +575,14 @@ Badge.getRecommendations = function (opts, callback) {
         'activityType': {'$ne': 'offline' }
       };
 
-      Badge.find(query, function (err, allBadges) {
+      const exclude = { image: 0 };
+
+      Badge.find(query, exclude, function (err, allBadges) {
         if (err) return callback(err);
         const filtered = allBadges
           .filter(function (b) {
+            const noAgeInappropriate = _.contains(b.ageRange, userAgeRange);
+            console.log(b.name, b.ageRange, noAgeInappropriate);
             const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
             const noneFromEarnedCategories =
@@ -582,6 +594,7 @@ Badge.getRecommendations = function (opts, callback) {
                     && noParticipation
                     && noneFromEarnedCategories
                     && onlyOnTrack
+                    && noAgeInappropriate
                    );
           });
         return callback(null, filtered.length
