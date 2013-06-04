@@ -336,7 +336,12 @@ Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
     : function (o) { return true };
 
   return codes.filter(filterFn).map(function (entry) {
-    return { code: entry.code, claimed: !!entry.claimedBy };
+    var claim = {
+      code: entry.code,
+      claimed: !!entry.claimedBy
+    };
+    if (entry.reservedFor) claim.reservedFor = entry.reservedFor;
+    return claim;
   });
 };
 

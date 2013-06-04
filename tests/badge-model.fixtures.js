@@ -78,6 +78,7 @@ module.exports = {
       { code: 'already-claimed', claimedBy: 'brian@example.org' },
       { code: 'never-claim' },
       { code: 'will-claim' },
+      { code: 'reserved-claim', reservedFor: 'foo@bar.org' },
       { code: 'remove-claim' },
     ]
   }),

@@ -163,7 +163,9 @@ exports.meta = function meta(req, res) {
 
 exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
   var codes = req.badge.claimCodes
-    .filter(function(c) { return !c.claimedBy && !c.multi; })
+    .filter(function(c) {
+      return !c.claimedBy && !c.multi && !c.reservedFor;
+    })
     .map(util.prop('code'));
   return res.type('text').send(200, codes.join('\n'));
 };

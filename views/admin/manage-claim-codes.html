@@ -49,6 +49,7 @@
       <tr>
         <th>Code</th>
         <th>Claimed By</th>
+        <th>Reserved For</th>
         <th>Actions</td>
       </tr>
     </thead>
@@ -61,6 +62,13 @@
             *multi*
           {% else %}
             {{ claim.claimedBy | default('<em>open</em>') }}
+          {% endif %}
+        </td>
+        <td>
+          {% if claim.reservedFor %}
+          {{claim.reservedFor}}
+          {% else %}
+          anyone
           {% endif %}
         </td>
         <td>

@@ -301,6 +301,7 @@ test.applyFixtures(fixtures, function () {
       {code: 'already-claimed', claimed: true},
       {code: 'never-claim', claimed: false},
       {code: 'will-claim', claimed: false},
+      {code: 'reserved-claim', reservedFor: 'foo@bar.org', claimed: false },
       {code: 'remove-claim', claimed: false},
     ];
 ;
@@ -313,7 +314,8 @@ test.applyFixtures(fixtures, function () {
     const expect = [
       {code: 'never-claim', claimed: false},
       {code: 'will-claim', claimed: false},
-      {code: 'remove-claim', claimed: false},
+      {code: 'reserved-claim', reservedFor: 'foo@bar.org', claimed: false },
+      {code: 'remove-claim', claimed: false}
     ];
     t.same(badge.getClaimCodes({unclaimed: true}), expect);
     t.end();
