@@ -436,7 +436,7 @@ Badge.prototype.award = function award(options, callback) {
       ], catCb);
     }, function(err, instances) {
       if (err) return callback(err);
-      return callback(null, instances, instances);
+      return callback(null, instance, instances);
     });
   });
 };
