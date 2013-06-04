@@ -42,6 +42,9 @@ module.exports = {
     shortname: 'link-advanced',
     description: 'For doing lots of links.',
     image: IMAGE,
+    claimCodes: [
+      { code: 'NARGS_CODE', reservedFor: 'narg@moose.org' },
+    ],
     behaviors: [
       { shortname: 'link', count: 10 }
     ]

@@ -189,6 +189,37 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('reserving badges for users works', function(t) {
+    var flashes = [];
+    conmock({
+      handler: badge.issueMany,
+      request: {
+        badge: fx['link-advanced'],
+        flash: function(type, results) {
+          flashes.push({type: type, results: results});
+        },
+        body: {
+          emails: 'blarg@goose.org\nnarg@moose.org'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 303);
+      t.equal(mockRes.path, 'back');
+      t.equal(flashes.length, 1);
+      t.equal(flashes[0].type, 'results');
+      t.equal(flashes[0].results.length, 2);
+      var success = flashes[0].results[0];
+      var dupe = flashes[0].results[1];
+      t.equal(success.email, 'blarg@goose.org');
+      t.equal(success.status, 'ok');
+      t.equal(typeof(success.claimCode), 'string');
+      t.equal(dupe.email, 'narg@moose.org');
+      t.equal(dupe.status, 'dupe');
+      t.end();
+    });
+  });
+
   test('shutting down #', function (t) {
     db.close(); t.end();
   });

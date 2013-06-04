@@ -490,6 +490,38 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge#reserveAndEmail does nothing when user already has badge', function(t) {
+    var badge = fixtures['link-comment'];
+    var email = fixtures['user'].user;
+    badge.reserveAndEmail(email, function(err, claimCode) {
+      if (err) throw err;
+      t.same(claimCode, null, "user already has badge");
+      t.end();
+    });
+  });
+
+  test('Badge#reserveAndEmail creates reserved claim code', function(t) {
+    var badge = fixtures['random-badge'];
+    var email = fixtures['user'].user;
+    badge.reserveAndEmail(email, function(err, claimCode) {
+      if (err) throw err;
+      t.equal(typeof(claimCode), 'string');
+      var claim = badge.getClaimCode(claimCode);
+      t.equal(claim.reservedFor, email, "reserved claim code is generated");
+      t.end();
+    });
+  });
+
+  test('Badge#reserveAndEmail does nothing when user has reserved claim code', function(t) {
+    var badge = fixtures['random-badge'];
+    var email = fixtures['user'].user;
+    badge.reserveAndEmail(email, function(err, claimCode) {
+      if (err) throw err;
+      t.same(claimCode, null, "user already has reserved claim code");
+      t.end();
+    });
+  });
+
   // necessary to stop the test runner
   test('shutting down #', function (t) {
     db.close();
