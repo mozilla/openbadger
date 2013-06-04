@@ -27,6 +27,7 @@ module.exports = {
   }),
   'link-basic': new Badge({
     _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
+    program: 'program',
     name: 'Link Badge, basic',
     shortname: 'link-basic',
     description: 'For doing links.',
@@ -38,6 +39,7 @@ module.exports = {
     ]
   }),
   'link-advanced': new Badge({
+    program: 'program',
     name : 'Link Badge, advanced',
     shortname: 'link-advanced',
     description: 'For doing lots of links.',
@@ -47,6 +49,7 @@ module.exports = {
     ]
   }),
   'comment': new Badge({
+    program: 'program',
     name : 'Commenting badge',
     shortname: 'comment',
     description: 'For doing lots of comments.',
@@ -56,6 +59,7 @@ module.exports = {
     ]
   }),
   'link-comment': new Badge({
+    program: 'program',
     name : 'Linking and commenting badge',
     shortname: 'link-comment',
     description: 'For doing lots of comments and links',
@@ -66,6 +70,7 @@ module.exports = {
     ]
   }),
   'offline-badge': new Badge({
+    program: 'program',
     name: 'Offline badge',
     shortname: 'offline-badge',
     description: 'For doing stuff offline',
@@ -79,6 +84,7 @@ module.exports = {
     ]
   }),
   'multi-claim-badge': new Badge({
+    program: 'program',
     name: 'Multi claim badge',
     shortname: 'multi-claim-badge',
     description: 'Multi',
@@ -91,6 +97,7 @@ module.exports = {
     ]
   }),
   'other-offline-badge': new Badge({
+    program: 'program',
     name: 'Other Offline badge',
     shortname: 'other-offline-badge',
     description: 'For doing more offline stuff',
@@ -102,6 +109,7 @@ module.exports = {
     ]
   }),
   'random-badge': new Badge({
+    program: 'program',
     name: 'Random code badge',
     shortname: 'random-badge',
     description: 'For doing random stuff',
@@ -109,6 +117,7 @@ module.exports = {
     claimCodes: []
   }),
   'with-criteria': new Badge({
+    program: 'program',
     name: 'Badge with criteria',
     shortname: 'with-criteria',
     description: 'For doing random stuff',
@@ -128,20 +137,24 @@ module.exports = {
     seen: true
   }),
   'science1': new Badge({
+    program: 'program',
     name: 'science1',
     shortname: 'science1',
     description: 'science1',
     image: IMAGE,
-    categories: ['science']
+    categories: ['science'],
   }),
   'science2': new Badge({
+    program: 'program',
     name: 'science2',
     shortname: 'science2',
     description: 'science2',
     image: IMAGE,
-    categories: ['science']
+    categories: ['science'],
+    program: '',
   }),
   'science3': new Badge({
+    program: 'program',
     name: 'science3',
     shortname: 'science3',
     description: 'science3',
@@ -149,6 +162,7 @@ module.exports = {
     categories: ['science']
   }),
   'science-math1': new Badge({
+    program: 'program',
     name: 'science-math1',
     shortname: 'science-math1',
     description: 'science-math1',
@@ -156,6 +170,7 @@ module.exports = {
     categories: ['science', 'math']
   }),
   'science-math2': new Badge({
+    program: 'program',
     name: 'science-math2',
     shortname: 'science-math2',
     description: 'science-math2',
@@ -163,6 +178,7 @@ module.exports = {
     categories: ['science', 'math']
   }),
   'science-math3': new Badge({
+    program: 'program',
     name: 'science-math3',
     shortname: 'science-math3',
     description: 'science-math3',
