@@ -407,7 +407,7 @@ Get a list of recommended badges for a user.
    * **type**
    * **activityType**
    * **rubric**
-
+   * **program**
 
 ## GET `/v2/badge/:shortname/recommendations`
 Get a list of recommended "next badges" based on the categories of another badge.
@@ -434,6 +434,7 @@ Get a list of recommended "next badges" based on the categories of another badge
    * **type**
    * **activityType**
    * **rubric**
+   * **program**
 
 ## GET `/v2/issuers`
 Get information about all existing issuers.
