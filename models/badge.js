@@ -258,18 +258,12 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
   }.bind(this));
 };
 
-function extracount(opts) {
-  const padded = Math.pow(opts.count, 1.06) | 0;
-  if (padded < opts.minimum)
-    return opts.minimum;
-  return padded;
-};
-
 /**
  * Adds a set of random claim codes to the badge.
  *
  * @param {Object} options
- *   - `count`: how many codes to try to generate
+ *   - `count`: how many codes to generate
+ *   - `codeGenerator`: function to generate random codes (optional)
  * @param {Function} callback
  *   Expects `function (err, codes)`
  * @return {[async]}
@@ -278,26 +272,31 @@ function extracount(opts) {
  */
 
 Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
-  // We want to generate more than we need upfront so if there are
-  // duplicates when we compare against all of the badges in the
-  // database we'll have backups.
+  const codeGenerator = options.codeGenerator || phraseGenerator;
   const count = options.count;
-  const countWithExtra = extracount({
-    count: count,
-    minimum: 100
-  });
-  const phrases = phraseGenerator(countWithExtra);
+  const accepted = [];
+  const self = this;
 
-  this.addClaimCodes({
-    codes: phrases,
-    limit: count,
-    alreadyClean: true,
-  }, function (err, accepted, rejected) {
+  async.until(function isDone() {
+    return accepted.length == count;
+  }, function addCodes(cb) {
+    const numLeft = count - accepted.length;
+    const phrases = codeGenerator(numLeft);
+
+    self.addClaimCodes({
+      codes: phrases,
+      limit: numLeft,
+      alreadyClean: true,
+    }, function (err, acceptedCodes, rejectedCodes) {
+      if (err) return cb(err);
+      accepted.push.apply(accepted, acceptedCodes);
+      return cb(null);
+    });
+  }, function done(err) {
     if (err) return callback(err);
-    return callback(null, accepted);
+    callback(null, accepted);
   });
 };
-
 
 Badge.prototype.getClaimCode = function getClaimCode(code) {
   const codes = this.claimCodes;
