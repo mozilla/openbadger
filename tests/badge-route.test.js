@@ -210,12 +210,13 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(flashes[0].type, 'results');
       t.equal(flashes[0].results.length, 2);
       var success = flashes[0].results[0];
-      var dupe = flashes[0].results[1];
+      var success2 = flashes[0].results[1];
       t.equal(success.email, 'blarg@goose.org');
       t.equal(success.status, 'ok');
       t.equal(typeof(success.claimCode), 'string');
-      t.equal(dupe.email, 'narg@moose.org');
-      t.equal(dupe.status, 'dupe');
+      t.equal(success2.email, 'narg@moose.org');
+      t.equal(success2.status, 'ok');
+      t.equal(typeof(success2.claimCode), 'string');      
       t.end();
     });
   });

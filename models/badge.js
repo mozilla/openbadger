@@ -382,13 +382,6 @@ Badge.prototype.earnableBy = function earnableBy(user) {
 Badge.prototype.reserveAndEmail = function reserveAndEmail(email, callback) {
   const self = this;
 
-  var existingCode = self.claimCodes.filter(function(claim) {
-    return claim.reservedFor == email;
-  });
-
-  if (existingCode.length)
-    return callback(null, null);
-
   BadgeInstance.findOne({
     userBadgeKey: email + '.' + self.id
   }, function (err, instance) {

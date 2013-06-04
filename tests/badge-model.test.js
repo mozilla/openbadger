@@ -512,12 +512,14 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
-  test('Badge#reserveAndEmail does nothing when user has reserved claim code', function(t) {
+  test('Badge#reserveAndEmail makes more codes when user has reserved claim code because user might be a guardian with lots of kids', function(t) {
     var badge = fixtures['random-badge'];
     var email = fixtures['user'].user;
     badge.reserveAndEmail(email, function(err, claimCode) {
       if (err) throw err;
-      t.same(claimCode, null, "user already has reserved claim code");
+      t.equal(typeof(claimCode), 'string');
+      var claim = badge.getClaimCode(claimCode);
+      t.equal(claim.reservedFor, email, "another reserved claim code is generated because the email might be for a guardian who has multiple kids");
       t.end();
     });
   });
