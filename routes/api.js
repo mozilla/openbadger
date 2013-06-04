@@ -113,7 +113,7 @@ function parseLimit(userLimit) {
 exports.similarBadges = function similarBadges(req, res, next) {
   const badge = req.badge;
   const email = req.query.email;
-  const limit = parseLimit(req.query.limit, 10);
+  const limit = parseLimit(req.query.limit);
 
   badge.getSimilar(email, function (err, badges) {
     if (err)
@@ -131,7 +131,9 @@ exports.similarBadges = function similarBadges(req, res, next) {
 
 exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
   Badge.getRecommendations({
-    email: req.authUser || req.query.email
+    email: req.authUser || req.query.email,
+    ageRange: req.query.ageRange,
+    limit: parseLimit(req.query.limit) || Infinity
   }, function (err, badges) {
     if (err) return res.json(500, {status: 'error', error: err });
     return res.json(200, {
