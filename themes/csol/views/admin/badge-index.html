@@ -1,17 +1,6 @@
 {% extends "admin/base.html" %}
 {% block main %}
 
-{% if badges.length %}
-<table class="badge-list">
-<tbody>
-<tr>
-<th class="oper view"></th>
-<th class="orga">Organization</th>
-<th class="prog">Program</th>
-<th class="badg">Badge</th>
-<th class="oper all"></th>
-</tr>
-
 <div>
   <p>
     {% if limit == "Infinity" %}
@@ -32,6 +21,18 @@
     {% endif %}
 
 </div>
+
+
+{% if badges.length %}
+<table class="badge-list">
+<tbody>
+<tr>
+<th class="oper view"></th>
+<th class="orga">Organization</th>
+<th class="prog">Program</th>
+<th class="badg">Badge</th>
+<th class="oper all"></th>
+</tr>
 
 {% for badge in badges %}
   <tr>
