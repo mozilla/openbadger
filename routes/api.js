@@ -14,6 +14,7 @@ const mongoose = require('mongoose');
 function normalizeBadge(badge) {
   var badgeData = {
     name: badge.name,
+    shortname: badge.shortname,
     description: badge.description,
     prerequisites: badge.prerequisites,
     image: badge.absoluteUrl('image'),
