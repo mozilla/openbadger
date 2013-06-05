@@ -384,7 +384,7 @@ Badge.prototype.earnableBy = function earnableBy(user) {
   }, true);
 };
 
-Badge.prototype.reserveAndEmail = function reserveAndEmail(email, callback) {
+Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
   const self = this;
 
   BadgeInstance.findOne({
@@ -395,8 +395,7 @@ Badge.prototype.reserveAndEmail = function reserveAndEmail(email, callback) {
       return callback(null, null);
     self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
       if (err) return callback(err);
-      console.log('WRITE SEND EMAIL CODE');
-      // #TODO: add email code here
+      console.log('TODO: WRITE NOTIFICATION/WEBHOOK CODE.');
       return callback(null, accepted[0]);
     });
   });

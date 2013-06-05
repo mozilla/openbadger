@@ -245,11 +245,11 @@ exports.awardToUser = function awardToUser(req, res, next) {
   });
 };
 
-function reserveAndEmail(badge) {
+function reserveAndNotify(badge) {
   return function (email, callback) {
     if (!util.isEmail(email))
       return callback(null, {email: email, status: 'invalid'});
-    badge.reserveAndEmail(email, function (err, claimCode) {
+    badge.reserveAndNotify(email, function (err, claimCode) {
       if (err) return callback(err);
       if (!claimCode)
         return callback(null, {email: email, status: 'dupe'});
@@ -269,7 +269,7 @@ exports.issueMany = function issueMany(req, res, next) {
     .trim()
     .split('\n')
     .map(util.method('trim'));
-  async.map(emails, reserveAndEmail(badge), function (err, results) {
+  async.map(emails, reserveAndNotify(badge), function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');
