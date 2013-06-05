@@ -40,7 +40,7 @@ const ClaimCodeSchema = new Schema({
   reservedFor: {
     type: String,
     required: false,
-    trim: true,    
+    trim: true,
   },
   multi: {
     type: Boolean,
@@ -688,11 +688,14 @@ Badge.prototype.getSimilar = function (email, callback) {
     '$or': this.categories.map(util.objWrap('categories'))
   };
   Badge.find(query, function (err, badges) {
+    if (err) return callback(err);
+
     badges = badges.filter(function (badge) {
       return !(badge.shortname == thisShortname);
     });
+
     if (!email)
-      return callback(err, badges);
+      return callback(null, badges);
 
     // Get all of the badge instances for the email address that was
     // passed in and remove any badge classes that the user already has
@@ -700,8 +703,7 @@ Badge.prototype.getSimilar = function (email, callback) {
     BadgeInstance.find({user: email})
       .populate('badge')
       .exec(function (err, instances) {
-        if (err)
-          return callback(err);
+        if (err) return callback(err);
 
         const earned = instances.map(function (inst) {
           return (inst.badge && inst.badge.shortname);
