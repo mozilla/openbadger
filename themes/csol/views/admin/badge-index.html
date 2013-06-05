@@ -78,7 +78,8 @@
 </tbody>
 </table>
 {% endif %}
-{% if issuers.length %}
+
+{% if issuers.length and not search %}
 <h2>Issuers</h2>
 <ul class="unstyled">
 {% for issuer in issuers.sort() %}
@@ -86,7 +87,11 @@
 {% endfor %}
 </ul>
 {% else %}
-<p>No Issuers found.</p>
+
+  {% if not search %}
+    <p>No Issuers found.</p>
+  {% endif %}
+
 {% endif %}
 
 
