@@ -8,7 +8,11 @@
     <input class="btn" type="submit" value="Search">
   </form>
 
-{% if not search %}
+{% if search %}
+
+  <a href="?"><button class="btn btn-danger">Clear Search</button></a>
+
+{% else %}
   <p>
     {% if limit == "Infinity" %}
     <a href="?">Limit Results</a>
