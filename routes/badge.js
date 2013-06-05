@@ -413,7 +413,6 @@ exports.findAll = function findAll(req, res, next) {
   const searchFn = makeSearchFn(req.query.search);
 
   if (!searchFn) {
-    req.searching = true;
     query.limit(limitAmount);
     query.skip(skipAmount);
   }
