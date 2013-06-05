@@ -207,6 +207,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(mockRes.status, 303);
       t.equal(mockRes.path, 'back');
       t.equal(flashes.length, 1);
+      t.ok(flashes[0]);
       t.equal(flashes[0].type, 'results');
       t.equal(flashes[0].results.length, 2);
       var success = flashes[0].results[0];
