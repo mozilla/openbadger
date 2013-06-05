@@ -44,6 +44,9 @@ module.exports = {
     shortname: 'link-advanced',
     description: 'For doing lots of links.',
     image: IMAGE,
+    claimCodes: [
+      { code: 'NARGS_CODE', reservedFor: 'narg@moose.org' },
+    ],
     behaviors: [
       { shortname: 'link', count: 10 }
     ]
@@ -80,6 +83,7 @@ module.exports = {
       { code: 'already-claimed', claimedBy: 'brian@example.org' },
       { code: 'never-claim' },
       { code: 'will-claim' },
+      { code: 'reserved-claim', reservedFor: 'foo@bar.org' },
       { code: 'remove-claim' },
     ]
   }),

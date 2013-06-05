@@ -163,7 +163,9 @@ exports.meta = function meta(req, res) {
 
 exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
   var codes = req.badge.claimCodes
-    .filter(function(c) { return !c.claimedBy && !c.multi; })
+    .filter(function(c) {
+      return !c.claimedBy && !c.multi && !c.reservedFor;
+    })
     .map(util.prop('code'));
   return res.type('text').send(200, codes.join('\n'));
 };
@@ -243,16 +245,19 @@ exports.awardToUser = function awardToUser(req, res, next) {
   });
 };
 
-function issueAndEmail(badge) {
+function reserveAndNotify(badge) {
   return function (email, callback) {
     if (!util.isEmail(email))
       return callback(null, {email: email, status: 'invalid'});
-    badge.award(email, function (err, instance) {
+    badge.reserveAndNotify(email, function (err, claimCode) {
       if (err) return callback(err);
-      // #TODO: SHOULD PUT EMAIL CODE HERE
-      if (!instance)
+      if (!claimCode)
         return callback(null, {email: email, status: 'dupe'});
-      return callback(null, {email: email, status: 'ok'});
+      return callback(null, {
+        email: email,
+        status: 'ok',
+        claimCode: claimCode
+      });
     });
   };
 }
@@ -264,7 +269,7 @@ exports.issueMany = function issueMany(req, res, next) {
     .trim()
     .split('\n')
     .map(util.method('trim'));
-  async.map(emails, issueAndEmail(badge), function (err, results) {
+  async.map(emails, reserveAndNotify(badge), function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');
