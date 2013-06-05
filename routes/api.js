@@ -68,7 +68,8 @@ function normalizeProgram(program) {
   programData.imageUrl = program.absoluteUrl('image');
   programData.issuer = {
     name: program.issuer.name,
-    url: program.issuer.url
+    url: program.issuer.url,
+    imageUrl: program.issuer.absoluteUrl('image')
   };
 
   return programData;
