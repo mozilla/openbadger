@@ -144,9 +144,8 @@ exports.criteria = function criteria(req, res) {
   });
 }
 
-exports.all = function all(req, res) {
-  return res.render('public/all.html', {
-    badges: req.badges,
+exports.anonymousHome = function all(req, res) {
+  return res.render('public/anonymous-home.html', {
     user: req.session.user,
     csrf: req.session._csrf,
   });

@@ -57,12 +57,10 @@
       {% else %}
         {{ badge.description | stupidSafe }}
       {% endif %}
-    </td>  
+    </td>
   </tr>
 {% endfor %}
 </tbody>
 </table>
-{% else %}
-<h1>No Badges to issue.</h1>
 {% endif %}
 {% endblock %}

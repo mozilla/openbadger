@@ -17,7 +17,7 @@ whitelists.NO_CACHE = [whitelists.ASSERTION];
 
 exports.define = function defineRoutes(app) {
   /** Routes */
-  app.get('/', badge.findNonOffline, render.all);
+  app.get('/', render.anonymousHome);
 
   app.all('/issuer*', user.requireAuth({
     level: 'issuer',
