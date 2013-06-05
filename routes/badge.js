@@ -390,25 +390,44 @@ function parseLimit(limit, _default) {
   return intLimit || DEFAULT;
 }
 
+function makeSearchFn(term) {
+  if (!term) return null;
+  const prop = util.prop;
+  const regex = new RegExp(term, 'i');
+  return function (badge) {
+    return (false
+     || regex.test(prop('name')(badge))
+     || regex.test(prop('program', 'name')(badge))
+     || regex.test(prop('program', 'issuer', 'name')(badge))
+    );
+  };
+}
+
 exports.findAll = function findAll(req, res, next) {
   const page = req.page = parseInt(req.query.page, 10) || 1;
   const limitAmount = req.limit = parseLimit(req.query.limit);
   const skipAmount = limitAmount * (page - 1);
-  const importantElements = {name: 1, shortname: 1, program: 1};
-  Badge.find({}, importantElements)
-    .limit(limitAmount)
-    .skip(skipAmount)
-    .populate('program')
-    .exec(function (err, badges) {
+
+  const query = Badge.find({}, {name: 1, shortname: 1, program: 1});
+
+  const searchFn = makeSearchFn(req.query.search);
+
+  if (!searchFn) {
+    req.searching = true;
+    query.limit(limitAmount);
+    query.skip(skipAmount);
+  }
+
+  query.populate('program').exec(function (err, badges) {
+    if (err) return next(err);
+    const programs = badges
+      .filter(util.prop('program'))
+      .map(util.prop('program'));
+    const populateIssuers = util.method('populate', 'issuer');
+    async.map(programs, populateIssuers, function (err) {
       if (err) return next(err);
-      req.badges = badges;
-      const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
-      const populateIssuers = util.method('populate', 'issuer');
-      async.map(programs, populateIssuers, function (err) {
-        if (err) return next(err);
-        return next();
-      });
+      req.badges = searchFn ? badges.filter(searchFn) : badges;
+      return next();
     });
+  });
 };

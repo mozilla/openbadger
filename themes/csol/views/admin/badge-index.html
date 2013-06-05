@@ -1,7 +1,14 @@
 {% extends "admin/base.html" %}
 {% block main %}
 
+
 <div>
+  <form action="?" method="get" class="form-search" style="float: right;">
+    <input type="text" name="search" class="input-large search-query" placeholder="badge, program, or issuer name" {% if search %}value="{{search}}"{% endif %}>
+    <input class="btn" type="submit" value="Search">
+  </form>
+
+{% if not search %}
   <p>
     {% if limit == "Infinity" %}
     <a href="?">Limit Results</a>
@@ -24,7 +31,7 @@
       <button class="btn">Next Page</button>
     </a>
     {% endif %}
-
+{% endif %}
 </div>
 
 

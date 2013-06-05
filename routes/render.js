@@ -118,6 +118,7 @@ exports.badgeIndex = function (req, res) {
 
     limit: req.limit,
     pageNumber: req.page,
+    search: req.query.search,
 
     issuers: req.issuers,
     user: req.session.user,
