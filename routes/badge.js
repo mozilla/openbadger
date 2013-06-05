@@ -359,7 +359,8 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
       .map(util.prop('_id'))
       .map(util.objWrap('program'))
   };
-  Badge.find(query)
+  Badge
+    .find(query, {image: 0})
     .populate('program')
     .exec(function (err, badges) {
       if (err) return next(err);
@@ -377,31 +378,8 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
 };
 
 exports.findAll = function findAll(req, res, next) {
-  Badge.find({})
+  Badge.find({}, {image: 0})
     .populate('program')
-    .exec(function (err, badges) {
-      if (err) return next(err);
-      req.badges = badges;
-      const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
-      const populateIssuers = util.method('populate', 'issuer');
-      async.map(programs, populateIssuers, function (err) {
-        if (err) return next(err);
-        return next();
-      });
-    });
-};
-
-exports.findNonOffline = function findNonOffline(req, res, next) {
-  var query = {
-    '$or': [
-      {claimCodes: {'$exists': false }} ,
-      {claimCodes: {'$size': 0 }}
-    ]
-  };
-  Badge.find(query)
-   .populate('program')
     .exec(function (err, badges) {
       if (err) return next(err);
       req.badges = badges;

@@ -9,8 +9,7 @@ const method = util.method;
 const prop = util.prop;
 
 exports.findAll = function findAll(req, res, next) {
-  Issuer.find({})
-    .populate('programs')
+  Issuer.find({}, {image: 0})
     .exec(function (err, issuers) {
       if (err) return next(err);
       req.issuers = issuers;
