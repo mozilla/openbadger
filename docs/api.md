@@ -381,6 +381,34 @@ Claim a badge via claim code.
 * `409`: User already has the badge.
 
 
+## GET `/v2/user/recommendations`
+Get a list of recommended badges for a user.
+
+### Request Parameters
+* **email**: (Optional) Email address for a user. If not passed, will use the email address specified in the authentication token.
+* **limit**: Limit the amount of badges returned by the API. Defaults to `10`, pass in `0` for unlimited.
+* **ageRange**: Age range of the user. Valid options are `0-13`, `13-18`, and `19-24`
+
+### Response Parameters
+* **status**: Status of the request. If the request is good, contains with the literal string `"ok"`. If the request is bad for any reason, contains the literal string `"error"`.
+
+* **badges**: Array of badge objects. Properties for each object are:
+   * **name**
+   * **description**
+   * **prerequisites**
+   * **image**
+   * **criteria**
+   * **tags**
+   * **categoryAward**
+   * **categoryRequirement**
+   * **categoryWeight**
+   * **categories**
+   * **ageRange**
+   * **type**
+   * **activityType**
+   * **rubric**
+   * **program**
+
 ## GET `/v2/badge/:shortname/recommendations`
 Get a list of recommended "next badges" based on the categories of another badge.
 
@@ -406,6 +434,7 @@ Get a list of recommended "next badges" based on the categories of another badge
    * **type**
    * **activityType**
    * **rubric**
+   * **program**
 
 ## GET `/v2/issuers`
 Get information about all existing issuers.

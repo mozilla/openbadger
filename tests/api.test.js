@@ -99,6 +99,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
         t.same(JSON.parse(JSON.stringify(mockRes.body)), {
           status: 'ok',
           badge: {
+            "shortname":"with-criteria",
             "name":"Badge with criteria",
             "description":"For doing random stuff",
             "criteria": "* person is awesome",

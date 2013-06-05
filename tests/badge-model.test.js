@@ -421,6 +421,43 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test('Badge#generateClaimCodes generates until finished', function (t) {
+    function generate(count) {
+      var retval = cannedCodes.shift();
+      t.equal(retval.length, count,
+              "expect generate(" + retval.length + ")");
+      return retval;
+    }
+
+    var cannedCodes = [
+      ['a', 'b', 'c'],
+      // Return a duplicate code from before.
+      ['d', 'e', 'a'],
+      // We'll get called upon to generate one more code b/c of the dup.
+      ['f']
+    ];
+
+    const badge = validBadge();
+    badge.shortname = badge.name = 'gcc-test-badge';
+    badge.generateClaimCodes({
+      count: 3,
+      codeGenerator: generate
+    }, function (err, codes) {
+      if (err) throw err;
+      t.same(codes, ['a', 'b', 'c']);
+      t.equal(cannedCodes.length, 2);
+      badge.generateClaimCodes({
+        count: 3,
+        codeGenerator: generate        
+      }, function(err, codes) {
+        if (err) throw err;
+        t.same(codes, ['d', 'e', 'f']);
+        t.equal(cannedCodes.length, 0);
+        t.end();
+      });
+    });
+  });
+
   test('Badge#generateClaimCodes', function (t) {
     const badge = fixtures['random-badge'];
     const count = 1000;

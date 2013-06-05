@@ -9,6 +9,10 @@ const phraseGenerator = require('../lib/phrases');
 const async = require('async');
 const Schema = mongoose.Schema;
 
+const KID = '0-13';
+const TEEN = '13-18';
+const ADULT = '19-24';
+
 const BehaviorSchema = new Schema({
   shortname: {
     type: String,
@@ -110,7 +114,7 @@ const BadgeSchema = new Schema({
   ageRange: [{
     type: String,
     trim: true,
-    'enum': ['0-13', '13-18', '19-24'],
+    'enum': [KID, TEEN, ADULT],
   }],
   type: {
     type: String,
@@ -134,6 +138,10 @@ const BadgeSchema = new Schema({
   },
 });
 const Badge = db.model('Badge', BadgeSchema);
+
+Badge.KID = KID;
+Badge.TEEN = TEEN;
+Badge.ADULT = ADULT;
 
 // Validators & Defaulters
 // -----------------------
@@ -258,18 +266,12 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
   }.bind(this));
 };
 
-function extracount(opts) {
-  const padded = Math.pow(opts.count, 1.06) | 0;
-  if (padded < opts.minimum)
-    return opts.minimum;
-  return padded;
-};
-
 /**
  * Adds a set of random claim codes to the badge.
  *
  * @param {Object} options
- *   - `count`: how many codes to try to generate
+ *   - `count`: how many codes to generate
+ *   - `codeGenerator`: function to generate random codes (optional)
  * @param {Function} callback
  *   Expects `function (err, codes)`
  * @return {[async]}
@@ -278,26 +280,31 @@ function extracount(opts) {
  */
 
 Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
-  // We want to generate more than we need upfront so if there are
-  // duplicates when we compare against all of the badges in the
-  // database we'll have backups.
+  const codeGenerator = options.codeGenerator || phraseGenerator;
   const count = options.count;
-  const countWithExtra = extracount({
-    count: count,
-    minimum: 100
-  });
-  const phrases = phraseGenerator(countWithExtra);
+  const accepted = [];
+  const self = this;
 
-  this.addClaimCodes({
-    codes: phrases,
-    limit: count,
-    alreadyClean: true,
-  }, function (err, accepted, rejected) {
+  async.until(function isDone() {
+    return accepted.length == count;
+  }, function addCodes(cb) {
+    const numLeft = count - accepted.length;
+    const phrases = codeGenerator(numLeft);
+
+    self.addClaimCodes({
+      codes: phrases,
+      limit: numLeft,
+      alreadyClean: true,
+    }, function (err, acceptedCodes, rejectedCodes) {
+      if (err) return cb(err);
+      accepted.push.apply(accepted, acceptedCodes);
+      return cb(null);
+    });
+  }, function done(err) {
     if (err) return callback(err);
-    return callback(null, accepted);
+    callback(null, accepted);
   });
 };
-
 
 Badge.prototype.getClaimCode = function getClaimCode(code) {
   const codes = this.claimCodes;
@@ -429,7 +436,7 @@ Badge.prototype.award = function award(options, callback) {
       ], catCb);
     }, function(err, instances) {
       if (err) return callback(err);
-      return callback(null, instances, instances);
+      return callback(null, instance, instances);
     });
   });
 };
@@ -526,17 +533,32 @@ Badge.prototype.getRubricItems = function() {
          : [];
 };
 
+// #TODO: maybe make this a Program model function?
+function isProgramActive(program) {
+  const now = Date.now();
+  if (!program || (!program.endDate && !program.startDate))
+    return true;
+  if (!program.endDate)
+    return now >= program.startDate;
+  if (!program.startDate)
+    return program.startDate <= now;
+  return (now <= program.endDate &&
+          now >= program.startDate);
+}
+
 Badge.getRecommendations = function (opts, callback) {
   const prop = util.prop;
+  const method = util.method;
+
+  const email = opts.email;
+  const limit = opts.limit || Infinity;
+  const userAgeRange = opts.ageRange;
+
+  function onlineBias(badge) {
+    return badge.activityType == 'offline' ? 1 : 0;
+  }
 
   // #TODO:
-  //   * Only recommend age appropriate badges.
-  //
-  //   * Deal with offline badges: right now we are not recommending
-  //     them because getting access to the program start date is
-  //     annoying, and we don't want to recommend badges that haven't
-  //     started yet
-  //
   //   * Be smarter about recommending badges that will complete a
   //     category level badge.
   //
@@ -547,7 +569,7 @@ Badge.getRecommendations = function (opts, callback) {
   //     filter out participation badges.
 
   BadgeInstance
-    .find({user: opts.email})
+    .find({user: email})
     .populate('badge')
     .exec(function (err, instances) {
       const earnedBadgeIds = instances.map(prop('badge', '_id'));
@@ -558,23 +580,28 @@ Badge.getRecommendations = function (opts, callback) {
         .uniq()
         .value();
 
-      const earnedCategoryLevel = instances
-        .filter(util.prop('badge', 'categoryAward'))
-        .map(util.prop('badge', 'categoryAward'));
+      const completedCategories = instances
+        .filter(prop('badge', 'categoryAward'))
+        .map(prop('badge', 'categoryAward'));
 
-      const query = {
-        _id: { '$nin': earnedBadgeIds },
-        'activityType': {'$ne': 'offline' }
-      };
+      const query = {_id: { '$nin': earnedBadgeIds }};
 
-      Badge.find(query, function (err, allBadges) {
+      const exclude = { image: 0 };
+
+      Badge.find(query, exclude)
+        .populate('program')
+        .exec(filterRecommendations);
+      function filterRecommendations(err, allBadges) {
         if (err) return callback(err);
+
         const filtered = allBadges
           .filter(function (b) {
+            const programIsActive = isProgramActive(b.program);
+            const noAgeInappropriate = _.contains(b.ageRange, userAgeRange);
             const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
             const noneFromEarnedCategories =
-              !_.intersection(b.categories, earnedCategoryLevel).length;
+              !_.intersection(b.categories, completedCategories).length;
             const onlyOnTrack =
               _.intersection(b.categories, onTrackCategories).length;
             return (true
@@ -582,12 +609,34 @@ Badge.getRecommendations = function (opts, callback) {
                     && noParticipation
                     && noneFromEarnedCategories
                     && onlyOnTrack
+                    && noAgeInappropriate
+                    && programIsActive
                    );
           });
-        return callback(null, filtered.length
+
+        // We want to have something to recommend, so we check to see if
+        // we've filtered out everything and if we have, resort to
+        // shuffling up all the badges and use that. Also, for the API
+        // endpoint we need to have fully populated badge classes,
+        // including program and issuer, so we filter out any badges
+        // that don't have an issuer associated with its program.
+        const result = (filtered.length
                         ? filtered
-                        : _.shuffle(allBadges));
-      });
+                        : _.shuffle(allBadges))
+          .sort(onlineBias)
+          .filter(prop('program', 'issuer'))
+          .slice(0, limit);
+
+        return async.map(
+          result.map(prop('program')),
+          method('populate', 'issuer'),
+          function (err) {
+            if (err) return callback(err);
+            return callback(null, result);
+          }
+        );
+
+      }
     });
 };
 
