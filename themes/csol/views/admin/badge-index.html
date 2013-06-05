@@ -1,7 +1,18 @@
 {% extends "admin/base.html" %}
 {% block main %}
 
+
 <div>
+  <form action="?" method="get" class="form-search" style="float: right;">
+    <input type="text" name="search" class="input-large search-query" placeholder="badge, program, or issuer name" {% if search %}value="{{search}}"{% endif %}>
+    <input class="btn" type="submit" value="Search">
+  </form>
+
+{% if search %}
+
+  <a href="?"><button class="btn btn-danger">Clear Search</button></a>
+
+{% else %}
   <p>
     {% if limit == "Infinity" %}
     <a href="?">Limit Results</a>
@@ -24,7 +35,7 @@
       <button class="btn">Next Page</button>
     </a>
     {% endif %}
-
+{% endif %}
 </div>
 
 
@@ -67,7 +78,8 @@
 </tbody>
 </table>
 {% endif %}
-{% if issuers.length %}
+
+{% if issuers.length and not search %}
 <h2>Issuers</h2>
 <ul class="unstyled">
 {% for issuer in issuers.sort() %}
@@ -75,7 +87,11 @@
 {% endfor %}
 </ul>
 {% else %}
-<p>No Issuers found.</p>
+
+  {% if not search %}
+    <p>No Issuers found.</p>
+  {% endif %}
+
 {% endif %}
 
 
