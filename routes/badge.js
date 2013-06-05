@@ -377,8 +377,22 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
     });
 };
 
+function parseLimit(limit, _default) {
+  const DEFAULT = _default || 50;
+  const intLimit = parseInt(limit, 10);
+  if (intLimit === 0)
+    return Infinity;
+  return intLimit || DEFAULT;
+}
+
 exports.findAll = function findAll(req, res, next) {
-  Badge.find({}, {image: 0})
+  const page = req.page = parseInt(req.query.page, 10) || 1;
+  const limitAmount = req.limit = parseLimit(req.query.limit);
+  const skipAmount = limitAmount * (page - 1);
+  const importantElements = {name: 1, shortname: 1, program: 1};
+  Badge.find({}, importantElements)
+    .limit(limitAmount)
+    .skip(skipAmount)
     .populate('program')
     .exec(function (err, badges) {
       if (err) return next(err);

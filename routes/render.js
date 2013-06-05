@@ -115,6 +115,10 @@ exports.newBehaviorForm = function (req, res) {
 exports.badgeIndex = function (req, res) {
   return res.render('admin/badge-index.html', {
     page: 'home',
+
+    limit: req.limit,
+    pageNumber: req.page,
+
     issuers: req.issuers,
     user: req.session.user,
     access: req.session.access,

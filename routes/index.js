@@ -47,7 +47,6 @@ exports.define = function defineRoutes(app) {
   // -------------
   var indexMiddleware = [
     badge.findAll,
-    behavior.findAll,
     issuer.findAll,
   ];
 
