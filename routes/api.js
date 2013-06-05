@@ -519,10 +519,18 @@ exports.programs = function programs(req, res) {
       return res.send(500, "There was an error retrieving the list of programs");
     }
     var result = { status: 'ok', programs : {} };
-    programs.forEach(function(p) {
-      result.programs[p.shortname] = {name: p.name, shortname: p.shortname };
+    async.map(programs, function(item, callback) {
+      item.populate('issuer', function(err) {
+        var programData = normalizeProgram(item)
+        return callback(err, {name:programData.name,
+                              shortname:programData.shortname,
+                              imageUrl:programData.imageUrl,
+                              issuer:programData.issuer});
+      })
+    }, function(err, results) {
+      result.programs = results;
+      return res.json(200, result);
     });
-    return res.json(200, result);
   });
 };
 
