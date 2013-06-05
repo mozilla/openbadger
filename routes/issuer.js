@@ -9,7 +9,8 @@ const method = util.method;
 const prop = util.prop;
 
 exports.findAll = function findAll(req, res, next) {
-  Issuer.find({}, {name: 1})
+  Issuer.find({}, {name: 1, programs: 1})
+    .populate('programs')
     .exec(function (err, issuers) {
       if (err) return next(err);
       req.issuers = issuers;
