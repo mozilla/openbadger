@@ -115,6 +115,10 @@ exports.newBehaviorForm = function (req, res) {
 exports.badgeIndex = function (req, res) {
   return res.render('admin/badge-index.html', {
     page: 'home',
+
+    limit: req.limit,
+    pageNumber: req.page,
+
     issuers: req.issuers,
     user: req.session.user,
     access: req.session.access,
@@ -144,9 +148,8 @@ exports.criteria = function criteria(req, res) {
   });
 }
 
-exports.all = function all(req, res) {
-  return res.render('public/all.html', {
-    badges: req.badges,
+exports.anonymousHome = function all(req, res) {
+  return res.render('public/anonymous-home.html', {
     user: req.session.user,
     csrf: req.session._csrf,
   });

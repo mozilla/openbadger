@@ -359,7 +359,8 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
       .map(util.prop('_id'))
       .map(util.objWrap('program'))
   };
-  Badge.find(query)
+  Badge
+    .find(query, {image: 0})
     .populate('program')
     .exec(function (err, badges) {
       if (err) return next(err);
@@ -376,32 +377,23 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
     });
 };
 
-exports.findAll = function findAll(req, res, next) {
-  Badge.find({})
-    .populate('program')
-    .exec(function (err, badges) {
-      if (err) return next(err);
-      req.badges = badges;
-      const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
-      const populateIssuers = util.method('populate', 'issuer');
-      async.map(programs, populateIssuers, function (err) {
-        if (err) return next(err);
-        return next();
-      });
-    });
-};
+function parseLimit(limit, _default) {
+  const DEFAULT = _default || 50;
+  const intLimit = parseInt(limit, 10);
+  if (intLimit === 0)
+    return Infinity;
+  return intLimit || DEFAULT;
+}
 
-exports.findNonOffline = function findNonOffline(req, res, next) {
-  var query = {
-    '$or': [
-      {claimCodes: {'$exists': false }} ,
-      {claimCodes: {'$size': 0 }}
-    ]
-  };
-  Badge.find(query)
-   .populate('program')
+exports.findAll = function findAll(req, res, next) {
+  const page = req.page = parseInt(req.query.page, 10) || 1;
+  const limitAmount = req.limit = parseLimit(req.query.limit);
+  const skipAmount = limitAmount * (page - 1);
+  const importantElements = {name: 1, shortname: 1, program: 1};
+  Badge.find({}, importantElements)
+    .limit(limitAmount)
+    .skip(skipAmount)
+    .populate('program')
     .exec(function (err, badges) {
       if (err) return next(err);
       req.badges = badges;
