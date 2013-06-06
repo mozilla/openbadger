@@ -543,11 +543,10 @@ exports.issuer = function issuer(req, res, next) {
 };
 
 
-exports.programs = function programs(req, res) {
+function createFilterFn(query) {
   const prop = util.prop;
-  const query = req.query;
 
-  function filterProgram(program, cb) {
+  return function filterProgram(program, cb) {
     if (!_.keys(query).length)
       return cb(true);
 
@@ -574,16 +573,20 @@ exports.programs = function programs(req, res) {
         return cb(false);
 
       if (query.age &&
-         !_.contains(ageRanges, query.age))
+          !_.contains(ageRanges, query.age))
         return cb(false);
 
       if (query.activity &&
-         !_.contains(activityTypes, query.activity))
+          !_.contains(activityTypes, query.activity))
         return cb(false);
 
       return cb(true);
     });
   };
+};
+
+exports.programs = function programs(req, res) {
+  const filterProgram = createFilterFn(req.query);
 
   function sendError(err, msg) {
     return res.json(500, {
