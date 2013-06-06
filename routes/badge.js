@@ -161,13 +161,7 @@ exports.meta = function meta(req, res) {
 };
 
 exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
-  var batchName = req.query.batchName;
-  var codes = req.badge.claimCodes
-    .filter(function(c) {
-      if (batchName && c.batchName != batchName) return false;
-      return !c.claimedBy && !c.multi && !c.reservedFor;
-    })
-    .map(util.prop('code'));
+  var codes = req.badge.getClaimCodesForDistribution(req.query.batchName);
   return res.type('text').send(200, codes.join('\n'));
 };
 
@@ -225,6 +219,10 @@ exports.releaseClaimCode = function releaseClaimCode(req, res, next) {
 var bulkClaimCodeActions = exports.bulkClaimCodeActions = {
   txt: function(req, res, next) {
     return res.redirect(303, '../unclaimed.txt?batchName=' +
+                             encodeURIComponent(req.body.batchName));
+  },
+  html: function(req, res, next) {
+    return res.redirect(303, '../unclaimed.html?batchName=' +
                              encodeURIComponent(req.body.batchName));
   }
 };

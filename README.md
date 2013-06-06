@@ -37,6 +37,7 @@ export OPENBADGER_REDIS_PORT=6379
 export OPENBADGER_MONGO_HOST="localhost"
 export OPENBADGER_MONGO_PORT=27017
 export OPENBADGER_MONGO_DB="openbadger"
+export OPENBADGER_CLAIM_URL_TEXT='csol.org/claim'
 export OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
 ```
 

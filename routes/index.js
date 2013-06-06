@@ -74,6 +74,8 @@ exports.define = function defineRoutes(app) {
            badge.bulkClaimCodeAction);
   app.get('/admin/badge/:shortname/claims/unclaimed.txt',
           badge.getUnclaimedCodesTxt);
+  app.get('/admin/badge/:shortname/claims/unclaimed.html',
+          render.getUnclaimedCodesHtml);
 
   app.post('/admin/badge', [
     badge.getUploadedImage({ required: true })

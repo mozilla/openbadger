@@ -355,6 +355,15 @@ Badge.prototype.getBatchNames = function getBatchNames() {
   return Object.keys(batchNames);
 };
 
+Badge.prototype.getClaimCodesForDistribution = function getClaimCodesForDistribution(batchName) {
+  return this.claimCodes
+    .filter(function(c) {
+      if (batchName && c.batchName != batchName) return false;
+      return !c.claimedBy && !c.multi && !c.reservedFor;
+    })
+    .map(util.prop('code'));
+};
+
 Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
   opts = _.defaults(opts||{}, {unclaimed: false});
 
