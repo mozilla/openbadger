@@ -541,29 +541,28 @@ exports.issuer = function issuer(req, res, next) {
 };
 
 exports.programs = function programs(req, res) {
-  Program.find({}, function(err, programs) {
-    if (err) {
-      return res.json(500, {
-        status: 'error',
-        error: "There was an error retrieving the list of programs"
-      });
-    }
-    var result = { status: 'ok', programs: {} };
-    async.map(programs, function(item, callback) {
-      item.populate('issuer', function(err) {
-        const programData = normalizeProgram(item);
-        return callback(err, {
-          name: programData.name,
-          shortname: programData.shortname,
-          imageUrl: programData.imageUrl,
-          issuer: programData.issuer
+  Program.find({})
+    .populate('issuer')
+    .exec(function(err, programs) {
+      if (err) {
+        return res.json(500, {
+          status: 'error',
+          error: "There was an error retrieving the list of programs"
         });
+      }
+      return res.json(200, {
+        status: 'ok',
+        programs: programs.map(function (program) {
+          const programData = normalizeProgram(program);
+          return {
+            name: programData.name,
+            shortname: programData.shortname,
+            imageUrl: program.image ? programData.imageUrl : null,
+            issuer: programData.issuer
+          };
+        })
       });
-    }, function(err, results) {
-      result.programs = results;
-      return res.json(200, result);
     });
-  });
 };
 
 exports.program = function program(req, res) {

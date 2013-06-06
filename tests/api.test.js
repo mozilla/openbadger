@@ -353,6 +353,21 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api provides program listing', function (t) {
+      conmock({
+        handler: api.programs,
+        request: {}
+      }, function (err, mockRes, req) {
+        const programs = mockRes.body.programs;
+        t.same(mockRes.body.status, 'ok', 'should have status ok');
+        t.ok(programs.some(function (program) {
+          return program.shortname == 'some-program';
+        }), 'should have some-program');
+        t.end();
+      });
+  });
+
+
   test('api can give badge recommendations', function(t) {
     conmock({
       handler: api.similarBadges,
