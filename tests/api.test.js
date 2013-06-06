@@ -4,6 +4,7 @@ const badgeFixtures = require('./badge-model.fixtures');
 const util = require('../lib/util');
 
 const Badge = require('../models/badge');
+const BadgeInstance = require('../models/badge-instance');
 const db = require('../models');
 const api = require('../routes/api');
 const env = require('../lib/environment');
@@ -129,6 +130,23 @@ test.applyFixtures(badgeFixtures, function(fx) {
       });
     });
   });
+
+  test('api does not provide images when they do not exist', function(t) {
+    conmock({
+      handler: api.badge,
+      request: {
+        badge: fx['no-image-badge']
+      }
+    }, function(err, mockRes, req) {
+      const badge = mockRes.body.badge;
+      t.notOk(badge.program.imageUrl,
+              'should not have program image url');
+      t.notOk(badge.program.issuer.imageUrl,
+              'should not have issuer image url');
+      t.end();
+    });
+  });
+
 
   test('api provides unclaimed badge info given claim code', function(t) {
     conmock({
@@ -276,6 +294,37 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api can award badge directly, with evidence', function (t) {
+    const email = 'award-evidence@example.org';
+    const evidence = 'https://foo.bar.org/evidence';
+    env.temp({origin: 'https://example.org'}, function(done) {
+      conmock({
+        handler: api.awardBadge,
+        request: {
+          badge: fx['link-basic'],
+          body: {
+            email: email,
+            evidence: evidence
+          }
+        }
+      }, function(err, mockRes, req) {
+        const body = mockRes.body;
+        const urlPrefix = 'https://example.org/badge/assertion/';
+        t.same(body.status, 'ok');
+        t.ok(body.url.match, urlPrefix);
+
+        const instanceId = body.url.split(urlPrefix).pop();
+        BadgeInstance.findById(instanceId, function (err, inst) {
+          t.notOk(err, 'should not have an error');
+          t.same(inst.user, email);
+          t.same(inst.evidence, evidence);
+          t.end();
+        });
+      });
+    });
+  });
+
+
   test('api provides program info w/ earnable badges', function(t) {
     env.temp({origin: 'https://example.org'}, function(done) {
       conmock({
@@ -303,6 +352,21 @@ test.applyFixtures(badgeFixtures, function(fx) {
       });
     });
   });
+
+  test('api provides program listing', function (t) {
+      conmock({
+        handler: api.programs,
+        request: {}
+      }, function (err, mockRes, req) {
+        const programs = mockRes.body.programs;
+        t.same(mockRes.body.status, 'ok', 'should have status ok');
+        t.ok(programs.some(function (program) {
+          return program.shortname == 'some-program';
+        }), 'should have some-program');
+        t.end();
+      });
+  });
+
 
   test('api can give badge recommendations', function(t) {
     conmock({

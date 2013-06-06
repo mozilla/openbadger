@@ -283,6 +283,7 @@ Award a badge directly to a user.
 ### Request Parameters
 * **auth**: The JWT corresponding to the user making the request.
 * **email**: The email of the relevant user.
+* **evidence**: A URL pointing to evidence for the badge.
 
 
 ### Response Codes

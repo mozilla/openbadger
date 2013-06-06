@@ -54,6 +54,7 @@ function normalizeProgram(program) {
   if (!(program.issuer && typeof(program.issuer) == "object"))
     throw new Error("expected populated program issuer");
 
+  const issuer = program.issuer;
   var programData = [
     'shortname',
     'name',
@@ -66,12 +67,17 @@ function normalizeProgram(program) {
   ].reduce(function (out, field) {
     return (out[field] = program[field], out);
   }, {});
-  programData.imageUrl = program.absoluteUrl('image');
+
+  if (program.image)
+    programData.imageUrl = program.absoluteUrl('image');
+
   programData.issuer = {
-    name: program.issuer.name,
-    url: program.issuer.url,
-    imageUrl: program.issuer.absoluteUrl('image')
+    name: issuer.name,
+    url: issuer.url,
   };
+
+  if (issuer.image)
+    programData.issuer.imageUrl = issuer.absoluteUrl('image');
 
   return programData;
 }
@@ -295,13 +301,20 @@ function getUnclaimedBadgeFromCode(code, req, res, next, cb) {
   });
 };
 
-function tryAwardingBadge(badge, email, res, successCb) {
+function tryAwardingBadge(opts, res, successCb) {
+  const badge = opts.badge;
+  const email = opts.email;
+  const evidence = opts.evidence;
+
   if (!badge)
     return res.json(404, {status: 'error', reason: 'badge not found'});
   if (!email)
     return res.json(400, {status: 'error', reason: 'missing email address'});
 
-  return badge.award(email, function (err, instance) {
+  return badge.award({
+    email: email,
+    evidence: evidence
+  }, function (err, instance) {
     if (err) {
       // TODO: log error properly
       console.dir(err);
@@ -310,17 +323,22 @@ function tryAwardingBadge(badge, email, res, successCb) {
         reason: 'database'
       });
     }
+
     if (!instance)
       return res.json(409, {
         status: 'error',
         reason: util.format('user `%s` already has badge', email),
         user: email,
       });
+
     var success = res.send.bind(res, 200, {
       status: 'ok',
       url: instance.absoluteUrl('assertion'),
     });
-    if (successCb) successCb(success); else success();
+
+    if (successCb)
+      return successCb(success);
+    return success();
   });
 }
 
@@ -336,12 +354,17 @@ exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
 exports.awardBadgeFromClaimCode = function(req, res, next) {
   const code = req.body.code;
   const email = req.body.email;
+  const evidence = req.body.evidence;
 
   if (!email)
     return res.json(400, {status: 'error', reason: 'missing email address'});
 
   getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
-    tryAwardingBadge(badge, email, res, function(success) {
+    tryAwardingBadge({
+      badge: badge,
+      email: email,
+      evidence: evidence
+    }, res, function(success) {
       badge.redeemClaimCode(code, email);
       badge.save(function(err) {
         if (err)
@@ -356,7 +379,11 @@ exports.awardBadgeFromClaimCode = function(req, res, next) {
 };
 
 exports.awardBadge = function awardBadge(req, res, next) {
-  tryAwardingBadge(req.badge, req.body.email, res);
+  tryAwardingBadge({
+    badge: req.badge,
+    email: req.body.email,
+    evidence: req.body.evidence
+  }, res);
 };
 
 exports.removeBadge = function removeBadge(req, res, next) {
@@ -514,24 +541,28 @@ exports.issuer = function issuer(req, res, next) {
 };
 
 exports.programs = function programs(req, res) {
-  Program.find({}, function(err, programs) {
-    if (err) {
-      return res.send(500, "There was an error retrieving the list of programs");
-    }
-    var result = { status: 'ok', programs : {} };
-    async.map(programs, function(item, callback) {
-      item.populate('issuer', function(err) {
-        var programData = normalizeProgram(item)
-        return callback(err, {name:programData.name,
-                              shortname:programData.shortname,
-                              imageUrl:programData.imageUrl,
-                              issuer:programData.issuer});
-      })
-    }, function(err, results) {
-      result.programs = results;
-      return res.json(200, result);
+  Program.find({})
+    .populate('issuer')
+    .exec(function(err, programs) {
+      if (err) {
+        return res.json(500, {
+          status: 'error',
+          error: "There was an error retrieving the list of programs"
+        });
+      }
+      return res.json(200, {
+        status: 'ok',
+        programs: programs.map(function (program) {
+          const programData = normalizeProgram(program);
+          return {
+            name: programData.name,
+            shortname: programData.shortname,
+            imageUrl: program.image ? programData.imageUrl : null,
+            issuer: programData.issuer
+          };
+        })
+      });
     });
-  });
 };
 
 exports.program = function program(req, res) {

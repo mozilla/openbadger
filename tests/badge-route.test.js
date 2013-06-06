@@ -204,10 +204,19 @@ test.applyFixtures(badgeFixtures, function(fx) {
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
+      t.equal(mockRes.fntype, 'redirect');
       t.equal(mockRes.status, 303);
       t.equal(mockRes.path, 'back');
       t.equal(flashes.length, 1);
-      t.ok(flashes[0]);
+      t.same(mockRes.nextErr, undefined);
+      if (!flashes.length) {
+        // The rest of this test assumes flashes[0] exists; if it doesn't,
+        // though, we need to return now, or else a "blah is not a property
+        // of undefined" type error will get thrown, which is completely
+        // unrelated to the actual problem.
+        return t.end();
+      }
+
       t.equal(flashes[0].type, 'results');
       t.equal(flashes[0].results.length, 2);
       var success = flashes[0].results[0];

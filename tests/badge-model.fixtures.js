@@ -14,6 +14,7 @@ module.exports = {
     name: 'Badge Authority',
     contact: 'brian@example.org',
     url: 'http://badgeauthority.org',
+    image: IMAGE,
     programs: [
       {name: 'Org 1'},
       {name: 'Org 2'},
@@ -24,6 +25,27 @@ module.exports = {
     name: 'Some Program',
     issuer: 'issuer',
     url: 'http://example.org/program',
+    image: IMAGE,
+  }),
+  'no-image-issuer': new Issuer({
+    _id: 'no-image-issuer',
+    name: 'No Image Issuer',
+    contact: 'brian@example.org',
+    url: 'http://no-image.example.org',
+  }),
+  'no-image-program': new Program({
+    _id: 'no-image-program',
+    name: 'no image program',
+    issuer: 'no-image-issuer',
+    url: 'http://example.org/program',
+  }),
+  'no-image-badge': new Badge({
+    program: 'no-image-program',
+    name: 'Program with no image',
+    shortname: 'no-image-badge',
+    description: 'desc',
+    image: IMAGE,
+    program: 'no-image-program',
   }),
   'link-basic': new Badge({
     _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
