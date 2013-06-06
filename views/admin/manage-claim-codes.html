@@ -104,8 +104,22 @@
       {% endfor %}
     </tbody>
   </table>
-  <a href="../unclaimed.txt" target="_blank" class="btn btn-small">Export all open codes as plain text</a>
-</form>
+  <form class="form-inline" action="bulk-action" method="post">
+    <legend>Bulk Actions</legend>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Apply the action</label>
+    <select name="action" class="input-xlarge">
+      <option value="txt">Export open codes as plain text</option>
+    </select>
+    <label>to claim codes in batch</label>
+    <select name="batchName">
+      <option value="">(All claim codes)</option>
+      {% for batchname in badge.getBatchNames() %}
+      <option value="{{batchname}}">{{batchname}}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Go</button>
+  </form>
 
 {% endif %}
 {% endblock %}

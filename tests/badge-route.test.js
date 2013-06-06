@@ -22,6 +22,51 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('getting open claim codes as txt w/ batchName works', function(t) {
+    conmock({
+      handler: badge.getUnclaimedCodesTxt,
+      request: {
+        badge: fx['offline-badge'],
+        query: {batchName: 'LOLOL'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.headers['Content-Type'], 'text/plain');
+      t.equal(mockRes.body, '');
+      t.end();
+    });
+  });
+
+  test('invalid bulk action returns 400', function(t) {
+    conmock({
+      handler: badge.bulkClaimCodeAction,
+      request: {
+        badge: fx['offline-badge'],
+        body: {action: 'LOLOL'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 400);
+      t.end();
+    });    
+  });
+
+  test('txt bulk action returns redirect', function(t) {
+    conmock({
+      handler: badge.bulkClaimCodeAction,
+      request: {
+        badge: fx['offline-badge'],
+        body: {action: 'txt', batchName: 'foo bar'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 303);
+      t.equal(mockRes.path, '../unclaimed.txt?batchName=foo%20bar');
+      t.end();
+    });    
+  });
+
   test('adding no claim codes does nothing', function(t) {
     var b = fx['link-basic'];
     t.equal(b.claimCodes.length, 0);
