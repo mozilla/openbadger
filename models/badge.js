@@ -683,12 +683,26 @@ Badge.getRecommendations = function (opts, callback) {
 };
 
 Badge.prototype.getSimilar = function (email, callback) {
+  const defer = global.setImmediate || process.nextTick;
+  const wrap = util.objWrap;
   const thisShortname = this.shortname;
+  const categories = this.categories;
+
   if (typeof email == 'function')
     callback = email, email = null;
-  const query = {
-    '$or': this.categories.map(util.objWrap('categories'))
-  };
+
+  const noCategories = !categories || categories.length == 0;
+
+  if (noCategories) {
+    return defer(function () {
+      callback(null, []);
+    });
+  }
+
+  // This builds up an array of objects that looks something like
+  // this: [{categories: 'science'}, {categories: 'math'}].
+  const query = { '$or': categories.map(wrap('categories')) };
+
   Badge.find(query, function (err, badges) {
     if (err) return callback(err);
 

@@ -13,7 +13,7 @@ const ALL_AGES = [Badge.KID, Badge.TEEN, Badge.ADULT];
 const TODAY = new Date('2013-06-03');
 
 function createBadge(id, obj) {
-  return new Badge(_.defaults(obj, {
+  return new Badge(_.defaults(obj||{}, {
     _id: id,
     shortname: id,
     name: 'badge',
@@ -118,6 +118,9 @@ test.applyFixtures({
   'earned-badge': createBadge('earned', {
     categories: ['science', 'math'],
   }),
+  'no-categories-badge': createBadge('no-categories', {
+    categories: null,
+  }),
 
   // Instances
   'earned-badge-instance': new BadgeInstance({
@@ -153,6 +156,15 @@ test.applyFixtures({
 
       t.same(hasMath, false, 'should not have math');
       t.same(hasEarned, false, 'should not have the earned badge');
+      t.end();
+    });
+  });
+
+  test('similar badges, no user, no categories', function (t) {
+    const noCategories = fx['no-categories-badge'];
+    noCategories.getSimilar(function (err, badges) {
+      t.notOk(err, 'no errors');
+      t.same(badges, [], 'should be an empty array');
       t.end();
     });
   });
@@ -203,7 +215,6 @@ test.applyFixtures({
       t.equal(lastElem(names), 'offline-science',
               'should recommend offline badges last');
 
-      console.dir(names);
       t.end();
     });
   });
