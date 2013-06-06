@@ -310,17 +310,22 @@ function tryAwardingBadge(badge, email, res, successCb) {
         reason: 'database'
       });
     }
+
     if (!instance)
       return res.json(409, {
         status: 'error',
         reason: util.format('user `%s` already has badge', email),
         user: email,
       });
+
     var success = res.send.bind(res, 200, {
       status: 'ok',
       url: instance.absoluteUrl('assertion'),
     });
-    if (successCb) successCb(success); else success();
+
+    if (successCb)
+      return successCb(success);
+    return success();
   });
 }
 
