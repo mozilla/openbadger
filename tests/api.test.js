@@ -131,6 +131,23 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api does not provide images when they do not exist', function(t) {
+    conmock({
+      handler: api.badge,
+      request: {
+        badge: fx['no-image-badge']
+      }
+    }, function(err, mockRes, req) {
+      const badge = mockRes.body.badge;
+      t.notOk(badge.program.imageUrl,
+              'should not have program image url');
+      t.notOk(badge.program.issuer.imageUrl,
+              'should not have issuer image url');
+      t.end();
+    });
+  });
+
+
   test('api provides unclaimed badge info given claim code', function(t) {
     conmock({
       handler: api.getUnclaimedBadgeInfoFromCode,
