@@ -110,7 +110,8 @@ test.applyFixtures(badgeFixtures, function(fx) {
               name: "Some Program",
               issuer: {
                 name: "Badge Authority",
-                url: "http://badgeauthority.org"
+                url: "http://badgeauthority.org",
+                imageUrl: "https://example.org/issuer/image/issuer"
               },
               url: "http://example.org/program",
               imageUrl: "https://example.org/program/image/program"
@@ -276,26 +277,30 @@ test.applyFixtures(badgeFixtures, function(fx) {
   });
 
   test('api provides program info w/ earnable badges', function(t) {
-    conmock({
-      handler: api.program,
-      request: {
-        params: {
-          programShortName: 'some-program'
+    env.temp({origin: 'https://example.org'}, function(done) {
+      conmock({
+        handler: api.program,
+        request: {
+          params: {
+            programShortName: 'some-program'
+          }
         }
-      }
-    }, function(err, mockRes, req) {
-      if (err) throw err;
-      t.equal(mockRes.status, 200);
-      t.equal(mockRes.body.status, 'ok');
-      t.equal(mockRes.body.program.name, "Some Program");
-      var program = mockRes.body.program;
-      t.ok('offline-badge' in program.earnableBadges);
-      t.equal(program.earnableBadges['offline-badge'].name, 'Offline badge');
-      t.same(program.issuer, {
-        name: "Badge Authority",
-        url: "http://badgeauthority.org"
+      }, function(err, mockRes, req) {
+        if (err) throw err;
+        t.equal(mockRes.status, 200);
+        t.equal(mockRes.body.status, 'ok');
+        t.equal(mockRes.body.program.name, "Some Program");
+        var program = mockRes.body.program;
+        t.ok('offline-badge' in program.earnableBadges);
+        t.equal(program.earnableBadges['offline-badge'].name, 'Offline badge');
+        t.same(program.issuer, {
+          name: "Badge Authority",
+          url: "http://badgeauthority.org",
+          imageUrl: "https://example.org/issuer/image/issuer"
+        });
+        t.end();
+        done();
       });
-      t.end();
     });
   });
 

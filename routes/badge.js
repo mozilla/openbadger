@@ -163,7 +163,9 @@ exports.meta = function meta(req, res) {
 
 exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
   var codes = req.badge.claimCodes
-    .filter(function(c) { return !c.claimedBy && !c.multi; })
+    .filter(function(c) {
+      return !c.claimedBy && !c.multi && !c.reservedFor;
+    })
     .map(util.prop('code'));
   return res.type('text').send(200, codes.join('\n'));
 };
@@ -243,16 +245,19 @@ exports.awardToUser = function awardToUser(req, res, next) {
   });
 };
 
-function issueAndEmail(badge) {
+function reserveAndNotify(badge) {
   return function (email, callback) {
     if (!util.isEmail(email))
       return callback(null, {email: email, status: 'invalid'});
-    badge.award(email, function (err, instance) {
+    badge.reserveAndNotify(email, function (err, claimCode) {
       if (err) return callback(err);
-      // #TODO: SHOULD PUT EMAIL CODE HERE
-      if (!instance)
+      if (!claimCode)
         return callback(null, {email: email, status: 'dupe'});
-      return callback(null, {email: email, status: 'ok'});
+      return callback(null, {
+        email: email,
+        status: 'ok',
+        claimCode: claimCode
+      });
     });
   };
 }
@@ -264,7 +269,7 @@ exports.issueMany = function issueMany(req, res, next) {
     .trim()
     .split('\n')
     .map(util.method('trim'));
-  async.map(emails, issueAndEmail(badge), function (err, results) {
+  async.map(emails, reserveAndNotify(badge), function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');
@@ -359,7 +364,8 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
       .map(util.prop('_id'))
       .map(util.objWrap('program'))
   };
-  Badge.find(query)
+  Badge
+    .find(query, {image: 0})
     .populate('program')
     .exec(function (err, badges) {
       if (err) return next(err);
@@ -376,42 +382,51 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
     });
 };
 
-exports.findAll = function findAll(req, res, next) {
-  Badge.find({})
-    .populate('program')
-    .exec(function (err, badges) {
-      if (err) return next(err);
-      req.badges = badges;
-      const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
-      const populateIssuers = util.method('populate', 'issuer');
-      async.map(programs, populateIssuers, function (err) {
-        if (err) return next(err);
-        return next();
-      });
-    });
-};
+function parseLimit(limit, _default) {
+  const DEFAULT = _default || 50;
+  const intLimit = parseInt(limit, 10);
+  if (intLimit === 0)
+    return Infinity;
+  return intLimit || DEFAULT;
+}
 
-exports.findNonOffline = function findNonOffline(req, res, next) {
-  var query = {
-    '$or': [
-      {claimCodes: {'$exists': false }} ,
-      {claimCodes: {'$size': 0 }}
-    ]
+function makeSearchFn(term) {
+  if (!term) return null;
+  const prop = util.prop;
+  const regex = new RegExp(term, 'i');
+  return function (badge) {
+    return (false
+     || regex.test(prop('name')(badge))
+     || regex.test(prop('program', 'name')(badge))
+     || regex.test(prop('program', 'issuer', 'name')(badge))
+    );
   };
-  Badge.find(query)
-   .populate('program')
-    .exec(function (err, badges) {
+}
+
+exports.findAll = function findAll(req, res, next) {
+  const page = req.page = parseInt(req.query.page, 10) || 1;
+  const limitAmount = req.limit = parseLimit(req.query.limit);
+  const skipAmount = limitAmount * (page - 1);
+
+  const query = Badge.find({}, {name: 1, shortname: 1, program: 1});
+
+  const searchFn = makeSearchFn(req.query.search);
+
+  if (!searchFn) {
+    query.limit(limitAmount);
+    query.skip(skipAmount);
+  }
+
+  query.populate('program').exec(function (err, badges) {
+    if (err) return next(err);
+    const programs = badges
+      .filter(util.prop('program'))
+      .map(util.prop('program'));
+    const populateIssuers = util.method('populate', 'issuer');
+    async.map(programs, populateIssuers, function (err) {
       if (err) return next(err);
-      req.badges = badges;
-      const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
-      const populateIssuers = util.method('populate', 'issuer');
-      async.map(programs, populateIssuers, function (err) {
-        if (err) return next(err);
-        return next();
-      });
+      req.badges = searchFn ? badges.filter(searchFn) : badges;
+      return next();
     });
+  });
 };

@@ -317,6 +317,7 @@ Get a list of claim codes for a specific badge class.
 * **claimcodes**: Array of objects with the following properties:
   * **code**: The claim code
   * **claimed**: Boolean for whether it's claimed or not
+  * **reservedFor**: Which email address the code is reserved for, if any
 
 
 ## POST `/v2/badge/<shortname>/claimcodes`

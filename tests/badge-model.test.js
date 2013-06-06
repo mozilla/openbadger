@@ -301,6 +301,7 @@ test.applyFixtures(fixtures, function () {
       {code: 'already-claimed', claimed: true},
       {code: 'never-claim', claimed: false},
       {code: 'will-claim', claimed: false},
+      {code: 'reserved-claim', reservedFor: 'foo@bar.org', claimed: false },
       {code: 'remove-claim', claimed: false},
     ];
 ;
@@ -313,7 +314,8 @@ test.applyFixtures(fixtures, function () {
     const expect = [
       {code: 'never-claim', claimed: false},
       {code: 'will-claim', claimed: false},
-      {code: 'remove-claim', claimed: false},
+      {code: 'reserved-claim', reservedFor: 'foo@bar.org', claimed: false },
+      {code: 'remove-claim', claimed: false}
     ];
     t.same(badge.getClaimCodes({unclaimed: true}), expect);
     t.end();
@@ -486,6 +488,40 @@ test.applyFixtures(fixtures, function () {
       t.notOk(err, 'should not have an error');
       t.ok(instance, 'should have a badge instance');
       t.same(instance.user, email, 'should be assigned to the right user');
+      t.end();
+    });
+  });
+
+  test('Badge#reserveAndNotify does nothing when user already has badge', function(t) {
+    var badge = fixtures['link-comment'];
+    var email = fixtures['user'].user;
+    badge.reserveAndNotify(email, function(err, claimCode) {
+      if (err) throw err;
+      t.same(claimCode, null, "user already has badge");
+      t.end();
+    });
+  });
+
+  test('Badge#reserveAndNotify creates reserved claim code', function(t) {
+    var badge = fixtures['random-badge'];
+    var email = fixtures['user'].user;
+    badge.reserveAndNotify(email, function(err, claimCode) {
+      if (err) throw err;
+      t.equal(typeof(claimCode), 'string');
+      var claim = badge.getClaimCode(claimCode);
+      t.equal(claim.reservedFor, email, "reserved claim code is generated");
+      t.end();
+    });
+  });
+
+  test('Badge#reserveAndNotify makes more codes when user has reserved claim code because user might be a guardian with lots of kids', function(t) {
+    var badge = fixtures['random-badge'];
+    var email = fixtures['user'].user;
+    badge.reserveAndNotify(email, function(err, claimCode) {
+      if (err) throw err;
+      t.equal(typeof(claimCode), 'string');
+      var claim = badge.getClaimCode(claimCode);
+      t.equal(claim.reservedFor, email, "another reserved claim code is generated because the email might be for a guardian who has multiple kids");
       t.end();
     });
   });

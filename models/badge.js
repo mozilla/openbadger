@@ -37,6 +37,11 @@ const ClaimCodeSchema = new Schema({
     required: false,
     trim: true,
   },
+  reservedFor: {
+    type: String,
+    required: false,
+    trim: true,
+  },
   multi: {
     type: Boolean,
     default: false
@@ -223,6 +228,7 @@ function inArray(array, thing) {
  *   - `codes`: Array of claim codes to add
  *   - `limit`: Maximum number of codes to add. [default: Infinity]
  *   - `multi`: Whether or not the claim is multi-use
+ *   - `reservedFor`: Who the claim code is reserved for
  *   - `alreadyClean`: Boolean whether or not items are already unique
  * @param {Function} callback
  *   Expects `function (err, accepted, rejected)`
@@ -233,6 +239,9 @@ function inArray(array, thing) {
 Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
   if (Array.isArray(options))
     options = { codes: options };
+
+  if (options.reservedFor && options.codes.length != 1)
+    throw new Error('only one code can be reserved for the same email');
 
   // remove duplicates
   const codes = (options.alreadyClean
@@ -256,7 +265,11 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
       return callback(err, accepted, rejected);
 
     accepted.forEach(function(code){
-      this.claimCodes.push({ code: code, multi: options.multi });
+      this.claimCodes.push({
+        code: code,
+        multi: options.multi,
+        reservedFor: options.reservedFor
+      });
     }.bind(this));
 
     return this.save(function (err, result) {
@@ -272,6 +285,8 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
  * @param {Object} options
  *   - `count`: how many codes to generate
  *   - `codeGenerator`: function to generate random codes (optional)
+ *   - `reservedFor`: email address to reserve the claim code for.
+ *       count=1 is implicit when this is non-falsy.
  * @param {Function} callback
  *   Expects `function (err, codes)`
  * @return {[async]}
@@ -281,10 +296,12 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
 
 Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
   const codeGenerator = options.codeGenerator || phraseGenerator;
-  const count = options.count;
+  const reservedFor = options.reservedFor;
   const accepted = [];
   const self = this;
+  var count = options.count;
 
+  if (reservedFor) count = 1;
   async.until(function isDone() {
     return accepted.length == count;
   }, function addCodes(cb) {
@@ -294,6 +311,7 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
     self.addClaimCodes({
       codes: phrases,
       limit: numLeft,
+      reservedFor: reservedFor,
       alreadyClean: true,
     }, function (err, acceptedCodes, rejectedCodes) {
       if (err) return cb(err);
@@ -326,7 +344,12 @@ Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
     : function (o) { return true };
 
   return codes.filter(filterFn).map(function (entry) {
-    return { code: entry.code, claimed: !!entry.claimedBy };
+    var claim = {
+      code: entry.code,
+      claimed: !!entry.claimedBy
+    };
+    if (entry.reservedFor) claim.reservedFor = entry.reservedFor;
+    return claim;
   });
 };
 
@@ -367,6 +390,23 @@ Badge.prototype.earnableBy = function earnableBy(user) {
   }).reduce(function (result, value) {
     return result && value;
   }, true);
+};
+
+Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
+  const self = this;
+
+  BadgeInstance.findOne({
+    userBadgeKey: email + '.' + self.id
+  }, function (err, instance) {
+    if (err) return callback(err);
+    if (instance)
+      return callback(null, null);
+    self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
+      if (err) return callback(err);
+      console.log('TODO: WRITE NOTIFICATION/WEBHOOK CODE.');
+      return callback(null, accepted[0]);
+    });
+  });
 };
 
 Badge.prototype.award = function award(options, callback) {
@@ -648,11 +688,14 @@ Badge.prototype.getSimilar = function (email, callback) {
     '$or': this.categories.map(util.objWrap('categories'))
   };
   Badge.find(query, function (err, badges) {
+    if (err) return callback(err);
+
     badges = badges.filter(function (badge) {
       return !(badge.shortname == thisShortname);
     });
+
     if (!email)
-      return callback(err, badges);
+      return callback(null, badges);
 
     // Get all of the badge instances for the email address that was
     // passed in and remove any badge classes that the user already has
@@ -660,8 +703,7 @@ Badge.prototype.getSimilar = function (email, callback) {
     BadgeInstance.find({user: email})
       .populate('badge')
       .exec(function (err, instances) {
-        if (err)
-          return callback(err);
+        if (err) return callback(err);
 
         const earned = instances.map(function (inst) {
           return (inst.badge && inst.badge.shortname);
