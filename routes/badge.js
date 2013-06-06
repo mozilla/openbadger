@@ -2,7 +2,6 @@ const _ = require('underscore');
 const fs = require('fs');
 const logger = require('../lib/logger');
 const Badge = require('../models/badge');
-const phrases = require('../lib/phrases');
 const BadgeInstance = require('../models/badge-instance');
 const util = require('../lib/util');
 const async = require('async');
@@ -171,30 +170,27 @@ exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
 };
 
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
-  var codes = [];
-  var count;
+  function goBack(err) {
+    if (err) return next(err);
+    return res.redirect('back');
+  }
+
   const badge = req.badge;
   const form = req.body;
 
   if (form.codes) {
-    codes = form.codes
+    var codes = form.codes
       .split('\n')
       .map(util.method('trim'))
       .filter(util.prop('length'));
+    badge.addClaimCodes({codes: codes, multi: !!form.multi}, goBack);
   } else if (form.quantity) {
-    count = parseInt(form.quantity);
-    if (count > 0)
-      codes = phrases(count);
+    var count = parseInt(form.quantity);
+    if (count > 0) {
+      badge.generateClaimCodes({count: count}, goBack);
+    } else
+      goBack();
   }
-
-  const options = {
-    codes: codes,
-    multi: !!form.multi
-  };
-  badge.addClaimCodes(options, function(err) {
-    if (err) return next(err);
-    return res.redirect('back');
-  });
 };
 
 exports.removeClaimCode = function removeClaimCode(req, res, next) {
