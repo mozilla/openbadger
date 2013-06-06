@@ -295,13 +295,20 @@ function getUnclaimedBadgeFromCode(code, req, res, next, cb) {
   });
 };
 
-function tryAwardingBadge(badge, email, res, successCb) {
+function tryAwardingBadge(opts, res, successCb) {
+  const badge = opts.badge;
+  const email = opts.email;
+  const evidence = opts.evidence;
+
   if (!badge)
     return res.json(404, {status: 'error', reason: 'badge not found'});
   if (!email)
     return res.json(400, {status: 'error', reason: 'missing email address'});
 
-  return badge.award(email, function (err, instance) {
+  return badge.award({
+    email: email,
+    evidence: evidence
+  }, function (err, instance) {
     if (err) {
       // TODO: log error properly
       console.dir(err);
@@ -341,12 +348,17 @@ exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
 exports.awardBadgeFromClaimCode = function(req, res, next) {
   const code = req.body.code;
   const email = req.body.email;
+  const evidence = req.body.evidence;
 
   if (!email)
     return res.json(400, {status: 'error', reason: 'missing email address'});
 
   getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
-    tryAwardingBadge(badge, email, res, function(success) {
+    tryAwardingBadge({
+      badge: badge,
+      email: email,
+      evidence: evidence
+    }, res, function(success) {
       badge.redeemClaimCode(code, email);
       badge.save(function(err) {
         if (err)
@@ -361,7 +373,11 @@ exports.awardBadgeFromClaimCode = function(req, res, next) {
 };
 
 exports.awardBadge = function awardBadge(req, res, next) {
-  tryAwardingBadge(req.badge, req.body.email, res);
+  tryAwardingBadge({
+    badge: req.badge,
+    email: req.body.email,
+    evidence: req.body.evidence
+  }, res);
 };
 
 exports.removeBadge = function removeBadge(req, res, next) {
