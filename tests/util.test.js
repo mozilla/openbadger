@@ -134,6 +134,7 @@ test('util.empty', function (t) {
    null,
    undefined,
    NaN,
+   Buffer(0),
    [],
    {}
   ].forEach(function (thing) {

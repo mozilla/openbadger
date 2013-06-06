@@ -55,6 +55,8 @@ function normalizeProgram(program) {
     throw new Error("expected populated program issuer");
 
   const issuer = program.issuer;
+  const empty = util.empty;
+
   var programData = [
     'shortname',
     'name',
@@ -68,7 +70,7 @@ function normalizeProgram(program) {
     return (out[field] = program[field], out);
   }, {});
 
-  if (program.image)
+  if (!empty(program.image))
     programData.imageUrl = program.absoluteUrl('image');
 
   programData.issuer = {
@@ -76,7 +78,7 @@ function normalizeProgram(program) {
     url: issuer.url,
   };
 
-  if (issuer.image)
+  if (!empty(issuer.image))
     programData.issuer.imageUrl = issuer.absoluteUrl('image');
 
   return programData;
@@ -541,6 +543,7 @@ exports.issuer = function issuer(req, res, next) {
 };
 
 exports.programs = function programs(req, res) {
+  const empty = util.empty;
   Program.find({})
     .populate('issuer')
     .exec(function(err, programs) {
@@ -554,10 +557,13 @@ exports.programs = function programs(req, res) {
         status: 'ok',
         programs: programs.map(function (program) {
           const programData = normalizeProgram(program);
+          const imageUrl = empty(program.image)
+            ? null
+            : programData.imageUrl;
           return {
             name: programData.name,
             shortname: programData.shortname,
-            imageUrl: program.image ? programData.imageUrl : null,
+            imageUrl: imageUrl,
             issuer: programData.issuer
           };
         })
