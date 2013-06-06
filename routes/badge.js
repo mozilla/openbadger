@@ -183,11 +183,18 @@ exports.addClaimCodes = function addClaimCodes(req, res, next) {
       .split('\n')
       .map(util.method('trim'))
       .filter(util.prop('length'));
-    badge.addClaimCodes({codes: codes, multi: !!form.multi}, goBack);
+    badge.addClaimCodes({
+      codes: codes,
+      multi: !!form.multi,
+      batchName: form.batchName
+    }, goBack);
   } else if (form.quantity) {
     var count = parseInt(form.quantity);
     if (count > 0) {
-      badge.generateClaimCodes({count: count}, goBack);
+      badge.generateClaimCodes({
+        count: count,
+        batchName: form.batchName
+      }, goBack);
     } else
       goBack();
   }

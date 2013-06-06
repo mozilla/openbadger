@@ -235,6 +235,7 @@ function inArray(array, thing) {
  *   - `limit`: Maximum number of codes to add. [default: Infinity]
  *   - `multi`: Whether or not the claim is multi-use
  *   - `reservedFor`: Who the claim code is reserved for
+ *   - `batchName`: Batch name of the claim code
  *   - `alreadyClean`: Boolean whether or not items are already unique
  * @param {Function} callback
  *   Expects `function (err, accepted, rejected)`
@@ -274,6 +275,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
       this.claimCodes.push({
         code: code,
         multi: options.multi,
+        batchName: options.batchName,
         reservedFor: options.reservedFor
       });
     }.bind(this));
@@ -291,6 +293,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
  * @param {Object} options
  *   - `count`: how many codes to generate
  *   - `codeGenerator`: function to generate random codes (optional)
+ *   - `batchName`: batch name to give to each generated code
  *   - `reservedFor`: email address to reserve the claim code for.
  *       count=1 is implicit when this is non-falsy.
  * @param {Function} callback
@@ -303,6 +306,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
 Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
   const codeGenerator = options.codeGenerator || phraseGenerator;
   const reservedFor = options.reservedFor;
+  const batchName = options.batchName;
   const accepted = [];
   const self = this;
   var count = options.count;
@@ -318,6 +322,7 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
       codes: phrases,
       limit: numLeft,
       reservedFor: reservedFor,
+      batchName: batchName,
       alreadyClean: true,
     }, function (err, acceptedCodes, rejectedCodes) {
       if (err) return cb(err);

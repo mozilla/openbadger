@@ -50,13 +50,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
       request: {
         badge: b,
         body: {
-          quantity: '3'
+          quantity: '3',
+          batchName: 'foo'
         }
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 301);
       t.equal(b.claimCodes.length, 3);
+      t.equal(b.getClaimCodes({batchName: 'foo'}).length, 3);
       t.end();
     });
   });
@@ -68,13 +70,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
       request: {
         badge: b,
         body: {
-          codes: 'blarg\nflarg\n\n\narg'
+          codes: 'blarg\nflarg\n\n\narg',
+          batchName: 'meh'
         }
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 301);
       t.same(b.claimCodes.map(util.prop('code')), ['blarg', 'flarg', 'arg']);
+      t.equal(b.getClaimCodes({batchName: 'meh'}).length, 3);
       t.end();
     });
   });
