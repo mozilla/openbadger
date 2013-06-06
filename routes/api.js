@@ -557,13 +557,10 @@ exports.programs = function programs(req, res) {
         status: 'ok',
         programs: programs.map(function (program) {
           const programData = normalizeProgram(program);
-          const imageUrl = empty(program.image)
-            ? null
-            : programData.imageUrl;
           return {
             name: programData.name,
             shortname: programData.shortname,
-            imageUrl: imageUrl,
+            imageUrl: programData.imageUrl,
             issuer: programData.issuer
           };
         })
