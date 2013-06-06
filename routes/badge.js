@@ -269,7 +269,10 @@ exports.issueMany = function issueMany(req, res, next) {
     .trim()
     .split('\n')
     .map(util.method('trim'));
-  async.map(emails, reserveAndNotify(badge), function (err, results) {
+  // We're doing this in series rather than parallel to avoid a
+  // mongoose versioning error. For more information, see:
+  // http://tgriff3.com/post/44230656391/versioning-in-mongoose
+  async.mapSeries(emails, reserveAndNotify(badge), function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');
