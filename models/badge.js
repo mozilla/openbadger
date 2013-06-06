@@ -8,6 +8,7 @@ const BadgeInstance = require('./badge-instance');
 const phraseGenerator = require('../lib/phrases');
 const async = require('async');
 const Schema = mongoose.Schema;
+const webhooks = require('../lib/webhooks');
 
 const KID = '0-13';
 const TEEN = '13-18';
@@ -403,7 +404,7 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
       return callback(null, null);
     self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
       if (err) return callback(err);
-      console.log('TODO: WRITE NOTIFICATION/WEBHOOK CODE.');
+      webhooks.notifyOfReservedClaim(email, accepted[0]);
       return callback(null, accepted[0]);
     });
   });
