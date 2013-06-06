@@ -543,7 +543,6 @@ exports.issuer = function issuer(req, res, next) {
 };
 
 exports.programs = function programs(req, res) {
-  const empty = util.empty;
   Program.find({})
     .populate('issuer')
     .exec(function(err, programs) {
