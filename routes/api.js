@@ -54,6 +54,7 @@ function normalizeProgram(program) {
   if (!(program.issuer && typeof(program.issuer) == "object"))
     throw new Error("expected populated program issuer");
 
+  const issuer = program.issuer;
   var programData = [
     'shortname',
     'name',
@@ -66,12 +67,17 @@ function normalizeProgram(program) {
   ].reduce(function (out, field) {
     return (out[field] = program[field], out);
   }, {});
-  programData.imageUrl = program.absoluteUrl('image');
+
+  if (program.image)
+    programData.imageUrl = program.absoluteUrl('image');
+
   programData.issuer = {
-    name: program.issuer.name,
-    url: program.issuer.url,
-    imageUrl: program.issuer.absoluteUrl('image')
+    name: issuer.name,
+    url: issuer.url,
   };
+
+  if (issuer.image)
+    programData.issuer.imageUrl = issuer.absoluteUrl('image');
 
   return programData;
 }
