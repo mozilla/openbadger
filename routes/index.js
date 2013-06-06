@@ -70,8 +70,12 @@ exports.define = function defineRoutes(app) {
   app.get('/admin/badge/:shortname', [behavior.findAll], render.showBadge);
   app.get('/admin/badge/:shortname/edit', render.editBadgeForm);
   app.get('/admin/badge/:shortname/claims/', render.manageClaimCodes);
-  app.get('/admin/badge/:shortname/unclaimed.txt',
+  app.post('/admin/badge/:shortname/claims/bulk-action',
+           badge.bulkClaimCodeAction);
+  app.get('/admin/badge/:shortname/claims/unclaimed.txt',
           badge.getUnclaimedCodesTxt);
+  app.get('/admin/badge/:shortname/claims/unclaimed.html',
+          render.getUnclaimedCodesHtml);
 
   app.post('/admin/badge', [
     badge.getUploadedImage({ required: true })

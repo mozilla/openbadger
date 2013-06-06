@@ -187,6 +187,15 @@ exports.manageClaimCodes = function (req, res) {
   });
 };
 
+exports.getUnclaimedCodesHtml = function (req, res) {
+  return res.render('admin/claim-code-printout.html', {
+    badge: req.badge,
+    batchName: req.query.batchName,
+    claimUrlText: process.env.OPENBADGER_CLAIM_URL_TEXT,
+    claimCodes: req.badge.getClaimCodesForDistribution(req.query.batchName),
+  });
+};
+
 exports.showFlushDbForm = function (req, res) {
   return res.render('admin/flush-user-info.html', {
     page: 'flush',
