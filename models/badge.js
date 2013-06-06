@@ -683,7 +683,7 @@ Badge.getRecommendations = function (opts, callback) {
 };
 
 Badge.prototype.getSimilar = function (email, callback) {
-  const defer = setImmediate || process.nextTick;
+  const defer = global.setImmediate || process.nextTick;
   const wrap = util.objWrap;
   const thisShortname = this.shortname;
   const categories = this.categories;
