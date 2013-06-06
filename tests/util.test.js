@@ -128,3 +128,20 @@ test('util.prop', function (t) {
   t.same(arr.map(prop('does', 'not', 'exist')), [undefined, undefined, undefined]);
   t.end();
 });
+
+test('util.empty', function (t) {
+  [false,
+   null,
+   undefined,
+   NaN,
+   Buffer(0),
+   [],
+   {}
+  ].forEach(function (thing) {
+    t.ok(util.empty(thing), 'thing should be empty');
+   });
+  ['1', true, {hi:'hi'}, [1,2]].forEach(function (thing) {
+    t.notOk(util.empty(thing), 'thing should not be empty');
+  });
+  t.end();
+});
