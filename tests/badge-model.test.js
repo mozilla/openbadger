@@ -526,6 +526,46 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  test("claim codes have a creationDate", function(t) {
+    t.ok(fixtures['offline-badge'].claimCodes[0].creationDate instanceof Date);
+    t.end();
+  });
+
+  test("Badge#getBatchNames", function(t) {
+    var badge = validBadge();
+    badge.claimCodes.push({
+      code: 'a',
+      batchName: 'lol'
+    });
+    badge.claimCodes.push({
+      code: 'b',
+      batchName: 'lol'
+    });
+    badge.claimCodes.push({
+      code: 'c',
+      batchName: 'heh'
+    });
+    badge.claimCodes.push({
+      code: 'd'
+    });
+
+    t.same(badge.getBatchNames(), ['lol', 'heh']);
+
+    t.same(badge.getClaimCodes({batchName: 'lol'}), [{
+      code: 'a',
+      claimed: false,
+      batchName: 'lol'
+    }, {
+      code: 'b',
+      claimed: false,
+      batchName: 'lol'
+    }]);
+
+    t.end();
+  });
+
+
+
   // necessary to stop the test runner
   test('shutting down #', function (t) {
     db.close();

@@ -42,6 +42,12 @@ const ClaimCodeSchema = new Schema({
     required: false,
     trim: true,
   },
+  creationDate: {type: Date, default: Date.now},
+  batchName: {
+    type: String,
+    required: false,
+    trim: true,    
+  },
   multi: {
     type: Boolean,
     default: false
@@ -335,20 +341,29 @@ Badge.prototype.getClaimCode = function getClaimCode(code) {
   return null;
 };
 
+Badge.prototype.getBatchNames = function getBatchNames() {
+  var batchNames = {};
+
+  this.claimCodes.forEach(function(code) {
+    if (code.batchName) batchNames[code.batchName] = true;
+  });
+  return Object.keys(batchNames);
+};
+
 Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
   opts = _.defaults(opts||{}, {unclaimed: false});
-  const codes = this.claimCodes;
 
-  const filterFn = opts.unclaimed
-    ? function (o) { return !o.claimedBy }
-    : function (o) { return true };
-
-  return codes.filter(filterFn).map(function (entry) {
+  return this.claimCodes.filter(function(code) {
+    if (opts.unclaimed && code.claimedBy) return false;
+    if (opts.batchName && code.batchName != opts.batchName) return false;
+    return true;
+  }).map(function (entry) {
     var claim = {
       code: entry.code,
       claimed: !!entry.claimedBy
     };
     if (entry.reservedFor) claim.reservedFor = entry.reservedFor;
+    if (entry.batchName) claim.batchName = entry.batchName;
     return claim;
   });
 };
