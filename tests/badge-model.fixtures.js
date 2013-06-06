@@ -11,6 +11,7 @@ const IMAGE = test.asset('sample.png');
 module.exports = {
   'issuer': new Issuer({
     _id: 'issuer',
+    shortname: 'issuer',
     name: 'Badge Authority',
     contact: 'brian@example.org',
     url: 'http://badgeauthority.org',
@@ -25,6 +26,22 @@ module.exports = {
     name: 'Some Program',
     issuer: 'issuer',
     url: 'http://example.org/program',
+    image: IMAGE,
+  }),
+  'filterable-program': new Program({
+    _id: 'filterable-program',
+    shortname: 'filterable-program',
+    name: 'Filterable Program',
+    issuer: 'issuer',
+  }),
+  'filterable-badge': new Badge({
+    program: 'filterable-program',
+    name: 'Badge for program filter',
+    shortname: 'filterable-badge',
+    description: 'desc',
+    categories: ['technology', 'math'],
+    ageRange: [Badge.ADULT],
+    activityType: 'online',
     image: IMAGE,
   }),
   'no-image-issuer': new Issuer({
@@ -47,7 +64,6 @@ module.exports = {
     shortname: 'no-image-badge',
     description: 'desc',
     image: IMAGE,
-    program: 'no-image-program',
   }),
   'link-basic': new Badge({
     _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
@@ -56,7 +72,6 @@ module.exports = {
     shortname: 'link-basic',
     description: 'For doing links.',
     image: IMAGE,
-    program: 'program',
     tags: ['linking', 'webdev'],
     behaviors: [
       { shortname: 'link', count: 5 }

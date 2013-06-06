@@ -542,27 +542,78 @@ exports.issuer = function issuer(req, res, next) {
   });
 };
 
+
+function createFilterFn(query) {
+  const prop = util.prop;
+
+  return function filterProgram(program, cb) {
+    if (!_.keys(query).length)
+      return cb(true);
+
+    program.findBadges(function (err, badges) {
+      if (err) return cb(false);
+      const organization = program.issuer.shortname;
+      const categories = _.chain(badges)
+        .map(prop('categories'))
+        .flatten()
+        .uniq()
+        .value();
+      const ageRanges = _.chain(badges)
+        .map(prop('ageRange'))
+        .flatten()
+        .uniq()
+        .value();
+      const activityTypes = badges.map(prop('activityType'));
+
+      if (query.org && query.org !== organization)
+        return cb(false);
+
+      if (query.category &&
+          !_.contains(categories, query.category))
+        return cb(false);
+
+      if (query.age &&
+          !_.contains(ageRanges, query.age))
+        return cb(false);
+
+      if (query.activity &&
+          !_.contains(activityTypes, query.activity))
+        return cb(false);
+
+      return cb(true);
+    });
+  };
+};
+
 exports.programs = function programs(req, res) {
+  const filterProgram = createFilterFn(req.query);
+
+  function sendError(err, msg) {
+    return res.json(500, {
+      status: 'error',
+      error: msg || err
+    });
+  }
+
   Program.find({})
     .populate('issuer')
     .exec(function(err, programs) {
-      if (err) {
-        return res.json(500, {
-          status: 'error',
-          error: "There was an error retrieving the list of programs"
+      if (err)
+        return sendError(err, "There was an error retrieving the list of programs");
+
+      async.filter(programs, filterProgram, function (programs) {
+        return res.json(200, {
+          status: 'ok',
+          programs: programs.map(function (program) {
+            const programData = normalizeProgram(program);
+            return {
+              name: programData.name,
+              shortname: programData.shortname,
+              imageUrl: programData.imageUrl,
+              issuer: programData.issuer
+            };
+          })
         });
-      }
-      return res.json(200, {
-        status: 'ok',
-        programs: programs.map(function (program) {
-          const programData = normalizeProgram(program);
-          return {
-            name: programData.name,
-            shortname: programData.shortname,
-            imageUrl: programData.imageUrl,
-            issuer: programData.issuer
-          };
-        })
       });
     });
 };
