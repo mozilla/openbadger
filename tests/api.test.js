@@ -354,19 +354,39 @@ test.applyFixtures(badgeFixtures, function(fx) {
   });
 
   test('api provides program listing', function (t) {
-      conmock({
-        handler: api.programs,
-        request: {}
-      }, function (err, mockRes, req) {
-        const programs = mockRes.body.programs;
-        t.same(mockRes.body.status, 'ok', 'should have status ok');
-        t.ok(programs.some(function (program) {
-          return program.shortname == 'some-program';
-        }), 'should have some-program');
-        t.end();
-      });
+    conmock({
+      handler: api.programs,
+      request: {}
+    }, function (err, mockRes, req) {
+      const programs = mockRes.body.programs;
+      t.same(mockRes.body.status, 'ok', 'should have status ok');
+      t.ok(programs.some(function (program) {
+        return program.shortname == 'some-program';
+      }), 'should have some-program');
+      t.end();
+    });
   });
 
+  test('api can filter program listing', function (t) {
+    const expect = fx['filterable-program'];
+    conmock({
+      handler: api.programs,
+      request: {
+        query: {
+          category: 'technology',
+          age: '19-24',
+          activity: 'online',
+          org: 'issuer'
+        }
+      }
+    }, function (err, mockRes, req) {
+      const programs = mockRes.body.programs;
+      t.same(mockRes.body.status, 'ok', 'should have status ok');
+      t.same(programs.length, 1, 'should have one program');
+      t.same(programs[0].shortname, 'filterable-program');
+      t.end();
+    });
+  });
 
   test('api can give badge recommendations', function(t) {
     conmock({
