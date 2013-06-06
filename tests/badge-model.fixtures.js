@@ -32,12 +32,14 @@ module.exports = {
     name: 'No Image Issuer',
     contact: 'brian@example.org',
     url: 'http://no-image.example.org',
+    image: Buffer(0),
   }),
   'no-image-program': new Program({
     _id: 'no-image-program',
     name: 'no image program',
     issuer: 'no-image-issuer',
     url: 'http://example.org/program',
+    image: Buffer(0),
   }),
   'no-image-badge': new Badge({
     program: 'no-image-program',

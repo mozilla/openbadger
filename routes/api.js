@@ -55,6 +55,8 @@ function normalizeProgram(program) {
     throw new Error("expected populated program issuer");
 
   const issuer = program.issuer;
+  const empty = util.empty;
+
   var programData = [
     'shortname',
     'name',
@@ -68,7 +70,7 @@ function normalizeProgram(program) {
     return (out[field] = program[field], out);
   }, {});
 
-  if (program.image)
+  if (!empty(program.image))
     programData.imageUrl = program.absoluteUrl('image');
 
   programData.issuer = {
@@ -76,7 +78,7 @@ function normalizeProgram(program) {
     url: issuer.url,
   };
 
-  if (issuer.image)
+  if (!empty(issuer.image))
     programData.issuer.imageUrl = issuer.absoluteUrl('image');
 
   return programData;
@@ -557,7 +559,7 @@ exports.programs = function programs(req, res) {
           return {
             name: programData.name,
             shortname: programData.shortname,
-            imageUrl: program.image ? programData.imageUrl : null,
+            imageUrl: programData.imageUrl,
             issuer: programData.issuer
           };
         })
