@@ -4,6 +4,7 @@ const badgeFixtures = require('./badge-model.fixtures');
 const util = require('../lib/util');
 
 const Badge = require('../models/badge');
+const BadgeInstance = require('../models/badge-instance');
 const db = require('../models');
 const api = require('../routes/api');
 const env = require('../lib/environment');
@@ -275,6 +276,37 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.end();
     });
   });
+
+  test('api can award badge directly, with evidence', function (t) {
+    const email = 'award-evidence@example.org';
+    const evidence = 'https://foo.bar.org/evidence';
+    env.temp({origin: 'https://example.org'}, function(done) {
+      conmock({
+        handler: api.awardBadge,
+        request: {
+          badge: fx['link-basic'],
+          body: {
+            email: email,
+            evidence: evidence
+          }
+        }
+      }, function(err, mockRes, req) {
+        const body = mockRes.body;
+        const urlPrefix = 'https://example.org/badge/assertion/';
+        t.same(body.status, 'ok');
+        t.ok(body.url.match, urlPrefix);
+
+        const instanceId = body.url.split(urlPrefix).pop();
+        BadgeInstance.findById(instanceId, function (err, inst) {
+          t.notOk(err, 'should not have an error');
+          t.same(inst.user, email);
+          t.same(inst.evidence, evidence);
+          t.end();
+        });
+      });
+    });
+  });
+
 
   test('api provides program info w/ earnable badges', function(t) {
     env.temp({origin: 'https://example.org'}, function(done) {
