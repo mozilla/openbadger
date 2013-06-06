@@ -1,0 +1,23 @@
+  <p>
+    {% if limit == "Infinity" %}
+    <a href="?">Limit Results</a>
+    {% else %}
+
+    <strong>Page</strong>: {{ pageNumber }}, <strong>Limit</strong>: {{ limit }}
+      (<a href="?limit=0">show all</a>)
+    </p>
+    {% if pageNumber != 1 %}
+      <a href="?limit={{limit}}&page={{pageNumber-1}}">
+        <button class="btn">Previous Page</button>
+      </a>
+
+    {% else %}
+      <button class="btn disabled">Previous Page</button>
+    {% endif %}
+
+
+    <a href="?limit={{limit}}&page={{pageNumber+1}}">
+      <button class="btn">Next Page</button>
+    </a>
+    {% endif %}
+  </p>
