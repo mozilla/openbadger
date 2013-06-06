@@ -5,6 +5,8 @@ const persona = require('../lib/persona');
 const util = require('../lib/util');
 const async = require('async');
 
+const FORBIDDEN_MSG = 'You must be an admin to access this page';
+
 function getAccessLevel(email, callback) {
   if (env.isAdmin(email))
     return process.nextTick(callback.bind({}, null, [email, 'super']));
@@ -30,7 +32,7 @@ exports.login = function login(req, res, next) {
     const email = result[0];
     const access = result[1];
     if (!access)
-      return res.send(403);
+      return res.send(403, FORBIDDEN_MSG);
     req.session.user = email;
     req.session.access = access;
     return res.redirect(paths[access]);
@@ -64,7 +66,7 @@ exports.requireAuth = function requireAuth(options) {
     if (!user)
       return res.redirect(options.redirectTo + '?path=' + path);
     if (userLevel != authLevel)
-      return res.send(403);
+      return res.send(403, FORBIDDEN_MSG);
     return next();
   };
 };
