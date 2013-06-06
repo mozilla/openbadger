@@ -543,17 +543,22 @@ exports.issuer = function issuer(req, res, next) {
 exports.programs = function programs(req, res) {
   Program.find({}, function(err, programs) {
     if (err) {
-      return res.send(500, "There was an error retrieving the list of programs");
+      return res.json(500, {
+        status: 'error',
+        error: "There was an error retrieving the list of programs"
+      });
     }
-    var result = { status: 'ok', programs : {} };
+    var result = { status: 'ok', programs: {} };
     async.map(programs, function(item, callback) {
       item.populate('issuer', function(err) {
-        var programData = normalizeProgram(item)
-        return callback(err, {name:programData.name,
-                              shortname:programData.shortname,
-                              imageUrl:programData.imageUrl,
-                              issuer:programData.issuer});
-      })
+        const programData = normalizeProgram(item);
+        return callback(err, {
+          name: programData.name,
+          shortname: programData.shortname,
+          imageUrl: programData.imageUrl,
+          issuer: programData.issuer
+        });
+      });
     }, function(err, results) {
       result.programs = results;
       return res.json(200, result);
