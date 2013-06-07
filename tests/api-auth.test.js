@@ -47,6 +47,20 @@ test.applyFixtures({}, function(fx) {
     });
   });
 
+  test("auth fails when 'auth' param uses wrong jwt secret", function(t) {
+    api.jwtSecret = 'lol';
+    conmock({
+      handler: api.auth(),
+      request: {
+        body: {auth: 'beans'}
+      }
+    }, function(err, mockRes, req) {
+      t.equal(mockRes.status, 403);
+      t.ok(mockRes.body.reason.match(/^error decoding JWT/));
+      t.end();
+    });
+  });
+
   test("auth works when 'auth' param is a jwt", function(t) {
     api.jwtSecret = 'lol';
     conmock({
@@ -56,12 +70,29 @@ test.applyFixtures({}, function(fx) {
       }
     }, function(err, mockRes, req) {
       t.equal(mockRes.fntype, 'next');
+      t.equal(req.authIsLimited, false);
+      t.end();
+    });
+  });
+
+  test("auth works when 'auth' param is limited jwt", function(t) {
+    api.jwtSecret = 'lol';
+    api.limitedJwtSecret = 'lolcats';
+    conmock({
+      handler: api.auth(),
+      request: {
+        body: {auth: jwt.encode({}, 'lolcats')}
+      }
+    }, function(err, mockRes, req) {
+      t.equal(mockRes.fntype, 'next');
+      t.equal(req.authIsLimited, true);
       t.end();
     });
   });
 
   test("auth works with GET requests", function(t) {
     api.jwtSecret = 'lol';
+    api.limitedJwtSecret = null;
     conmock({
       handler: api.auth(),
       request: {

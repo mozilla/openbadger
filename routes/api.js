@@ -85,6 +85,7 @@ function normalizeProgram(program) {
 }
 
 exports.jwtSecret = null;
+exports.limitedJwtSecret = null;
 
 /**
  * Get listing of all badges
@@ -661,10 +662,13 @@ exports.auth = function auth(options) {
     const token = param.auth;
     const email = param.email;
     const secret = exports.jwtSecret;
+    const limitedSecret = exports.limitedJwtSecret;
     const origin = env.origin();
     const isXHR = req.headers['x-requested-with'] === 'XMLHttpRequest';
     const now = Date.now()/1000|0;
     var auth, msg;
+    var limitedAccess = false;
+    if (!limitedSecret) limitedSecret = secret;
     if (!token)
       return respondWithError(res, 'missing mandatory `auth` param');
     if (!secret)
@@ -672,7 +676,12 @@ exports.auth = function auth(options) {
     try {
       auth = jwt.decode(token, secret);
     } catch(err) {
-      return respondWithError(res, 'error decoding JWT: ' + err.message);
+      try {
+        auth = jwt.decode(token, limitedSecret);
+        limitedAccess = true;
+      } catch (err) {
+        return respondWithError(res, 'error decoding JWT: ' + err.message);
+      }
     }
     if (options.user && auth.prn !== email) {
       msg = '`prn` mismatch: given %s, expected %s';
@@ -686,6 +695,7 @@ exports.auth = function auth(options) {
       return respondWithError(res, msg);
     }
     req.authUser = email;
+    req.authIsLimited = limitedAccess;
     return next();
   };
 };

@@ -32,6 +32,7 @@ export OPENBADGER_PERSONA_AUDIENCE="http://localhost:3000"
 export OPENBADGER_LOGDIR='.'
 export OPENBADGER_SECRET="badgerbadgerbadgerbadger"
 export OPENBADGER_JWT_SECRET="badgerjwtsecret"
+export OPENBADGER_LIMITED_JWT_SECRET="ihavelimitedaccess"
 export OPENBADGER_REDIS_HOST="localhost"
 export OPENBADGER_REDIS_PORT=6379
 export OPENBADGER_MONGO_HOST="localhost"

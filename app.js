@@ -32,6 +32,7 @@ var templateEnv = template.buildEnvironment({
 templateEnv.express(app);
 
 api.jwtSecret = env.get('jwt_secret');
+api.limitedJwtSecret = env.get('limited_jwt_secret');
 
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
