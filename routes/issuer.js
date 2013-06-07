@@ -54,7 +54,6 @@ exports.getUploadedImage = function getUploadedImage(options) {
   options = _.extend({field: 'image'}, options||{});
   const field = options.field;
   return function (req, res, next) {
-    console.dir(req.files);
     const image = req.files[options.field];
     return fs.readFile(image.path, function (err, buffer) {
       if (err) return next(err);
@@ -162,12 +161,10 @@ exports.meta = function meta(req, res, next) {
 };
 
 exports.image = function image(req, res, next) {
-  console.dir(req.issuer);
   res.type('png');
   return res.send(req.issuer.image);
 };
 exports.programImage = function image(req, res, next) {
-  console.dir(req.program);
   res.type('png');
   return res.send(req.program.image);
 };

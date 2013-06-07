@@ -32,12 +32,15 @@ export OPENBADGER_PERSONA_AUDIENCE="http://localhost:3000"
 export OPENBADGER_LOGDIR='.'
 export OPENBADGER_SECRET="badgerbadgerbadgerbadger"
 export OPENBADGER_JWT_SECRET="badgerjwtsecret"
+export OPENBADGER_LIMITED_JWT_SECRET="ihavelimitedaccess"
 export OPENBADGER_REDIS_HOST="localhost"
 export OPENBADGER_REDIS_PORT=6379
 export OPENBADGER_MONGO_HOST="localhost"
 export OPENBADGER_MONGO_PORT=27017
 export OPENBADGER_MONGO_DB="openbadger"
+export OPENBADGER_CLAIM_URL_TEXT='csol.org/claim'
 export OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
+export OPENBADGER_NOTIFICATION_WEBHOOK="http://localhost:3000/notify/claim"
 ```
 
 You can either paste that directly into your terminal, or you can put
@@ -130,6 +133,9 @@ $ vmc env-add clopenbadger OPENBADGER_ADMINS='[\"swex@mozilla.com\", \"*@mozilla
 $ vmc env-add clopenbadger OPENBADGER_PERSONA_AUDIENCE=https://clopenbadger.vcap.mozillalabs.com
     Adding Environment Variable [OPENBADGER_PERSONA_AUDIENCE=https://clopenbadger.vcap.mozillalabs.com]: OK
 
+$ vmc env-add clopenbadger OPENBADGER_NOTIFICATION_WEBHOOK=http://localhost:3000/notify/claim
+    Adding Environment Variable [OPENBADGER_NOTIFICATION_WEBHOOK=http://localhost:3000/notify/claim]: OK
+
 And finally:
 
 $ vmc restart clopenbadger
@@ -207,6 +213,7 @@ heroku config:add OPENBADGER_MONGO_HOST="your-mongo-host.org"
 heroku config:add OPENBADGER_MONGO_PORT=27017
 heroku config:add OPENBADGER_MONGO_DB="openbadger"
 heroku config:add OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
+heroku config:add OPENBADGER_NOTIFICATION_WEBHOOK="http://localhost:3000/notify/claim"
 ```
 
 # Deploying to Heroku

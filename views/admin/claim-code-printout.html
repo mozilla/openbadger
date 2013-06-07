@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+div.cutout {
+  display: inline-block;
+  vertical-align: top;
+  width: 2in;
+  min-height: 3in;
+  border: 1px dotted black;
+  margin: 0.1in;
+}
+
+div.cutout .badge {
+  display: block;
+  width: 1.75in;
+  padding: 0;
+  margin: 0.125in;
+}
+
+div.cutout .text {
+  margin: 0 0.125in 0.125in 0.125in;
+  font-size: 9pt;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-align: center;
+}
+
+div.cutout .text .title {
+  display: block;
+  font-weight: bold;
+}
+
+div.cutout .text .claim {
+  display: block;
+  font-family: Monaco, Menlo, monospace;
+}
+
+.claim-url-text {
+  text-decoration: underline;
+}
+</style>
+<title>Claim Codes{% if batchName %}, batch {{batchName}}{% endif %}</title>
+{% for code in claimCodes %}
+<div class="cutout">
+  <img class="badge" src="{{ badge.relativeUrl('image') }}">
+  <div class="text">
+    <span class="title">{{ badge.name }}</span>
+    <p>To redeem this badge, go to 
+      {% if claimUrlText %}
+      <span class="claim-url-text">{{ claimUrlText }}</span>
+      {% else %}
+      the website
+      {% endif %}
+      and use the claim code</p>
+    <span class="claim">{{ code }}</span>
+  </div>
+</div>
+{% endfor %}

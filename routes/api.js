@@ -4,6 +4,7 @@ const jwt = require('jwt-simple');
 const urlutil = require('url');
 const env = require('../lib/environment');
 const util = require('../lib/util');
+const webhooks = require('../lib/webhooks');
 const Badge = require('../models/badge');
 const User = require('../models/user');
 const BadgeInstance = require('../models/badge-instance');
@@ -85,6 +86,7 @@ function normalizeProgram(program) {
 }
 
 exports.jwtSecret = null;
+exports.limitedJwtSecret = null;
 
 /**
  * Get listing of all badges
@@ -271,6 +273,7 @@ exports.user = function user(req, res) {
         issuedOn: instance.issuedOnUnix(),
         badgeClass: {
           name: instance.badge.name,
+          description: instance.badge.description,
           image: instance.badge.absoluteUrl('image')
         }
       };
@@ -542,27 +545,78 @@ exports.issuer = function issuer(req, res, next) {
   });
 };
 
+
+function createFilterFn(query) {
+  const prop = util.prop;
+
+  return function filterProgram(program, cb) {
+    if (!_.keys(query).length)
+      return cb(true);
+
+    program.findBadges(function (err, badges) {
+      if (err) return cb(false);
+      const organization = program.issuer.shortname;
+      const categories = _.chain(badges)
+        .map(prop('categories'))
+        .flatten()
+        .uniq()
+        .value();
+      const ageRanges = _.chain(badges)
+        .map(prop('ageRange'))
+        .flatten()
+        .uniq()
+        .value();
+      const activityTypes = badges.map(prop('activityType'));
+
+      if (query.org && query.org !== organization)
+        return cb(false);
+
+      if (query.category &&
+          !_.contains(categories, query.category))
+        return cb(false);
+
+      if (query.age &&
+          !_.contains(ageRanges, query.age))
+        return cb(false);
+
+      if (query.activity &&
+          !_.contains(activityTypes, query.activity))
+        return cb(false);
+
+      return cb(true);
+    });
+  };
+};
+
 exports.programs = function programs(req, res) {
+  const filterProgram = createFilterFn(req.query);
+
+  function sendError(err, msg) {
+    return res.json(500, {
+      status: 'error',
+      error: msg || err
+    });
+  }
+
   Program.find({})
     .populate('issuer')
     .exec(function(err, programs) {
-      if (err) {
-        return res.json(500, {
-          status: 'error',
-          error: "There was an error retrieving the list of programs"
+      if (err)
+        return sendError(err, "There was an error retrieving the list of programs");
+
+      async.filter(programs, filterProgram, function (programs) {
+        return res.json(200, {
+          status: 'ok',
+          programs: programs.map(function (program) {
+            const programData = normalizeProgram(program);
+            return {
+              name: programData.name,
+              shortname: programData.shortname,
+              imageUrl: programData.imageUrl,
+              issuer: programData.issuer
+            };
+          })
         });
-      }
-      return res.json(200, {
-        status: 'ok',
-        programs: programs.map(function (program) {
-          const programData = normalizeProgram(program);
-          return {
-            name: programData.name,
-            shortname: programData.shortname,
-            imageUrl: programData.imageUrl,
-            issuer: programData.issuer
-          };
-        })
       });
     });
 };
@@ -595,6 +649,20 @@ exports.program = function program(req, res) {
   });
 };
 
+exports.testWebhook = function testWebhook(req, res) {
+  webhooks.notifyOfReservedClaim(req.body.email, req.body.claimCode, function(err, body) {
+    if (err)
+      return res.json(502, {
+        status: 'error',
+        error: err.toString()
+      });
+    return res.json(200, {
+      status: 'ok',
+      body: body
+    });
+  }, true);
+};
+
 /**
  * (Middleware) Confirm that a request is authenticated by decoding the
  * JWT param and confirming audience and issuer.
@@ -609,10 +677,13 @@ exports.auth = function auth(options) {
     const token = param.auth;
     const email = param.email;
     const secret = exports.jwtSecret;
+    const limitedSecret = exports.limitedJwtSecret;
     const origin = env.origin();
     const isXHR = req.headers['x-requested-with'] === 'XMLHttpRequest';
     const now = Date.now()/1000|0;
     var auth, msg;
+    var limitedAccess = false;
+    if (!limitedSecret) limitedSecret = secret;
     if (!token)
       return respondWithError(res, 'missing mandatory `auth` param');
     if (!secret)
@@ -620,7 +691,12 @@ exports.auth = function auth(options) {
     try {
       auth = jwt.decode(token, secret);
     } catch(err) {
-      return respondWithError(res, 'error decoding JWT: ' + err.message);
+      try {
+        auth = jwt.decode(token, limitedSecret);
+        limitedAccess = true;
+      } catch (err) {
+        return respondWithError(res, 'error decoding JWT: ' + err.message);
+      }
     }
     if (options.user && auth.prn !== email) {
       msg = '`prn` mismatch: given %s, expected %s';
@@ -634,6 +710,7 @@ exports.auth = function auth(options) {
       return respondWithError(res, msg);
     }
     req.authUser = email;
+    req.authIsLimited = limitedAccess;
     return next();
   };
 };

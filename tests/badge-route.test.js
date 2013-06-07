@@ -22,6 +22,51 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('getting open claim codes as txt w/ batchName works', function(t) {
+    conmock({
+      handler: badge.getUnclaimedCodesTxt,
+      request: {
+        badge: fx['offline-badge'],
+        query: {batchName: 'LOLOL'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.headers['Content-Type'], 'text/plain');
+      t.equal(mockRes.body, '');
+      t.end();
+    });
+  });
+
+  test('invalid bulk action returns 400', function(t) {
+    conmock({
+      handler: badge.bulkClaimCodeAction,
+      request: {
+        badge: fx['offline-badge'],
+        body: {action: 'LOLOL'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 400);
+      t.end();
+    });    
+  });
+
+  test('txt bulk action returns redirect', function(t) {
+    conmock({
+      handler: badge.bulkClaimCodeAction,
+      request: {
+        badge: fx['offline-badge'],
+        body: {action: 'txt', batchName: 'foo bar'}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 303);
+      t.equal(mockRes.path, '../unclaimed.txt?batchName=foo%20bar');
+      t.end();
+    });    
+  });
+
   test('adding no claim codes does nothing', function(t) {
     var b = fx['link-basic'];
     t.equal(b.claimCodes.length, 0);
@@ -50,13 +95,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
       request: {
         badge: b,
         body: {
-          quantity: '3'
+          quantity: '3',
+          batchName: 'foo'
         }
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 301);
       t.equal(b.claimCodes.length, 3);
+      t.equal(b.getClaimCodes({batchName: 'foo'}).length, 3);
       t.end();
     });
   });
@@ -68,13 +115,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
       request: {
         badge: b,
         body: {
-          codes: 'blarg\nflarg\n\n\narg'
+          codes: 'blarg\nflarg\n\n\narg',
+          batchName: 'meh'
         }
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 301);
       t.same(b.claimCodes.map(util.prop('code')), ['blarg', 'flarg', 'arg']);
+      t.equal(b.getClaimCodes({batchName: 'meh'}).length, 3);
       t.end();
     });
   });

@@ -92,3 +92,8 @@ Program.prototype.relativeUrl = function relativeUrl(field) {
 Program.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
 };
+
+Program.prototype.findBadges = function findBadges(callback) {
+  const Badge = require('./badge');
+  Badge.find({ program: this.id }, callback);
+};

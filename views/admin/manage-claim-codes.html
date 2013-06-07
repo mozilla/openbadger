@@ -34,6 +34,15 @@
     <form method="post" action="?">
       <label>Number of codes</label>
       <input type="number" name="quantity" value="5" required>
+      <label>Batch name</label>
+      <input type="text" name="batchName">
+      <span class="help-block">
+        If you give a name to this batch of claim codes, you will be
+        able to easily print out all the claim codes in the batch,
+        track statistics on them, and more. A useful batch name might be
+        the name of the event where you hand out the claim codes, e.g.
+        "World Environment Day event".
+      </span>
       <div class="form-actions">
         <input type="hidden" name="csrf" value="{{ csrf }}">
         <input type="submit" value="Generate codes" class="btn btn-primary">
@@ -48,6 +57,7 @@
     <thead>
       <tr>
         <th>Code</th>
+        <th>Batch Name</th>
         <th>Claimed By</th>
         <th>Reserved For</th>
         <th>Actions</td>
@@ -57,6 +67,13 @@
       {% for claim in codes %}
       <tr>
         <td>{{ claim.code }}</td>
+        <td>
+          {% if claim.batchName %}
+          {{ claim.batchName }}
+          {% else %}
+          <em>none</em>
+          {% endif %}
+        </td>
         <td>
           {% if claim.multi %}
             *multi*
@@ -87,8 +104,23 @@
       {% endfor %}
     </tbody>
   </table>
-  <a href="../unclaimed.txt" target="_blank" class="btn btn-small">Export all open codes as plain text</a>
-</form>
+  <form class="form-inline" action="bulk-action" method="post">
+    <legend>Bulk Actions</legend>
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Apply the action</label>
+    <select name="action" class="input-xlarge">
+      <option value="txt">Export open codes as plain text</option>
+      <option value="html">Export printable handouts</option>
+    </select>
+    <label>to claim codes in batch</label>
+    <select name="batchName">
+      <option value="">(All claim codes)</option>
+      {% for batchname in badge.getBatchNames() %}
+      <option value="{{batchname}}">{{batchname}}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Go</button>
+  </form>
 
 {% endif %}
 {% endblock %}

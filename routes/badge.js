@@ -2,7 +2,6 @@ const _ = require('underscore');
 const fs = require('fs');
 const logger = require('../lib/logger');
 const Badge = require('../models/badge');
-const phrases = require('../lib/phrases');
 const BadgeInstance = require('../models/badge-instance');
 const util = require('../lib/util');
 const async = require('async');
@@ -162,39 +161,39 @@ exports.meta = function meta(req, res) {
 };
 
 exports.getUnclaimedCodesTxt = function getUnclaimedCodesTxt(req, res, next) {
-  var codes = req.badge.claimCodes
-    .filter(function(c) {
-      return !c.claimedBy && !c.multi && !c.reservedFor;
-    })
-    .map(util.prop('code'));
+  var codes = req.badge.getClaimCodesForDistribution(req.query.batchName);
   return res.type('text').send(200, codes.join('\n'));
 };
 
 exports.addClaimCodes = function addClaimCodes(req, res, next) {
-  var codes = [];
-  var count;
+  function goBack(err) {
+    if (err) return next(err);
+    return res.redirect('back');
+  }
+
   const badge = req.badge;
   const form = req.body;
 
   if (form.codes) {
-    codes = form.codes
+    var codes = form.codes
       .split('\n')
       .map(util.method('trim'))
       .filter(util.prop('length'));
+    badge.addClaimCodes({
+      codes: codes,
+      multi: !!form.multi,
+      batchName: form.batchName
+    }, goBack);
   } else if (form.quantity) {
-    count = parseInt(form.quantity);
-    if (count > 0)
-      codes = phrases(count);
+    var count = parseInt(form.quantity);
+    if (count > 0) {
+      badge.generateClaimCodes({
+        count: count,
+        batchName: form.batchName
+      }, goBack);
+    } else
+      goBack();
   }
-
-  const options = {
-    codes: codes,
-    multi: !!form.multi
-  };
-  badge.addClaimCodes(options, function(err) {
-    if (err) return next(err);
-    return res.redirect('back');
-  });
 };
 
 exports.removeClaimCode = function removeClaimCode(req, res, next) {
@@ -215,6 +214,25 @@ exports.releaseClaimCode = function releaseClaimCode(req, res, next) {
     if (err) return next(err);
     return res.redirect('back');
   });
+};
+
+var bulkClaimCodeActions = exports.bulkClaimCodeActions = {
+  txt: function(req, res, next) {
+    return res.redirect(303, '../unclaimed.txt?batchName=' +
+                             encodeURIComponent(req.body.batchName));
+  },
+  html: function(req, res, next) {
+    return res.redirect(303, '../unclaimed.html?batchName=' +
+                             encodeURIComponent(req.body.batchName));
+  }
+};
+
+exports.bulkClaimCodeAction = function bulkClaimCodeAction(req, res, next) {
+  var action = req.body.action;
+
+  if (action in bulkClaimCodeActions)
+    return bulkClaimCodeActions[action](req, res, next);
+  return res.send(400, 'invalid action');
 };
 
 function reportError(err) {

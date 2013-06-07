@@ -208,7 +208,12 @@ This endpoint returns `200 OK`:
     "first-login": {
       "issuedOn": 1344816000,
       "assertionUrl": "https://clopenbadger.webmaker.org/afjeo23",
-      "isRead": false
+      "isRead": false,
+      "badgeClass": {
+        "name": "First Login",
+        "image": "/badge/image/first-login.png",
+        "description": "Yay you logged in."
+      }
     }
   }
 }

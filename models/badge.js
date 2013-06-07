@@ -8,6 +8,7 @@ const BadgeInstance = require('./badge-instance');
 const phraseGenerator = require('../lib/phrases');
 const async = require('async');
 const Schema = mongoose.Schema;
+const webhooks = require('../lib/webhooks');
 
 const KID = '0-13';
 const TEEN = '13-18';
@@ -41,6 +42,12 @@ const ClaimCodeSchema = new Schema({
     type: String,
     required: false,
     trim: true,
+  },
+  creationDate: {type: Date, default: Date.now},
+  batchName: {
+    type: String,
+    required: false,
+    trim: true,    
   },
   multi: {
     type: Boolean,
@@ -229,6 +236,7 @@ function inArray(array, thing) {
  *   - `limit`: Maximum number of codes to add. [default: Infinity]
  *   - `multi`: Whether or not the claim is multi-use
  *   - `reservedFor`: Who the claim code is reserved for
+ *   - `batchName`: Batch name of the claim code
  *   - `alreadyClean`: Boolean whether or not items are already unique
  * @param {Function} callback
  *   Expects `function (err, accepted, rejected)`
@@ -268,6 +276,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
       this.claimCodes.push({
         code: code,
         multi: options.multi,
+        batchName: options.batchName,
         reservedFor: options.reservedFor
       });
     }.bind(this));
@@ -285,6 +294,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
  * @param {Object} options
  *   - `count`: how many codes to generate
  *   - `codeGenerator`: function to generate random codes (optional)
+ *   - `batchName`: batch name to give to each generated code
  *   - `reservedFor`: email address to reserve the claim code for.
  *       count=1 is implicit when this is non-falsy.
  * @param {Function} callback
@@ -297,6 +307,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
 Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
   const codeGenerator = options.codeGenerator || phraseGenerator;
   const reservedFor = options.reservedFor;
+  const batchName = options.batchName;
   const accepted = [];
   const self = this;
   var count = options.count;
@@ -312,6 +323,7 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
       codes: phrases,
       limit: numLeft,
       reservedFor: reservedFor,
+      batchName: batchName,
       alreadyClean: true,
     }, function (err, acceptedCodes, rejectedCodes) {
       if (err) return cb(err);
@@ -335,20 +347,38 @@ Badge.prototype.getClaimCode = function getClaimCode(code) {
   return null;
 };
 
+Badge.prototype.getBatchNames = function getBatchNames() {
+  var batchNames = {};
+
+  this.claimCodes.forEach(function(code) {
+    if (code.batchName) batchNames[code.batchName] = true;
+  });
+  return Object.keys(batchNames);
+};
+
+Badge.prototype.getClaimCodesForDistribution = function getClaimCodesForDistribution(batchName) {
+  return this.claimCodes
+    .filter(function(c) {
+      if (batchName && c.batchName != batchName) return false;
+      return !c.claimedBy && !c.multi && !c.reservedFor;
+    })
+    .map(util.prop('code'));
+};
+
 Badge.prototype.getClaimCodes = function getClaimCodes(opts) {
   opts = _.defaults(opts||{}, {unclaimed: false});
-  const codes = this.claimCodes;
 
-  const filterFn = opts.unclaimed
-    ? function (o) { return !o.claimedBy }
-    : function (o) { return true };
-
-  return codes.filter(filterFn).map(function (entry) {
+  return this.claimCodes.filter(function(code) {
+    if (opts.unclaimed && code.claimedBy) return false;
+    if (opts.batchName && code.batchName != opts.batchName) return false;
+    return true;
+  }).map(function (entry) {
     var claim = {
       code: entry.code,
       claimed: !!entry.claimedBy
     };
     if (entry.reservedFor) claim.reservedFor = entry.reservedFor;
+    if (entry.batchName) claim.batchName = entry.batchName;
     return claim;
   });
 };
@@ -403,7 +433,7 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
       return callback(null, null);
     self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
       if (err) return callback(err);
-      console.log('TODO: WRITE NOTIFICATION/WEBHOOK CODE.');
+      webhooks.notifyOfReservedClaim(email, accepted[0]);
       return callback(null, accepted[0]);
     });
   });

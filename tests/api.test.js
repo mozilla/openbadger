@@ -1,3 +1,5 @@
+const sinon = require('sinon');
+const jwt = require('jwt-simple');
 const test = require('./');
 const conmock = require('./conmock');
 const badgeFixtures = require('./badge-model.fixtures');
@@ -8,6 +10,7 @@ const BadgeInstance = require('../models/badge-instance');
 const db = require('../models');
 const api = require('../routes/api');
 const env = require('../lib/environment');
+const webhooks = require('../lib/webhooks');
 
 function ensureAlreadyClaimedError(t) {
   return function(err, mockRes, req) {
@@ -39,6 +42,9 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(typeof(badge.issuedOn), 'number');
       t.equal(typeof(badge.isRead), 'boolean');
       t.equal(typeof(badge.assertionUrl), 'string');
+      t.equal(badge.badgeClass.name, 'Link Badge, basic');
+      t.equal(badge.badgeClass.image, '/badge/image/link-basic.png');
+      t.equal(badge.badgeClass.description, 'For doing links.');
       t.end();
     });
   });
@@ -354,19 +360,39 @@ test.applyFixtures(badgeFixtures, function(fx) {
   });
 
   test('api provides program listing', function (t) {
-      conmock({
-        handler: api.programs,
-        request: {}
-      }, function (err, mockRes, req) {
-        const programs = mockRes.body.programs;
-        t.same(mockRes.body.status, 'ok', 'should have status ok');
-        t.ok(programs.some(function (program) {
-          return program.shortname == 'some-program';
-        }), 'should have some-program');
-        t.end();
-      });
+    conmock({
+      handler: api.programs,
+      request: {}
+    }, function (err, mockRes, req) {
+      const programs = mockRes.body.programs;
+      t.same(mockRes.body.status, 'ok', 'should have status ok');
+      t.ok(programs.some(function (program) {
+        return program.shortname == 'some-program';
+      }), 'should have some-program');
+      t.end();
+    });
   });
 
+  test('api can filter program listing', function (t) {
+    const expect = fx['filterable-program'];
+    conmock({
+      handler: api.programs,
+      request: {
+        query: {
+          category: 'technology',
+          age: '19-24',
+          activity: 'online',
+          org: 'issuer'
+        }
+      }
+    }, function (err, mockRes, req) {
+      const programs = mockRes.body.programs;
+      t.same(mockRes.body.status, 'ok', 'should have status ok');
+      t.same(programs.length, 1, 'should have one program');
+      t.same(programs[0].shortname, 'filterable-program');
+      t.end();
+    });
+  });
 
   test('api can give badge recommendations', function(t) {
     conmock({
@@ -394,6 +420,56 @@ test.applyFixtures(badgeFixtures, function(fx) {
     }, function(err, mockRes, req) {
       const badges = mockRes.body.badges;
       t.ok(badges.length == 2, 'should have exactly two badges');
+      t.end();
+    });
+  });
+
+  test('api can be used to test webhook success', function(t) {
+    t.plan(7);
+    webhooks.webhookUrl = 'http://mywebhook/blah';
+    webhooks.jwtSecret = 'somekindasecret';
+    sinon.stub(webhooks.request, 'post', function(options, cb) {
+      var auth = jwt.decode(options.json.auth, 'somekindasecret');
+      t.same(auth.prn, 'test@test.com');
+      t.ok(auth.exp > Date.now());
+      t.same(options.url, 'http://mywebhook/blah');
+      t.same(options.json.email, "test@test.com");
+      t.same(options.json.claimCode, "TESTING");
+      t.equal(options.json.isTesting, true);
+      cb(null, {statusCode: 200}, "lolol");
+    });
+    conmock({
+      handler: api.testWebhook,
+      request: {
+        body: {
+          email: 'test@test.com',
+          claimCode: 'TESTING'
+        }
+      }
+    }, function(err, mockRes, req) {
+      webhooks.request.post.restore();
+      if (err) throw err;
+      t.same(mockRes.body, {status: "ok", body: "lolol"});
+      t.end();
+    });
+  });
+
+  test('api can be used to test webhook failure', function(t) {
+    sinon.stub(webhooks.request, 'post', function(options, cb) {
+      cb(null, {statusCode: 500}, "OOF");
+    });
+    conmock({
+      handler: api.testWebhook,
+      request: {
+        body: {
+          email: 'test@test.com',
+          claimCode: 'TESTING'
+        }
+      }
+    }, function(err, mockRes, req) {
+      webhooks.request.post.restore();
+      if (err) throw err;
+      t.same(mockRes.body, {status: "error", error: "OOF"});
       t.end();
     });
   });
