@@ -229,6 +229,7 @@ exports.define = function defineRoutes(app) {
 
   app.get('/v2/program/:programShortName', api.program);
   app.get('/v2/issuer/:issuerShortName', api.issuer);
+  app.post('/v2/test/webhook', api.testWebhook);
 
   // Resources
   app.get('/issuer/image/:issuerId', [
