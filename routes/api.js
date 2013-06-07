@@ -4,6 +4,7 @@ const jwt = require('jwt-simple');
 const urlutil = require('url');
 const env = require('../lib/environment');
 const util = require('../lib/util');
+const webhooks = require('../lib/webhooks');
 const Badge = require('../models/badge');
 const User = require('../models/user');
 const BadgeInstance = require('../models/badge-instance');
@@ -646,6 +647,20 @@ exports.program = function program(req, res) {
       });
     });
   });
+};
+
+exports.testWebhook = function testWebhook(req, res) {
+  webhooks.notifyOfReservedClaim(req.body.email, req.body.claimCode, function(err, body) {
+    if (err)
+      return res.json(502, {
+        status: 'error',
+        error: err.toString()
+      });
+    return res.json(200, {
+      status: 'ok',
+      body: body
+    });
+  }, true);
 };
 
 /**
