@@ -271,6 +271,7 @@ exports.user = function user(req, res) {
         issuedOn: instance.issuedOnUnix(),
         badgeClass: {
           name: instance.badge.name,
+          description: instance.badge.description,
           image: instance.badge.absoluteUrl('image')
         }
       };

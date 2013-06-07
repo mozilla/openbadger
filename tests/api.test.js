@@ -39,6 +39,9 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(typeof(badge.issuedOn), 'number');
       t.equal(typeof(badge.isRead), 'boolean');
       t.equal(typeof(badge.assertionUrl), 'string');
+      t.equal(badge.badgeClass.name, 'Link Badge, basic');
+      t.equal(badge.badgeClass.image, '/badge/image/link-basic.png');
+      t.equal(badge.badgeClass.description, 'For doing links.');
       t.end();
     });
   });
