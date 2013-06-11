@@ -554,7 +554,11 @@ function createFilterFn(query) {
       return cb(true);
 
     program.findBadges(function (err, badges) {
-      if (err) return cb(false);
+      if (err)
+        return cb(false);
+      // remove orphaned programs
+      if (!program.issuer)
+        return cb(false);
       const organization = program.issuer.shortname;
       const categories = _.chain(badges)
         .map(prop('categories'))
