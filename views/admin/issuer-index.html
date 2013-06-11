@@ -1,14 +1,32 @@
 {% extends "admin/base.html" %}
 {% block main %}
+{% if badges %}
 <h1>Issue Badges</h1>
-<ul>
+<table class="badge-list">
+<tbody>
+<tr>
+<th class="orga">Organization</th>
+<th class="prog">Program</th>
+<th class="badg">Badge</th>
+</tr>
+
 {% for badge in badges %}
-  <li>
-    <strong>
-      <a href="/issue/{{badge.id}}">{{ badge.name | e }}</a>
-    </strong>
-    (<em>{{ badge.program.name }}</em>)
-  </li>
+  <tr>
+    <td class="orga">
+      {{ badge.program.issuer.name | e}}
+    </td>
+    <td class="prog">
+      {{ badge.program.name | e}}
+    </td>
+    <td class="badg">
+      <a href="/issue/{{ badge.id | e}}">{{ badge.name }}</a>
+    </td>
+  </tr>
 {% endfor %}
-</ul>
+</tbody>
+</table>
+{% else %}
+<h1>No Badges to issue.</h1>
+{% endif %}
+
 {% endblock %}
