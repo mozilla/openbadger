@@ -8,6 +8,7 @@
 <th class="orga">Organization</th>
 <th class="prog">Program</th>
 <th class="badg">Badge</th>
+<th></th>
 </tr>
 
 {% for badge in badges %}
@@ -19,7 +20,16 @@
       {{ badge.program.name | e}}
     </td>
     <td class="badg">
-      <a href="/issue/{{ badge.id | e}}">{{ badge.name }}</a>
+      {{ badge.name }}
+    </td>
+    <td class="oper all">
+      <div class="btn-group">
+        <a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="/issue/{{ badge.id | e }}"><i class="icon-pencil"></i> Issue</a></li>
+          <li><a href="/issue/{{ badge.id | e }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
+        </ul>
+      </div>
     </td>
   </tr>
 {% endfor %}
