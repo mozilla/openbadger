@@ -375,15 +375,19 @@ exports.findById = function findById(req, res, next) {
 
 exports.findByIssuers = function findByIssuers(req, res, next) {
   const issuers = req.issuers;
+  const prop = util.prop;
+  const wrap = util.objWrap;
+
   if (!issuers.length)
     return next();
+
   const query = {
     '$or': issuers
       .reduce(function (arr, issuer) {
         return arr.concat(issuer.programs);
       }, [])
-      .map(util.prop('_id'))
-      .map(util.objWrap('program'))
+      .map(prop('_id'))
+      .map(wrap('program'))
   };
   Badge
     .find(query, {image: 0})
@@ -393,8 +397,8 @@ exports.findByIssuers = function findByIssuers(req, res, next) {
       req.badges = badges;
       // #TODO: dry this out, see exports.findAll
       const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
+        .filter(prop('program'))
+        .map(prop('program'));
       const populateIssuers = util.method('populate', 'issuer');
       async.map(programs, populateIssuers, function (err) {
         if (err) return next(err);
