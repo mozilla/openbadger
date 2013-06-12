@@ -349,10 +349,15 @@ function tryAwardingBadge(opts, res, successCb) {
 
 exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
   getUnclaimedBadgeFromCode(req.query.code, req, res, next, function(badge) {
-    return res.json(200, {
+    var claim = badge.getClaimCode(req.query.code);
+    var result ={
       status: 'ok',
+      evidenceItems: claim.evidence.length,
       badge: normalizeBadge(badge)
-    });
+    };
+
+    if (claim.reservedFor) result.reservedFor = claim.reservedFor;
+    return res.json(200, result);
   });
 };
 

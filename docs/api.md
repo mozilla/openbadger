@@ -368,7 +368,7 @@ Get information about an unclaimed badge.
 * **code**: The claimcode of the badge.
 
 ### Response Codes
-* `200`: Returns an object with `status` set to `ok` and `badge` set to an object containing information about the badge for the claim code. See the documentation of `/v2/badge/<shortname>` for an example of this object.
+* `200`: Returns an object with `status` set to `ok` and `badge` set to an object containing information about the badge for the claim code. See the documentation of `/v2/badge/<shortname>` for an example of this object. Additionally, `reservedFor` will be the email the claim code is reserved for, if any, and `evidenceItems` is the number of reserved evidence items the claim code has.
 * `409`: Claim code has already been used.
 * `404`: Unknown claim code.
 * `400 Bad Request`: Missing or invalid parameters.

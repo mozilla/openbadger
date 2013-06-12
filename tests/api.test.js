@@ -159,13 +159,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
       handler: api.getUnclaimedBadgeInfoFromCode,
       request: {
         query: {
-          code: 'will-claim'
+          code: 'reserved-claim'
         }
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 200);
       t.equal(mockRes.body.status, 'ok');
+      t.equal(mockRes.body.evidenceItems, 0);
+      t.equal(mockRes.body.reservedFor, 'foo@bar.org');
       t.equal(mockRes.body.badge.name, 'Offline badge');
       t.end();
     });
