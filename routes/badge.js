@@ -199,8 +199,10 @@ exports.addClaimCodes = function addClaimCodes(req, res, next) {
 exports.removeClaimCode = function removeClaimCode(req, res, next) {
   var code = req.param('code');
   var badge = req.badge;
-  badge.removeClaimCode(code);
-  badge.save(function (err) {
+  async.series([
+    badge.removeClaimCode.bind(badge, code),
+    badge.save.bind(badge)
+  ], function (err) {
     if (err) return next(err);
     return res.redirect('back');
   });

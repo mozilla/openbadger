@@ -473,12 +473,14 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#removeClaimCode', function (t) {
     const badge = fixtures['offline-badge'];
-    badge.removeClaimCode('remove-claim');
-    badge.claimCodes.forEach(function (claim) {
-      if (claim.code == 'remove-claim')
-        t.fail('should have removed');
+    badge.removeClaimCode('remove-claim', function(err) {
+      if (err) throw err;
+      badge.claimCodes.forEach(function (claim) {
+        if (claim.code == 'remove-claim')
+          t.fail('should have removed');
+      });
+      t.end();
     });
-    t.end();
   });
 
   test('Badge#awardOrFind: award badge to a user', function (t) {

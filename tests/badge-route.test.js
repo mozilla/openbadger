@@ -386,6 +386,23 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('removing claim codes works', function(t) {
+    var badgeModel = fx['no-image-badge']
+    conmock({
+      handler: badge.removeClaimCode,
+      request: {
+        badge: badgeModel,
+        params: {code: badgeModel.claimCodes[0].code}
+      }      
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.fntype, 'redirect');
+      t.equal(mockRes.path, 'back');
+      t.equal(badgeModel.claimCodes.length, 0);
+      t.end();
+    });
+  });
+
   test('shutting down #', function (t) {
     db.close(); t.end();
   });

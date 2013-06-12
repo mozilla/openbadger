@@ -469,9 +469,13 @@ Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
   return true;
 };
 
-Badge.prototype.removeClaimCode = function removeClaimCode(code) {
-  this.claimCodes = this.claimCodes.filter(function (claim) {
-    return claim.code !== code;
+Badge.prototype.removeClaimCode = function removeClaimCode(code, cb) {
+  var self = this;
+  var claim = this.getClaimCode(code);
+  Badge.temporaryEvidence.destroy(claim, function(err) {
+    if (err) return cb(err);
+    self.claimCodes.pull(claim._id);
+    cb();
   });
 };
 
