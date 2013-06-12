@@ -15,6 +15,16 @@ whitelists.CSRF = [whitelists.API];
 whitelists.CORS = [whitelists.API];
 whitelists.NO_CACHE = [whitelists.ASSERTION];
 
+function addClaimManagementRoutes(app, prefix) {
+  app.get(prefix + '/', render.manageClaimCodes);
+  app.post(prefix, badge.addClaimCodes);
+  app.post(prefix + '/bulk-action', badge.bulkClaimCodeAction);
+  app.get(prefix + '/unclaimed.txt', badge.getUnclaimedCodesTxt);
+  app.get(prefix + '/unclaimed.html', render.getUnclaimedCodesHtml);
+  app.delete(prefix + '/:code', badge.removeClaimCode);
+  app.patch(prefix + '/:code', badge.releaseClaimCode);
+}
+
 exports.define = function defineRoutes(app) {
   /** Routes */
   app.get('/', render.anonymousHome);
@@ -29,12 +39,13 @@ exports.define = function defineRoutes(app) {
     badge.findByIssuers,
   ], render.issuerIndex);
 
-  app.all('/issue/:badgeId', [
+  app.all('/issue/:badgeId*', [
     badge.findById,
     badge.confirmAccess,
   ]);
   app.get('/issue/:badgeId', render.issueBadge);
   app.post('/issue/:badgeId', badge.issueMany);
+  addClaimManagementRoutes(app, '/issue/:badgeId/claims');
 
   app.all('/admin*', user.requireAuth({
     level: 'super',
@@ -69,13 +80,7 @@ exports.define = function defineRoutes(app) {
   app.get('/admin/badge', render.newBadgeForm);
   app.get('/admin/badge/:shortname', [behavior.findAll], render.showBadge);
   app.get('/admin/badge/:shortname/edit', render.editBadgeForm);
-  app.get('/admin/badge/:shortname/claims/', render.manageClaimCodes);
-  app.post('/admin/badge/:shortname/claims/bulk-action',
-           badge.bulkClaimCodeAction);
-  app.get('/admin/badge/:shortname/claims/unclaimed.txt',
-          badge.getUnclaimedCodesTxt);
-  app.get('/admin/badge/:shortname/claims/unclaimed.html',
-          render.getUnclaimedCodesHtml);
+  addClaimManagementRoutes(app, '/admin/badge/:shortname/claims');
 
   app.post('/admin/badge', [
     badge.getUploadedImage({ required: true })
@@ -86,9 +91,6 @@ exports.define = function defineRoutes(app) {
   app.delete('/admin/badge/:shortname', badge.destroy);
   app.post('/admin/badge/:shortname/behavior', badge.addBehavior);
   app.delete('/admin/badge/:shortname/behavior', badge.removeBehavior);
-  app.post('/admin/badge/:shortname/claims', badge.addClaimCodes);
-  app.delete('/admin/badge/:shortname/claims/:code', badge.removeClaimCode);
-  app.patch('/admin/badge/:shortname/claims/:code', badge.releaseClaimCode);
 
   // Issuers
   // -------
