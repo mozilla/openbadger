@@ -387,6 +387,29 @@ Claim a badge via claim code.
 * `400 Bad Request`: Missing or invalid parameters.
 * `409`: User already has the badge.
 
+## GET `/v2/claim/evidence`
+Return an evidence item of a claim code.
+
+### Request Parameters
+* **code**: The claimcode.
+* **n**: The evidence item number to retrieve. 0 is the first evidence item, 1 is the second, and so on.
+
+### Response Codes
+* `200`: Returns the evidence data with the appropriate mime type set.
+* `404`: Unknown claim code or evidence item number.
+* `400 Bad Request`: Missing or invalid parameters.
+
+## DELETE `/v2/claim/evidence`
+Permanently delete all evidence associated with a claim code.
+
+### Request Parameters
+* **code**: The claimcode.
+
+### Response Codes
+* `200`: Any evidence associated with the claim code has been destroyed.
+* `304`: Valid claim code, but no evidence for it exists.
+* `404`: Unknown claim code.
+* `400 Bad Request`: Missing or invalid parameters.
 
 ## GET `/v2/user/recommendations`
 Get a list of recommended badges for a user.
