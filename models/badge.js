@@ -9,10 +9,22 @@ const phraseGenerator = require('../lib/phrases');
 const async = require('async');
 const Schema = mongoose.Schema;
 const webhooks = require('../lib/webhooks');
+const s3 = require('../lib/s3');
 
 const KID = '0-13';
 const TEEN = '13-18';
 const ADULT = '19-24';
+
+const TemporaryEvidenceSchema = new Schema({
+  path: {
+    type: String,
+    required: true
+  },
+  mimeType: {
+    type: String,
+    required: true
+  }
+});
 
 const BehaviorSchema = new Schema({
   shortname: {
@@ -44,6 +56,7 @@ const ClaimCodeSchema = new Schema({
     trim: true,
   },
   creationDate: {type: Date, default: Date.now},
+  evidence: [TemporaryEvidenceSchema],
   batchName: {
     type: String,
     required: false,
@@ -176,6 +189,59 @@ BadgeSchema.pre('validate', function normalizeCategoryInfo(next) {
 
 // Model methods
 // -------------
+
+TemporaryEvidenceSchema.methods.getReadStream = function(cb) {
+  s3.get(this.path).on('response', function(stream) {
+    cb(null, stream);
+  }).end();
+};
+
+ClaimCodeSchema.methods.addEvidence = function(files, cb) {
+  var self = this;
+
+  async.mapSeries(files, function addFile(file, cb) {
+    var remotePath = '/' + self.code + '/' + self.evidence.length;
+
+    s3.putFile(file.filename, remotePath, {
+      'Content-Type': file.type
+    }, function(err) {
+      if (err) return cb(err);
+      self.evidence.push({
+        path: remotePath,
+        mimeType: file.type
+      });
+      cb();
+    });
+  }, cb);
+};
+
+ClaimCodeSchema.methods.destroyEvidence = function(cb) {
+  var self = this;
+
+  async.mapSeries(self.evidence, function deleteFile(evidence, done) {
+    s3.deleteFile(evidence.path, function(err) {
+      if (err) return done(err);
+      self.evidence.pull(evidence._id);
+      done();
+    });
+  }, cb);
+};
+
+// Ideally our claim and evidence methods could be added as methods to
+// their subdocument objects, just like normal model methods are, but
+// this doesn't seem to be possible with Mongoose, so we'll add accessors
+// to them here. Not particularly clean, but not sure what else to do. -AV
+Badge.temporaryEvidence = {
+  add: function(claim, files, cb) {
+    return ClaimCodeSchema.methods.addEvidence.call(claim, files, cb);
+  },
+  destroy: function(claim, cb) {
+    return ClaimCodeSchema.methods.destroyEvidence.call(claim, cb);
+  },
+  getReadStream: function(evidence, cb) {
+    return TemporaryEvidenceSchema.methods.getReadStream.call(evidence, cb);
+  }
+};
 
 Badge.findByBehavior = function findByBehavior(shortnames, callback) {
   shortnames = Array.isArray(shortnames) ? shortnames : [shortnames];
