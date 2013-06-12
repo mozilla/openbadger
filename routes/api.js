@@ -319,7 +319,7 @@ function tryAwardingBadge(opts, res, successCb) {
   return badge.award({
     email: email,
     evidence: evidence
-  }, function (err, instance) {
+  }, function (err, instance, autoAwardedInstances) {
     if (err) {
       // TODO: log error properly
       console.dir(err);
@@ -336,14 +336,25 @@ function tryAwardingBadge(opts, res, successCb) {
         user: email,
       });
 
-    var success = res.send.bind(res, 200, {
-      status: 'ok',
-      url: instance.absoluteUrl('assertion'),
-    });
+    function getShortNameFromInstance(instance, cb) {
+      Badge.findById(instance.badge, function (err, badge) {
+        if (err)
+          return cb(err);
+        return cb(null, badge.shortname);
+      });
+    }
 
-    if (successCb)
-      return successCb(success);
-    return success();
+    return async.map(autoAwardedInstances, getShortNameFromInstance, function (err, autoAwardedShortnames) {
+      var success = res.send.bind(res, 200, {
+        status: 'ok',
+        url: instance.absoluteUrl('assertion'),
+        autoAwardedBadges: autoAwardedShortnames
+      });
+
+      if (successCb)
+        return successCb(success);
+      return success();
+    });
   });
 }
 
