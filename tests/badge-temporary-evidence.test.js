@@ -15,19 +15,19 @@ test.applyFixtures({
   })[0];
   var tempFiles = [
     {
-      filename: __dirname + '/temp-evidence-0.txt',
+      path: __dirname + '/temp-evidence-0.txt',
       type: 'text/plain',
       _testContent: Date.now().toString()
     },
     {
-      filename: __dirname + '/temp-evidence-1.html',
+      path: __dirname + '/temp-evidence-1.html',
       type: 'text/html',
       _testContent: '<p>hi</p>'
     }
   ];
 
   tempFiles.forEach(function(file) {
-    fs.writeFileSync(file.filename, file._testContent);
+    fs.writeFileSync(file.path, file._testContent);
   });
 
   test('adding evidence works', function(t) {
@@ -72,7 +72,7 @@ test.applyFixtures({
   // necessary to stop the test runner
   test('shutting down #', function (t) {
     tempFiles.forEach(function(file) {
-      fs.unlinkSync(file.filename);
+      fs.unlinkSync(file.path);
     });
     db.close();
     t.end();
