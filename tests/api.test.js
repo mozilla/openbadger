@@ -194,6 +194,25 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api returns information for awarded steam badges', function(t) {
+    conmock({
+      handler: api.awardBadgeFromClaimCode,
+      request: {
+        body: {
+          email: 'foo@bar.org',
+          code: 'science-requirement'
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body.status, 'ok');
+      t.ok('url' in mockRes.body);
+      t.equal(mockRes.body.autoAwardedBadges[0], 'science-reward');
+      t.end();
+    });
+  });
+
   test('api rejects unused claim codes for pre-earned badges', function(t) {
     conmock({
       handler: api.awardBadgeFromClaimCode,

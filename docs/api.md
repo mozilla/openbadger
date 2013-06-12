@@ -300,6 +300,7 @@ Award a badge directly to a user.
 ### Response Parameters
 * **status**: Status of the request. If the request is good, contains with the literal string `"ok"`. If the request is bad for any reason, contains the literal string `"error"`.
 * **url**: URL for the badge assertion.
+* **autoAwardedBadges**: An array containing shortnames of all additional badges awarded as a result of this action.
 
 
 
@@ -387,6 +388,10 @@ Claim a badge via claim code.
 * `400 Bad Request`: Missing or invalid parameters.
 * `409`: User already has the badge.
 
+### Response Parameters
+* **status**: Status of the request. If the request is good, contains with the literal string `"ok"`. If the request is bad for any reason, contains the literal string `"error"`.
+* **url**: URL for the badge assertion.
+* **autoAwardedBadges**: An array containing shortnames of all additional badges awarded as a result of this action.
 
 ## GET `/v2/user/recommendations`
 Get a list of recommended badges for a user.
