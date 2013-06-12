@@ -1,5 +1,6 @@
 const _ = require('underscore');
 const async = require('async');
+const mime = require('mime');
 const jwt = require('jwt-simple');
 const urlutil = require('url');
 const env = require('../lib/environment');
@@ -358,6 +359,39 @@ exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
 
     if (claim.reservedFor) result.reservedFor = claim.reservedFor;
     return res.json(200, result);
+  });
+};
+
+exports.getClaimCodeEvidence = function(req, res, next) {
+  var code = req.query.code;
+  var n = parseInt(req.query.n);
+
+  if (isNaN(n) || n < 0)
+    return res.send(400, {
+      status: 'error',
+      reason: 'n must be a non-negative integer'
+    });
+
+  getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
+    var claim = badge.getClaimCode(code);
+    if (n >= claim.evidence.length)
+      return res.send(404, {
+        status: 'error',
+        reason: 'evidence item number does not exist'
+      });
+    var evidence = claim.evidence[n];
+    Badge.temporaryEvidence.getReadStream(evidence, function(err, s) {
+      if (err) return res.json(500, {
+        status: 'error',
+        reason: 'cannot retrieve evidence'
+      });
+      res.type(evidence.mimeType);
+      var ext = mime.extension(evidence.mimeType);
+      var filename = 'evidence-' + n + (ext ? '.' + ext : '');
+      res.set('Content-Disposition',
+              'attachment; filename="' + filename + '"');
+      s.pipe(res);
+    });
   });
 };
 

@@ -192,6 +192,10 @@ exports.define = function defineRoutes(app) {
     api.auth()
   ], api.awardBadgeFromClaimCode);
 
+  app.get('/v2/claim/evidence', [
+    api.auth()
+  ], api.getClaimCodeEvidence);
+
   app.get('/v2/user', [
     api.auth()
   ], api.user);

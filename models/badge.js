@@ -203,9 +203,10 @@ ClaimCodeSchema.methods.addEvidence = function(files, cb) {
   var self = this;
 
   async.mapSeries(files, function addFile(file, cb) {
+    var method = file.path ? 'putFile' : 'putBuffer';
     var remotePath = '/' + self.code + '/' + self.evidence.length;
 
-    s3.putFile(file.path, remotePath, {
+    s3[method](file.path || file.buffer, remotePath, {
       'Content-Type': file.type
     }, function(err) {
       if (err) return cb(err);
