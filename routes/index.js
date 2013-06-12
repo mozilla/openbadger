@@ -29,12 +29,13 @@ exports.define = function defineRoutes(app) {
     badge.findByIssuers,
   ], render.issuerIndex);
 
-  app.all('/issue/:badgeId', [
+  app.all('/issue/:badgeId*', [
     badge.findById,
     badge.confirmAccess,
   ]);
   app.get('/issue/:badgeId', render.issueBadge);
   app.post('/issue/:badgeId', badge.issueMany);
+  app.post('/issue/:badgeId/with-evidence', badge.issueOneWithEvidence);
 
   app.all('/admin*', user.requireAuth({
     level: 'super',

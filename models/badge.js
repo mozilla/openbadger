@@ -491,8 +491,12 @@ Badge.prototype.earnableBy = function earnableBy(user) {
   }, true);
 };
 
-Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
+Badge.prototype.reserveAndNotify = function reserveAndNotify(info, callback) {
+  if (typeof(info) == 'string') info = {email: info};
+
   const self = this;
+  var email = info.email;
+  var files = info.evidenceFiles || [];
 
   BadgeInstance.findOne({
     userBadgeKey: email + '.' + self.id
@@ -502,8 +506,19 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
       return callback(null, null);
     self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
       if (err) return callback(err);
-      webhooks.notifyOfReservedClaim(email, accepted[0]);
-      return callback(null, accepted[0]);
+      var claimCode = accepted[0];
+      var claim = self.getClaimCode(claimCode);
+      var finish = function(err) {
+        if (err) return callback(err);
+        webhooks.notifyOfReservedClaim(email, claimCode);
+        return callback(null, claimCode);
+      };
+
+      if (!files.length) return finish(null);
+      async.series([
+        Badge.temporaryEvidence.add.bind(null, claim, files),
+        self.save.bind(self)
+      ], finish);
     });
   });
 };

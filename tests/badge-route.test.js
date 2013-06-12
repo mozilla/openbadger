@@ -1,10 +1,12 @@
 const util = require('util');
+const fs = require('fs');
 const test = require('./');
 const conmock = require('./conmock');
 const badgeFixtures = require('./badge-model.fixtures');
 
 const db = require('../models');
 const badge = require('../routes/badge');
+const Badge = require('../models/badge');
 
 test.applyFixtures(badgeFixtures, function(fx) {
   test('getting open claim codes as txt works', function(t) {
@@ -234,6 +236,110 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.same(mockRes.body, 
              "A validation error occurred on the following fields: " +
              "image (maxLength).");
+      t.end();
+    });
+  });
+
+  test('reserving a badge w/ evidence works', function(t) {
+    var badgeModel = fx['no-image-badge'];
+    var content = Date.now().toString();
+    var path = __dirname + '/temp-evidence.txt';
+
+    fs.writeFileSync(path, content);
+    t.equal(badgeModel.claimCodes.length, 0);
+    conmock({
+      handler: badge.issueOneWithEvidence,
+      request: {
+        badge: badgeModel,
+        body: {
+          email: 'blarg@goose.org '
+        },
+        files: {
+          evidence: {
+            path: path,
+            type: 'text/plain'
+          }
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      fs.unlinkSync(path);
+      t.equal(badgeModel.claimCodes.length, 1);
+      var claim = badgeModel.claimCodes[0];
+      t.equal(claim.reservedFor, 'blarg@goose.org');
+      t.equal(claim.evidence.length, 1);
+      var evidence = claim.evidence[0];
+      t.equal(evidence.mimeType, 'text/plain');
+      Badge.temporaryEvidence.getReadStream(evidence, function(err, s) {
+        if (err) throw err;
+        var chunks = [];
+        s.on('data', function(c) { chunks.push(c); });
+        s.on('end', function() {
+          t.equal(Buffer.concat(chunks).toString('ascii'), content);
+          Badge.temporaryEvidence.destroy(claim, function(err) {
+            if (err) throw err;
+            t.end();
+          });
+        });
+      });
+    });
+  });
+
+  test('reserving a badge w/ evidence array works', function(t) {
+    var badgeModel = fx['link-comment'];
+    var path = __dirname + '/temp-evidence.txt';
+
+    fs.writeFileSync(path, 'blah');
+    t.equal(badgeModel.claimCodes.length, 0);
+    conmock({
+      handler: badge.issueOneWithEvidence,
+      request: {
+        badge: badgeModel,
+        body: {
+          email: 'blarg@goose.org'
+        },
+        files: {
+          evidence: [{
+            path: path,
+            type: 'text/plain'
+          }]
+        }
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      fs.unlinkSync(path);
+      t.equal(badgeModel.claimCodes.length, 1);
+      var claim = badgeModel.claimCodes[0];
+      t.equal(claim.reservedFor, 'blarg@goose.org');
+      t.equal(claim.evidence.length, 1);
+      var evidence = claim.evidence[0];
+      t.equal(evidence.mimeType, 'text/plain');
+      Badge.temporaryEvidence.destroy(claim, function(err) {
+        if (err) throw err;
+        t.end();
+      });
+    });
+  });
+
+  test('reserving a badge w/o evidence works', function(t) {
+    var badgeModel = fx['science-math1'];
+
+    t.equal(badgeModel.claimCodes.length, 0);
+    conmock({
+      handler: badge.issueOneWithEvidence,
+      request: {
+        badge: badgeModel,
+        body: {
+          email: 'blarg@goose.org'
+        },
+        files: {}
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(badgeModel.claimCodes.length, 1);
+      var claim = badgeModel.claimCodes[0];
+      t.equal(claim.reservedFor, 'blarg@goose.org');
+      t.equal(claim.evidence.length, 0);
       t.end();
     });
   });

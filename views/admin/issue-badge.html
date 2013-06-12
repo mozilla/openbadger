@@ -30,4 +30,28 @@
     <input class="btn btn-primary" type="submit" value="Issue Badges">
   </div>
 </form>
+
+<h2>Issue One Badge With Evidence</h2>
+
+<form method="post" action="{{ badge._id }}/with-evidence" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{csrf}}">
+  <div>
+    <label for="email">Email Address</label>
+    <input type="text" name="email" required>
+  </div>
+
+  <div>
+    <label for="evidence">Evidence</label>
+    <input type="file" multiple name="evidence">
+    <span class="help-block">
+      Upload as many files as you like.
+    </span>
+  </div>
+
+  <div>
+    <input class="btn" type="reset" value="Clear Form">
+    <input class="btn btn-primary" type="submit" value="Issue Badge">
+  </div>
+</form>
+
 {% endblock %}
