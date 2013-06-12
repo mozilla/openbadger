@@ -337,14 +337,21 @@ function tryAwardingBadge(opts, res, successCb) {
       });
 
     function getShortNameFromInstance(instance, cb) {
-      Badge.findById(instance.badge, function (err, badge) {
+      instance.populate('badge', function (err) {
         if (err)
           return cb(err);
-        return cb(null, badge.shortname);
+        return cb(null, instance.badge.shortname);
       });
     }
 
     return async.map(autoAwardedInstances, getShortNameFromInstance, function (err, autoAwardedShortnames) {
+      if (err) {
+        return res.json(500, {
+          status: 'error',
+          reason: 'database'
+        });
+      }
+
       var success = res.send.bind(res, 200, {
         status: 'ok',
         url: instance.absoluteUrl('assertion'),
