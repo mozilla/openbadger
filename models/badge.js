@@ -196,6 +196,9 @@ TemporaryEvidenceSchema.methods.getReadStream = function(cb) {
   }).end();
 };
 
+// `files` is expected to be an array of file objects
+// that conform to the structure described at
+// http://expressjs.com/api.html#req.files.
 ClaimCodeSchema.methods.addEvidence = function(files, cb) {
   var self = this;
 
