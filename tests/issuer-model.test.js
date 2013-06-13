@@ -92,30 +92,6 @@ test.applyFixtures({
     t.end();
   });
 
-  test('Issuer#removeAccess', function (t) {
-    const issuer = new Issuer({
-      accessList: [{email: 'remove-me@example.org'}],
-    });
-    t.same(issuer.hasAccess('remove-me@example.org'), true);
-    t.same(issuer.removeAccess('remove-me@example.org'), true);
-    t.same(issuer.hasAccess('remove-me@example.org'), false);
-    t.end();
-  });
-
-  test('Issuer#addAccess', function (t) {
-    const issuer = new Issuer();
-    issuer.addAccess('test1@example.org');
-    issuer.addAccess('test1@example.org');
-    issuer.addAccess('test1@example.org');
-    issuer.addAccess(['test2@example.org', 'test3@example.org']);
-    issuer.addAccess('test4@example.org', 'test5@example.org');
-
-    [1,2,3,4,5].forEach(function (n) {
-      t.same(issuer.hasAccess('test'+n+'@example.org'), true);
-    });
-    t.end();
-  });
-
   test('Issuer.findByAccess', function (t) {
     t.plan(3);
     Issuer.findByAccess('one@example.org', function (err, results) {

@@ -116,6 +116,14 @@ test('util.negate', function (t) {
   });
 });
 
+test('util.objWrap', function (t) {
+  const nums = [1,2,3,4].map(util.objWrap('n'));
+  t.same(nums, [{n:1}, {n:2}, {n:3}, {n:4}]);
+  t.end();
+ });
+
+
+
 test('util.prop', function (t) {
   const prop = util.prop;
   const arr = [

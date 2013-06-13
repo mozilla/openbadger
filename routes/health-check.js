@@ -1,35 +1,47 @@
 // TODO: Separate this module out into its own npm module/git repo.
 
 var async = require('async');
+var colors = require('colors');
 
-const HEALTH_CHECK_TIMEOUT = 2000;
+const CHECKMARK = "\u2713";
 
 function checker(fn) {
+  var meta = {};
+  var result = function(obj) {
+    Object.keys(obj).forEach(function(prop) {
+      meta[prop] = obj[prop];
+    });
+    return meta;
+  };
+
   return function check(cb) {
     var timeout = setTimeout(function() {
       timeout = null;
-      cb(null, {status: "FAILED", reason: "TIMEOUT"});
-    }, HEALTH_CHECK_TIMEOUT);
+      cb(null, result({status: "FAILED", reason: "TIMEOUT"}));
+    }, module.exports.TIMEOUT);
 
     try {
-      fn(function(err) {
+      fn(meta, function(err) {
         if (timeout === null) return;
         clearTimeout(timeout);
         timeout = null;
         if (err)
-          return cb(null, {status: "FAILED", reason: err.toString()});
-        cb(null, {status: "OK"});
+          return cb(null, result({
+            status: "FAILED",
+            reason: err.toString()
+          }));
+        cb(null, result({status: "OK"}));
       });
     } catch (e) {
       clearTimeout(timeout);
       timeout = null;
-      cb(null, {status: "FAILED", reason: e.toString()});
+      cb(null, result({status: "FAILED", reason: e.toString()}));
     }
   };
 }
 
 function sessionStorageChecker(sessionStore) {
-  return checker(function checkSessionStorage(cb) {
+  return checker(function checkSessionStorage(meta, cb) {
     var randomNumber = Math.floor(Math.random() * 10000000);
     var sid = "healthCheck_sessionStorage_" + randomNumber;
     var session = {
@@ -71,6 +83,27 @@ function runChecks(checks, cb) {
   });
 }
 
+function resultsToConsoleString(results) {
+  var lines = [];
+
+  Object.keys(results).forEach(function(name) {
+    var info = results[name];
+
+    if (info && typeof(info) == "object" && info.status) {
+      var fullName = name;
+      if (info.notes) fullName += " (" + info.notes + ")";
+      if (info.status == "OK") {
+        lines.push(CHECKMARK.green + " " + fullName.grey);
+      } else {
+        lines.push("x".red + " " + fullName.grey + " " +
+                   (info.reason ? info.reason : ""));
+      }
+    }
+  });
+
+  return lines.join('\n');
+}
+
 module.exports = function healthCheck(options) {
   var authenticate = options.auth || function(req, res, next) { next(); };
   var checks = options.checks;
@@ -92,6 +125,8 @@ module.exports = function healthCheck(options) {
   return healthChecker;
 };
 
+module.exports.TIMEOUT = 15000;
+module.exports.resultsToConsoleString = resultsToConsoleString;
 module.exports.runChecks = runChecks;
 module.exports.sessionStorageChecker = sessionStorageChecker;
 module.exports.checker = checker;
