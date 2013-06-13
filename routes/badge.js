@@ -246,20 +246,23 @@ exports.awardToUser = function awardToUser(req, res, next) {
   var email = (form.email || '').trim();
   var code = (form.code || '').trim();
   var badge = req.badge;
-  var claimSuccess = badge.redeemClaimCode(code, email);
 
-  if (claimSuccess === false)
-    return res.send({ status: 'already-claimed' });
-  if (claimSuccess === null)
-    return res.send({ status: 'not-found' });
-
-  badge.awardOrFind(email, function (err, instance) {
+  badge.redeemClaimCode(code, email, function(err, claimSuccess) {
     if (err) return res.send(reportError(err));
-    badge.save(function (err) {
+
+    if (claimSuccess === false)
+      return res.send({ status: 'already-claimed' });
+    if (claimSuccess === null)
+      return res.send({ status: 'not-found' });
+
+    badge.awardOrFind(email, function (err, instance) {
       if (err) return res.send(reportError(err));
-      return res.send({
-        status: 'ok',
-        assertionUrl: instance.absoluteUrl('assertion')
+      badge.save(function (err) {
+        if (err) return res.send(reportError(err));
+        return res.send({
+          status: 'ok',
+          assertionUrl: instance.absoluteUrl('assertion')
+        });
       });
     });
   });

@@ -460,14 +460,17 @@ Badge.prototype.claimCodeIsClaimed = function claimCodeIsClaimed(code) {
   return !!(claim.claimedBy && !claim.multi);
 };
 
-Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
+Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email, cb) {
   const claim = this.getClaimCode(code);
   if (!claim)
-    return null;
+    return cb(null, null);
   if (!claim.multi && claim.claimedBy && claim.claimedBy !== email)
-    return false;
+    return cb(null, false);
   claim.claimedBy = email;
-  return true;
+  Badge.temporaryEvidence.destroy(claim, function(err) {
+    if (err) return cb(err);
+    cb(null, true);
+  });
 };
 
 Badge.prototype.removeClaimCode = function removeClaimCode(code, cb) {

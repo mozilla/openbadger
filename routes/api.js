@@ -427,12 +427,14 @@ exports.awardBadgeFromClaimCode = function(req, res, next) {
       email: email,
       evidence: evidence
     }, res, function(success) {
-      badge.redeemClaimCode(code, email);
-      badge.save(function(err) {
+      async.series([
+        badge.redeemClaimCode.bind(badge, code, email),
+        badge.save.bind(badge)
+      ], function(err) {
         if (err)
           // Well, this is unfortunate, since we've already given them
           // the badge... Not sure what else we can do here, but at least
-          // this error condition is highly unlikely.
+          // this error condition is unlikely.
           return next(err);
         success();
       });
