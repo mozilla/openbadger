@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const util = require('util');
 
 const stdin = process.stdin;
 const stdout = process.stdout;
@@ -6,10 +7,23 @@ const stderr = process.stderr;
 
 const gelfStream = require('gelf-stream');
 
-const GRAYLOG_HOST = process.env['GRAYLOG_HOST'];
-const GRAYLOG_PORT = process.env['GRAYLOG_PORT'];
+const GRAYLOG_HOST = process.env['GRAYLOG_HOST'] || 'localhost';
+const GRAYLOG_PORT = process.env['GRAYLOG_PORT'] || 12201;
+const GRAYLOG_FACILITY = process.env['GRAYLOG_FACILITY'];
 
 const logStream = gelfStream.forBunyan(GRAYLOG_HOST, GRAYLOG_PORT);
+logStream.on('error', function (err) {
+  print('Messina couldn\'t find Loggins', util.inspect(err));
+  process.exit(1);
+});
+
+
+function print() {
+  const args = [].slice.call(arguments);
+  stderr.write(Array(72).join('-') + '\n');
+  args.forEach(function (s) {stderr.write(s + '\n')});
+  stderr.write(Array(72).join('-') + '\n');
+}
 
 function isValidRecord(rec) {
   if (rec.v == null ||
@@ -53,6 +67,8 @@ function emit(str) {
 
 
 function emitRecord(rec, line) {
+  if (GRAYLOG_FACILITY)
+    rec.name = GRAYLOG_FACILITY;
   return logStream.write(rec);
 }
 
@@ -92,4 +108,5 @@ function processStdin() {
   });
 }
 
+print(util.format('Piping log events to %s:%s', GRAYLOG_HOST, GRAYLOG_PORT));
 processStdin();

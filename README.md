@@ -6,7 +6,7 @@ Badging.
 
 At this point, the v2.0 branch of this repository is primarily
 an administrative back-end for [CSOL-site][]. In the future,
-we'll likely create a v3.0 branch that brings in the best of the 
+we'll likely create a v3.0 branch that brings in the best of the
 v2.0 branch and the development branch (which was created for [Thimble][]).
 
   [CSOL-site]: https://github.com/mozilla/CSOL-site/
@@ -59,6 +59,16 @@ export OPENBADGER_MEMCACHED_HOSTS="127.0.0.1:11211"
 ```
 
 Note the use of `HOSTS` in the plural – the memcached session store supports using multiple servers, so you can pass in an array of memcached instances if necessary.
+
+## Logging Configuration
+
+If you plan on using this with `bin/messina` and Graylog, you'll also want to configure the following variables.
+
+```bash
+export GRAYLOG_HOST="graylog.example.org"    #defaults to localhost
+export GRAYLOG_PORT=12201                    #defaults to 11201
+export GRAYLOG_FACILITY="openbadger-whatevs" #defaults to openbadger
+```
 
 # Installing deps & starting the server
 
