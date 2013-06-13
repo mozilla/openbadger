@@ -12,19 +12,26 @@ exports.cookieParser = function () {
 exports.logger = function () {
   return function (req, res, next) {
     const startTime = new Date();
-    log.info({req: req}, 'incoming');
+    log.info({
+      req: req
+    }, util.format(
+      'Incoming Request: %s %s',
+      req.method, req.url));
 
     // this method of hijacking res.end is inspired by connect.logger()
     // see connect/lib/middleware/logger.js for details.
     const end = res.end;
     res.end = function(chunk, encoding){
+      const responseTime = new Date() - startTime;
       res.end = end;
       res.end(chunk, encoding);
       log.info({
         url: req.url,
-        responseTime: new Date() - startTime,
+        responseTime: responseTime,
         res: res,
-      }, 'outgoing');
+      }, util.format(
+        'Outgoing Response: HTTP %s %s (%s ms)',
+        res.statusCode, req.url, responseTime));
     };
     return next();
   };
