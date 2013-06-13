@@ -60,15 +60,23 @@ export OPENBADGER_MEMCACHED_HOSTS="127.0.0.1:11211"
 
 Note the use of `HOSTS` in the plural – the memcached session store supports using multiple servers, so you can pass in an array of memcached instances if necessary.
 
-## Logging Configuration
+# Logging
+We use `bunyan` to generate rich logs in JSON format. We output these logs to `stdout` and do our best (through some monkey patching of the `console` object) to output everything else to `stderr`. So the *only* thing that should come through on `stdout` is the stream of log events, unless some component directly writes to `process.stdout` (which should be considered a bug).
 
-If you plan on using this with `bin/messina` and Graylog, you'll also want to configure the following variables.
+By default, our default `make` task (or `npm run-script start`) starts the server pipes stdout through a formatter, so you should see human-readable logs in the console instead of a stream of JSON objects. You can do this manually by doing
+`node app.js | ./node_modules/.bin/bunyan`.
+
+
+## Log aggregation with Graylog2
+If you want to aggregate logs with Graylog2 there is a minor amount of additional setup:
 
 ```bash
 export GRAYLOG_HOST="graylog.example.org"    #defaults to localhost
 export GRAYLOG_PORT=12201                    #defaults to 11201
 export GRAYLOG_FACILITY="openbadger-whatevs" #defaults to openbadger
 ```
+
+We've included a CLI tool, `bin/messina`, which takes a stream of JSON on stdin, converts it to [GELF](https://github.com/Graylog2/graylog2-docs/wiki/GELF) and sends it off to the configured Graylog2 server. It also pipes stdin to stdout, so you can chain commands: `node app.js | bin/messina | bunyan`. This is exactly what `npm run-script start-with-logs` does.
 
 # Installing deps & starting the server
 
