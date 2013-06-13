@@ -518,7 +518,7 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(info, callback) {
       var claim = self.getClaimCode(claimCode);
       var finish = function(err) {
         if (err) return callback(err);
-        webhooks.notifyOfReservedClaim(email, claimCode);
+        webhooks.notifyOfReservedClaim(email, claimCode, files.length);
         return callback(null, claimCode);
       };
 

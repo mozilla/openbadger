@@ -713,7 +713,7 @@ exports.program = function program(req, res) {
 };
 
 exports.testWebhook = function testWebhook(req, res) {
-  webhooks.notifyOfReservedClaim(req.body.email, req.body.claimCode, function(err, body) {
+  webhooks.notifyOfReservedClaim(req.body.email, req.body.claimCode, req.body.evidenceItems, function(err, body) {
     if (err)
       return res.json(502, {
         status: 'error',
