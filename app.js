@@ -4,6 +4,7 @@ if ( process.env.NEW_RELIC_HOME ) {
 var express = require('express');
 var http = require('http');
 var util = require('util');
+var colors = require('colors');
 
 var middleware = require('./middleware');
 var template = require('./template');
@@ -87,12 +88,17 @@ if (!module.parent) {
     app.logger.info("Performing health check.");
 
     healthChecker.runChecks(function(results) {
+      var consoleStr = healthCheck.resultsToConsoleString(results);
+      console.log("Health check results:\n");
       if (results.status != "OK") {
-        console.error("Health check failed:", results);
-        console.error("Please resolve the problem and restart the server.");
-        process.exit(1);
+        console.error(consoleStr + "\n");
+        console.error(("One or more critical services are down or " +
+                       "misconfigured. Please fix them!").red.bold);
+      } else {
+        console.log(consoleStr);
+        console.log(("\nHealth check indicates all systems are " +
+                     "functional.").green);
       }
-      console.log("Health check indicates all systems are functional.");
     });
   });
 }

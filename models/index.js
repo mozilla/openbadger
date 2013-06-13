@@ -19,7 +19,7 @@ const connection = module.exports = Object.create(
   mongoose.createConnection(opts.host, opts.db, opts.port, authOpts)
 );
 connection.generateId = generateId;
-connection.healthCheck = function(cb) {
+connection.healthCheck = function(meta, cb) {
   var Issuer = require('./issuer');
   Issuer.findOne({}, cb);
 };
