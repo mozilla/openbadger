@@ -236,7 +236,7 @@ exports.nextError = function nextError(req, res, next) {
 };
 
 exports.errorHandler = function (err, req, res, next) {
-  logger.error('there was an error at ' + req.url, err);
+  logger.error(err, 'there was an error at ' + req.url);
   res.status(500);
   return res.render('public/500.html');
 };
