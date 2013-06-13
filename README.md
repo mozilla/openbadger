@@ -63,7 +63,7 @@ Note the use of `HOSTS` in the plural – the memcached session store supports u
 # Logging
 We use `bunyan` to generate rich logs in JSON format. We output these logs to `stdout` and do our best (through some monkey patching of the `console` object) to output everything else to `stderr`. So the *only* thing that should come through on `stdout` is the stream of log events, unless some component directly writes to `process.stdout` (which should be considered a bug).
 
-By default, our default `make` task (or `npm run-script start`) starts the server pipes stdout through a formatter, so you should see human-readable logs in the console instead of a stream of JSON objects. You can do this manually by doing
+Our default `make` task (or `npm run-script start`) starts the server pipes stdout through a formatter, so you should see human-readable logs in the console instead of a stream of JSON objects. You can do this manually by doing
 `node app.js | ./node_modules/.bin/bunyan`.
 
 
