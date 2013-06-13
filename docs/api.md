@@ -374,8 +374,22 @@ Get information about an unclaimed badge.
 * `404`: Unknown claim code.
 * `400 Bad Request`: Missing or invalid parameters.
 
+## GET `/v2/unclaimed/evidence`
+Return an evidence item of an unclaimed claim code.
+
+### Request Parameters
+* **code**: The unclaimed claimcode.
+* **n**: The evidence item number to retrieve. 0 is the first evidence item, 1 is the second, and so on.
+
+### Response Codes
+* `200`: Returns the evidence data with the appropriate mime type set.
+* `404`: Unknown claim code or evidence item number.
+* `400 Bad Request`: Missing or invalid parameters.
+
 ## POST `/v2/claim`
 Claim a badge via claim code.
+
+Note that this will destroy any temporary evidence associated with it, so be sure to retrieve it if needed beforehand.
 
 ### Request Parameters
 * **email**: The email address of the user to award the badge to.
@@ -392,30 +406,6 @@ Claim a badge via claim code.
 * **status**: Status of the request. If the request is good, contains with the literal string `"ok"`. If the request is bad for any reason, contains the literal string `"error"`.
 * **url**: URL for the badge assertion.
 * **autoAwardedBadges**: An array containing shortnames of all additional badges awarded as a result of this action.
-
-## GET `/v2/claim/evidence`
-Return an evidence item of a claim code.
-
-### Request Parameters
-* **code**: The claimcode.
-* **n**: The evidence item number to retrieve. 0 is the first evidence item, 1 is the second, and so on.
-
-### Response Codes
-* `200`: Returns the evidence data with the appropriate mime type set.
-* `404`: Unknown claim code or evidence item number.
-* `400 Bad Request`: Missing or invalid parameters.
-
-## DELETE `/v2/claim/evidence`
-Permanently delete all evidence associated with a claim code.
-
-### Request Parameters
-* **code**: The claimcode.
-
-### Response Codes
-* `200`: Any evidence associated with the claim code has been destroyed.
-* `304`: Valid claim code, but no evidence for it exists.
-* `404`: Unknown claim code.
-* `400 Bad Request`: Missing or invalid parameters.
 
 ## GET `/v2/user/recommendations`
 Get a list of recommended badges for a user.

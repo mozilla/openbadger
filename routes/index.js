@@ -188,13 +188,13 @@ exports.define = function defineRoutes(app) {
     api.auth()
   ], api.getUnclaimedBadgeInfoFromCode);
 
+  app.get('/v2/unclaimed/evidence', [
+    api.auth()
+  ], api.getClaimCodeEvidence);
+
   app.post('/v2/claim', [
     api.auth()
   ], api.awardBadgeFromClaimCode);
-
-  app.get('/v2/claim/evidence', [
-    api.auth()
-  ], api.getClaimCodeEvidence);
 
   app.get('/v2/user', [
     api.auth()
