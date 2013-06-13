@@ -397,29 +397,50 @@ exports.findById = function findById(req, res, next) {
 
 exports.findByIssuers = function findByIssuers(req, res, next) {
   const issuers = req.issuers;
+  const prop = util.prop;
+  const wrap = util.objWrap;
+
   if (!issuers.length)
     return next();
+
   const query = {
     '$or': issuers
       .reduce(function (arr, issuer) {
         return arr.concat(issuer.programs);
       }, [])
-      .map(util.prop('_id'))
-      .map(util.objWrap('program'))
+      .map(prop('_id'))
+      .map(wrap('program'))
   };
   Badge
     .find(query, {image: 0})
     .populate('program')
-    .exec(function (err, badges) {
+    .exec(function (err, allBadges) {
       if (err) return next(err);
-      req.badges = badges;
+      const badges = allBadges.filter(prop('program'));
+
       // #TODO: dry this out, see exports.findAll
-      const programs = badges
-        .filter(util.prop('program'))
-        .map(util.prop('program'));
+      const programs = badges.map(prop('program'));
       const populateIssuers = util.method('populate', 'issuer');
       async.map(programs, populateIssuers, function (err) {
-        if (err) return next(err);
+        if (err)
+          return next(err);
+
+        req.badges = badges
+          .filter(prop('program', 'issuer'))
+          .sort(function (a, b) {
+            const strA = [
+              (a.program.issuer.name || ''),
+              (a.program.name || ''),
+              (a.name || ''),
+            ].join(':');
+            const strB = [
+              (b.program.issuer.name || ''),
+              (b.program.name || ''),
+              (b.name || ''),
+            ].join(':');
+            return (strA).localeCompare(strB);
+          });
+
         return next();
       });
     });

@@ -228,4 +228,27 @@ module.exports = {
     image: IMAGE,
     categories: ['science', 'math']
   }),
+  'science-requirement': new Badge({
+    program: 'program',
+    name: 'science-requirement',
+    shortname: 'science-requirement',
+    description: 'science-requirement',
+    image: IMAGE,
+    categories: ['science'],
+    categoryRequirement: 0,
+    categoryWeight: 100,
+    claimCodes: [
+      { code: 'science-requirement' }
+    ]
+  }),
+  'science-reward': new Badge({
+    program: 'program',
+    name: 'science-reward',
+    shortname: 'science-reward',
+    description: 'science-reward',
+    image: IMAGE,
+    categoryAward: 'science',
+    categoryRequirement: 100,
+    categoryWeight: 0
+  })
 };
