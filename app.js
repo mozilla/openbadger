@@ -1,6 +1,7 @@
 if ( process.env.NEW_RELIC_HOME ) {
   require( 'newrelic' );
 }
+
 var express = require('express');
 var http = require('http');
 var util = require('util');
@@ -38,7 +39,7 @@ api.limitedJwtSecret = env.get('limited_jwt_secret');
 app.configure(function () {
   app.set('port', process.env.PORT || 3000);
   app.use(express.favicon(__dirname + '/public/img/favicon.ico'));
-  app.use(express.logger('dev'));
+  app.use(middleware.logger());
   app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(middleware.cookieParser());

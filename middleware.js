@@ -1,12 +1,33 @@
-var env = require('./lib/environment');
-var util = require('./lib/util');
-var logger = require('./lib/logger');
-var express = require('express');
-var flash = require('connect-flash');
+const env = require('./lib/environment');
+const util = require('./lib/util');
+const log = require('./lib/logger');
+const express = require('express');
+const flash = require('connect-flash');
 
 exports.cookieParser = function () {
   var secret = env.get('secret');
   return express.cookieParser(secret);
+};
+
+exports.logger = function () {
+  return function (req, res, next) {
+    const startTime = new Date();
+    log.info({req: req}, 'incoming');
+
+    // this method of hijacking res.end is inspired by connect.logger()
+    // see connect/lib/middleware/logger.js for details.
+    const end = res.end;
+    res.end = function(chunk, encoding){
+      res.end = end;
+      res.end(chunk, encoding);
+      log.info({
+        url: req.url,
+        responseTime: new Date() - startTime,
+        res: res,
+      }, 'outgoing');
+    };
+    return next();
+  };
 };
 
 exports.getSessionStore = function getSessionStore(env) {
