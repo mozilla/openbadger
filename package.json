@@ -27,7 +27,8 @@
     "nunjucks": "~0.1.8a",
     "newrelic": "~0.9.19",
     "dataurl": "~0.1.0",
-    "bunyan": "~0.21.3"
+    "bunyan": "~0.21.3",
+    "gelf-stream": "~0.2.2"
   },
   "devDependencies": {
     "tap": "~0.4.1",
