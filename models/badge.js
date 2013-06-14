@@ -47,7 +47,7 @@ const ClaimCodeSchema = new Schema({
   batchName: {
     type: String,
     required: false,
-    trim: true,    
+    trim: true,
   },
   multi: {
     type: Boolean,
@@ -570,7 +570,7 @@ Badge.prototype.makeJson = function makeJson() {
   return {
     name: this.name,
     description: this.description,
-    image: this.imageDataURI(),
+    image: this.absoluteUrl('image'),
     criteria: this.absoluteUrl('criteria'),
     issuer: this.program.absoluteUrl('json'),
     tags: this.tags
