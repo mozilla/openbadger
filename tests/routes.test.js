@@ -78,7 +78,7 @@ test.applyFixtures(fixtures, function () {
       .expect(200, function(err, res) {
         if (err) throw err;
         t.equal(res.body.name, 'Offline badge');
-        t.ok(/^data:image\/png;base64,/.test(res.body.image));
+        t.ok(/png/.test(res.body.image));
 
         criteriaUrl = res.body.criteria;
         issuerUrl = res.body.issuer;
