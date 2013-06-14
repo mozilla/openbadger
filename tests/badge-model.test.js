@@ -77,7 +77,7 @@ test.applyFixtures(fixtures, function () {
         const expect = {
           name: badge.name,
           description: badge.description,
-          image: badge.imageDataURI(),
+          image: badge.absoluteUrl('image'),
           criteria: badge.absoluteUrl('criteria'),
           issuer: program.absoluteUrl('json'),
           tags: badge.tags
@@ -450,7 +450,7 @@ test.applyFixtures(fixtures, function () {
       t.equal(cannedCodes.length, 2);
       badge.generateClaimCodes({
         count: 3,
-        codeGenerator: generate        
+        codeGenerator: generate
       }, function(err, codes) {
         if (err) throw err;
         t.same(codes, ['d', 'e', 'f']);
