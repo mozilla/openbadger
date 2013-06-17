@@ -41,8 +41,8 @@ test.applyFixtures({
     _id: 'not-yet',
     issuer: 'issuer',
     shortname: 'not-yet',
-    startDate: new Date('2013-06-15'),
-    endDate: new Date('2013-07-15'),
+    startDate: new Date('2099-06-15'),
+    endDate: new Date('2099-07-15'),
     name: 'Not Yet',
   }),
   'in-progress-program': new Program({
@@ -206,8 +206,10 @@ test.applyFixtures({
       // program related
       t.equal(contains(names, 'in-progress-science'), true,
               'should contain in-progress science badge');
+
       t.equal(contains(names, 'not-yet-science'), false,
               'no badges from inactive programs');
+
       t.equal(contains(names, 'ended-science'), false,
               'no badges from inactive programs');
 
