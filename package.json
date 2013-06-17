@@ -27,7 +27,8 @@
     "connect-memcached": "0.0.3",
     "nunjucks": "~0.1.8a",
     "newrelic": "~0.9.19",
-    "dataurl": "~0.1.0"
+    "dataurl": "~0.1.0",
+    "knox": "~0.8.3"
   },
   "devDependencies": {
     "tap": "~0.4.1",
