@@ -25,6 +25,7 @@ and mongo locally.
 ```bash
 export NODE_ENV="development"
 export THEME_DIR="themes/csol"
+export OPENBADGER_AWS_FAKE_S3_DIR="s3-fake-storage"
 export OPENBADGER_HOST="localhost"
 export OPENBADGER_PROTOCOL="http"
 export OPENBADGER_PORT=3000
@@ -49,6 +50,18 @@ this at `config.env`, do:
 
 ```bash
 $ source config.env
+```
+
+## Using real S3 instead of fake S3
+
+For production builds, you'll want to modify the above sample configuration
+with the following:
+
+```bash
+unset OPENBADGER_AWS_FAKE_S3_DIR
+export OPENBADGER_AWS_KEY="aewgaewgaweg"
+export OPENBADGER_AWS_SECRET="zcvzncvzcbm"
+export OPENBADGER_AWS_BUCKET="bucket-o-s3"
 ```
 
 ## Using memcached instead of redis for sessions

@@ -9,10 +9,22 @@ const phraseGenerator = require('../lib/phrases');
 const async = require('async');
 const Schema = mongoose.Schema;
 const webhooks = require('../lib/webhooks');
+const s3 = require('../lib/s3');
 
 const KID = '0-13';
 const TEEN = '13-18';
 const ADULT = '19-24';
+
+const TemporaryEvidenceSchema = new Schema({
+  path: {
+    type: String,
+    required: true
+  },
+  mimeType: {
+    type: String,
+    required: true
+  }
+});
 
 const BehaviorSchema = new Schema({
   shortname: {
@@ -44,6 +56,7 @@ const ClaimCodeSchema = new Schema({
     trim: true,
   },
   creationDate: {type: Date, default: Date.now},
+  evidence: [TemporaryEvidenceSchema],
   batchName: {
     type: String,
     required: false,
@@ -176,6 +189,63 @@ BadgeSchema.pre('validate', function normalizeCategoryInfo(next) {
 
 // Model methods
 // -------------
+
+TemporaryEvidenceSchema.methods.getReadStream = function(cb) {
+  s3.get(this.path).on('response', function(stream) {
+    cb(null, stream);
+  }).end();
+};
+
+// `files` is expected to be an array of file objects
+// that conform to the structure described at
+// http://expressjs.com/api.html#req.files.
+ClaimCodeSchema.methods.addEvidence = function(files, cb) {
+  var self = this;
+
+  async.mapSeries(files, function addFile(file, cb) {
+    var method = file.path ? 'putFile' : 'putBuffer';
+    var remotePath = '/' + self.code + '/' + self.evidence.length;
+
+    s3[method](file.path || file.buffer, remotePath, {
+      'Content-Type': file.type
+    }, function(err) {
+      if (err) return cb(err);
+      self.evidence.push({
+        path: remotePath,
+        mimeType: file.type
+      });
+      cb();
+    });
+  }, cb);
+};
+
+ClaimCodeSchema.methods.destroyEvidence = function(cb) {
+  var self = this;
+
+  async.mapSeries(self.evidence, function deleteFile(evidence, done) {
+    s3.deleteFile(evidence.path, function(err) {
+      if (err) return done(err);
+      self.evidence.pull(evidence._id);
+      done();
+    });
+  }, cb);
+};
+
+// Ideally our claim and evidence methods could be added as methods to
+// their subdocument objects, just like normal model methods are, but
+// this doesn't seem to be possible with Mongoose, so we'll add accessors
+// to them here. Not particularly clean, but not sure what else to do. -AV
+Badge.temporaryEvidence = {
+  add: function(claim, files, cb) {
+    return ClaimCodeSchema.methods.addEvidence.call(claim, files, cb);
+  },
+  destroy: function(claim, cb) {
+    return ClaimCodeSchema.methods.destroyEvidence.call(claim, cb);
+  },
+  getReadStream: function(evidence, cb) {
+    return TemporaryEvidenceSchema.methods.getReadStream.call(evidence, cb);
+  }
+};
 
 Badge.findByBehavior = function findByBehavior(shortnames, callback) {
   shortnames = Array.isArray(shortnames) ? shortnames : [shortnames];
@@ -390,19 +460,26 @@ Badge.prototype.claimCodeIsClaimed = function claimCodeIsClaimed(code) {
   return !!(claim.claimedBy && !claim.multi);
 };
 
-Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email) {
+Badge.prototype.redeemClaimCode = function redeemClaimCode(code, email, cb) {
   const claim = this.getClaimCode(code);
   if (!claim)
-    return null;
+    return cb(null, null);
   if (!claim.multi && claim.claimedBy && claim.claimedBy !== email)
-    return false;
+    return cb(null, false);
   claim.claimedBy = email;
-  return true;
+  Badge.temporaryEvidence.destroy(claim, function(err) {
+    if (err) return cb(err);
+    cb(null, true);
+  });
 };
 
-Badge.prototype.removeClaimCode = function removeClaimCode(code) {
-  this.claimCodes = this.claimCodes.filter(function (claim) {
-    return claim.code !== code;
+Badge.prototype.removeClaimCode = function removeClaimCode(code, cb) {
+  var self = this;
+  var claim = this.getClaimCode(code);
+  Badge.temporaryEvidence.destroy(claim, function(err) {
+    if (err) return cb(err);
+    self.claimCodes.pull(claim._id);
+    cb();
   });
 };
 
@@ -422,8 +499,12 @@ Badge.prototype.earnableBy = function earnableBy(user) {
   }, true);
 };
 
-Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
+Badge.prototype.reserveAndNotify = function reserveAndNotify(info, callback) {
+  if (typeof(info) == 'string') info = {email: info};
+
   const self = this;
+  var email = info.email;
+  var files = info.evidenceFiles || [];
 
   BadgeInstance.findOne({
     userBadgeKey: email + '.' + self.id
@@ -433,8 +514,19 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(email, callback) {
       return callback(null, null);
     self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
       if (err) return callback(err);
-      webhooks.notifyOfReservedClaim(email, accepted[0]);
-      return callback(null, accepted[0]);
+      var claimCode = accepted[0];
+      var claim = self.getClaimCode(claimCode);
+      var finish = function(err) {
+        if (err) return callback(err);
+        webhooks.notifyOfReservedClaim(email, claimCode, files.length);
+        return callback(null, claimCode);
+      };
+
+      if (!files.length) return finish(null);
+      async.series([
+        Badge.temporaryEvidence.add.bind(null, claim, files),
+        self.save.bind(self)
+      ], finish);
     });
   });
 };

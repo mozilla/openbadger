@@ -23,6 +23,7 @@ var healthChecker = healthCheck({
   auth: express.basicAuth('health_check', env.get('secret')),
   checks: {
     database: healthCheck.checker(require('./models').healthCheck),
+    s3: healthCheck.checker(require('./lib/s3').healthCheck),
     sessionStorage: healthCheck.sessionStorageChecker(sessionStore)
   }
 });

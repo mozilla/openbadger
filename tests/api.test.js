@@ -1,3 +1,7 @@
+const express = require('express');
+const http = require('http');
+const request = require('supertest');
+const async = require('async');
 const sinon = require('sinon');
 const jwt = require('jwt-simple');
 const test = require('./');
@@ -159,13 +163,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
       handler: api.getUnclaimedBadgeInfoFromCode,
       request: {
         query: {
-          code: 'will-claim'
+          code: 'reserved-claim'
         }
       }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 200);
       t.equal(mockRes.body.status, 'ok');
+      t.equal(mockRes.body.evidenceItems, 0);
+      t.equal(mockRes.body.reservedFor, 'foo@bar.org');
       t.equal(mockRes.body.badge.name, 'Offline badge');
       t.end();
     });
@@ -490,6 +496,81 @@ test.applyFixtures(badgeFixtures, function(fx) {
       if (err) throw err;
       t.same(mockRes.body, {status: "error", error: "OOF"});
       t.end();
+    });
+  });
+
+  test('api requires evidence numbers to be nonnegative ints', function(t) {
+    var fakeRes = {
+      send: function(code, json) {
+        t.same([code, json], [400, {
+          status: 'error',
+          reason: 'n must be a non-negative integer'
+        }]);
+      }
+    };
+
+    t.plan(3);
+    api.getClaimCodeEvidence({query: {}}, fakeRes);
+    api.getClaimCodeEvidence({query: {n: '-2'}}, fakeRes);
+    api.getClaimCodeEvidence({query: {n: 'OOF'}}, fakeRes);
+    t.end();
+  });
+
+  test('api can be used to get claim code evidence', function(t) {
+    var badge = fx['science-math3'];
+    var content = Date.now().toString();
+    var app = express();
+    var srv = http.createServer(app);
+
+    badge.claimCodes.push({code: 'has-evidence'});
+    var claim = badge.getClaimCode('has-evidence');
+    async.series([
+      Badge.temporaryEvidence.add.bind(null, claim, [{
+        buffer: new Buffer(content),
+        type: 'text/plain'
+      }]),
+      badge.save.bind(badge)
+    ], function(err) {
+      if (err) throw err;
+
+      var asyncify = function(name, req) {
+        return function(cb) {
+          req.end(function(err) {
+            if (err) return cb(err);
+            t.ok(true, name);
+            cb();
+          });
+        };
+      };
+
+      app.get('/evidence', api.getClaimCodeEvidence);
+
+      async.series([
+        asyncify(
+          "valid evidence numbers work",
+          request(srv)
+          .get('/evidence?code=has-evidence&n=0')
+          .expect('Content-Type', 'text/plain')
+          .expect('Content-Disposition',
+                  'attachment; filename="evidence-0.txt"')
+          .expect(content)
+          .expect(200)
+        ),
+        asyncify(
+          "invalid evidence numbers return 404",
+          request(srv)
+          .get('/evidence?code=has-evidence&n=1')
+          .expect(404)
+          .expect({
+            status: 'error',
+            reason: 'evidence item number does not exist'
+          })
+        )
+      ], function(err) {
+        if (err) throw err;
+        srv.close();
+        t.end();
+      });
     });
   });
 

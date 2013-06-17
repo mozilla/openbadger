@@ -87,6 +87,9 @@
           {% else %}
           anyone
           {% endif %}
+          {% if claim.evidence.length %}
+          <p class="muted">{{ claim.evidence.length }} evidence item(s)</p>
+          {% endif %}
         </td>
         <td>
           <form method="post" action="{{ claim.code }}" class="claim-action js-claim-action">
