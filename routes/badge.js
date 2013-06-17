@@ -199,8 +199,10 @@ exports.addClaimCodes = function addClaimCodes(req, res, next) {
 exports.removeClaimCode = function removeClaimCode(req, res, next) {
   var code = req.param('code');
   var badge = req.badge;
-  badge.removeClaimCode(code);
-  badge.save(function (err) {
+  async.series([
+    badge.removeClaimCode.bind(badge, code),
+    badge.save.bind(badge)
+  ], function (err) {
     if (err) return next(err);
     return res.redirect('back');
   });
@@ -244,41 +246,63 @@ exports.awardToUser = function awardToUser(req, res, next) {
   var email = (form.email || '').trim();
   var code = (form.code || '').trim();
   var badge = req.badge;
-  var claimSuccess = badge.redeemClaimCode(code, email);
 
-  if (claimSuccess === false)
-    return res.send({ status: 'already-claimed' });
-  if (claimSuccess === null)
-    return res.send({ status: 'not-found' });
-
-  badge.awardOrFind(email, function (err, instance) {
+  badge.redeemClaimCode(code, email, function(err, claimSuccess) {
     if (err) return res.send(reportError(err));
-    badge.save(function (err) {
+
+    if (claimSuccess === false)
+      return res.send({ status: 'already-claimed' });
+    if (claimSuccess === null)
+      return res.send({ status: 'not-found' });
+
+    badge.awardOrFind(email, function (err, instance) {
       if (err) return res.send(reportError(err));
-      return res.send({
-        status: 'ok',
-        assertionUrl: instance.absoluteUrl('assertion')
+      badge.save(function (err) {
+        if (err) return res.send(reportError(err));
+        return res.send({
+          status: 'ok',
+          assertionUrl: instance.absoluteUrl('assertion')
+        });
       });
     });
   });
 };
 
-function reserveAndNotify(badge) {
-  return function (email, callback) {
-    if (!util.isEmail(email))
-      return callback(null, {email: email, status: 'invalid'});
-    badge.reserveAndNotify(email, function (err, claimCode) {
-      if (err) return callback(err);
-      if (!claimCode)
-        return callback(null, {email: email, status: 'dupe'});
-      return callback(null, {
-        email: email,
-        status: 'ok',
-        claimCode: claimCode
-      });
+function reserveAndNotify(badge, evidenceFiles, email, callback) {
+  if (!util.isEmail(email))
+    return callback(null, {email: email, status: 'invalid'});
+  badge.reserveAndNotify({
+    email: email,
+    evidenceFiles: evidenceFiles
+  }, function (err, claimCode) {
+    if (err) return callback(err);
+    if (!claimCode)
+      return callback(null, {email: email, status: 'dupe'});
+    return callback(null, {
+      email: email,
+      status: 'ok',
+      claimCode: claimCode
     });
-  };
+  });
 }
+
+exports.issueOneWithEvidence = function issueOneWithEvidence(req, res, next) {
+  const badge = req.badge;
+  var email = req.body.email.trim();
+  var files = req.files.evidence;
+
+  if (files) {
+    if (!Array.isArray(files))
+      files = [files];
+  } else
+    files = [];
+
+  reserveAndNotify(badge, files, email, function(err, result) {
+    if (err) return next(err);
+    req.flash('results', [result]);
+    return res.redirect(303, 'back');
+  });
+};
 
 exports.issueMany = function issueMany(req, res, next) {
   const badge = req.badge;
@@ -287,10 +311,11 @@ exports.issueMany = function issueMany(req, res, next) {
     .trim()
     .split('\n')
     .map(util.method('trim'));
+  const reserveEmail = reserveAndNotify.bind(null, badge, null);
   // We're doing this in series rather than parallel to avoid a
   // mongoose versioning error. For more information, see:
   // http://tgriff3.com/post/44230656391/versioning-in-mongoose
-  async.mapSeries(emails, reserveAndNotify(badge), function (err, results) {
+  async.mapSeries(emails, reserveEmail, function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');

@@ -1,3 +1,4 @@
+const async = require('async');
 const test = require('./');
 const env = require('../lib/environment');
 const util = require('../lib/util');
@@ -363,22 +364,40 @@ test.applyFixtures(fixtures, function () {
     });
   });
 
+  function checkRedeem(t, badge, code, email, expected) {
+    return function(cb) {
+      badge.redeemClaimCode(code, email, function(err, result) {
+        if (err) return cb(err);
+        t.same(result, expected);
+        cb();
+      });
+    };
+  }
+
   test('Badge#redeemClaimCode', function (t) {
     const badge = fixtures['offline-badge'];
     const code ='will-claim';
-    t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
-    t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
-    t.same(badge.redeemClaimCode(code, 'otherguy@example.org'), false);
-    t.end();
+    async.series([
+      checkRedeem(t, badge, code, 'brian@example.org', true),
+      checkRedeem(t, badge, code, 'brian@example.org', true),
+      checkRedeem(t, badge, code, 'otherguy@example.org', false)
+    ], function(err) {
+      if (err) throw err;
+      t.end();
+    });
   });
 
   test('Badge#redeemClaimCode, multi', function (t) {
     const badge = fixtures['multi-claim-badge'];
     const code ='multi-claim';
-    t.same(badge.redeemClaimCode(code, 'brian@example.org'), true);
-    t.same(badge.redeemClaimCode(code, 'anyone@example.org'), true);
-    t.same(badge.redeemClaimCode(code, 'otherguy@example.org'), true);
-    t.end();
+    async.series([
+      checkRedeem(t, badge, code, 'brian@example.org', true),
+      checkRedeem(t, badge, code, 'anyone@example.org', true),
+      checkRedeem(t, badge, code, 'otherguy@example.org', true)      
+    ], function(err) {
+      if (err) throw err;
+      t.end();
+    });
   });
 
   test('Badge#claimCodeIsClaimed', function (t) {
@@ -473,12 +492,14 @@ test.applyFixtures(fixtures, function () {
 
   test('Badge#removeClaimCode', function (t) {
     const badge = fixtures['offline-badge'];
-    badge.removeClaimCode('remove-claim');
-    badge.claimCodes.forEach(function (claim) {
-      if (claim.code == 'remove-claim')
-        t.fail('should have removed');
+    badge.removeClaimCode('remove-claim', function(err) {
+      if (err) throw err;
+      badge.claimCodes.forEach(function (claim) {
+        if (claim.code == 'remove-claim')
+          t.fail('should have removed');
+      });
+      t.end();
     });
-    t.end();
   });
 
   test('Badge#awardOrFind: award badge to a user', function (t) {
