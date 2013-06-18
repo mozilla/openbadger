@@ -26,7 +26,7 @@
         url: this.href,
         type: 'DELETE',
         data: {csrf: csrfToken},
-        success: function() { row.remove(); },
+        success: function() { window.location.reload(); },
         error: function() { alert('Alas, an error occurred.'); }
       });
     return (e.preventDefault(), false);

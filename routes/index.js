@@ -54,7 +54,6 @@ exports.define = function defineRoutes(app) {
     redirectTo: '/login'
   }));
 
-  app.get('/admin/undo', [undo.records], render.undo);
   app.post('/admin/undo/:undoId', undo);
   app.get('/admin/stats', [stats.monthly], render.stats);
 
@@ -63,6 +62,7 @@ exports.define = function defineRoutes(app) {
   var indexMiddleware = [
     badge.findAll,
     issuer.findAll,
+    undo.findAll
   ];
 
   app.get('/admin', indexMiddleware, render.badgeIndex);

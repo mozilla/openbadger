@@ -13,10 +13,10 @@ module.exports = function(req, res, next) {
   });
 };
 
-module.exports.records = function(req, res, next) {
+module.exports.findAll = function(req, res, next) {
   DeletionRecord.find(function(err, records) {
     if (err) return next(err);
-    req.records = records;
+    req.undoRecords = records;
     next();
   });
 };

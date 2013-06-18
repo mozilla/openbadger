@@ -126,6 +126,7 @@ exports.badgeIndex = function (req, res) {
     access: req.session.access,
     csrf: req.session._csrf,
     badges: req.badges,
+    undoRecords: req.undoRecords,
     behaviors: req.behaviors
   });
 };
@@ -224,13 +225,6 @@ exports.stats = function stats(req, res, next) {
     access: req.session.access,
     csrf: req.session._csrf,
     users: req.users
-  });
-};
-
-exports.undo = function undo(req, res, next) {
-  return res.render('admin/undo.html', {
-    csrf: req.session._csrf,
-    records: req.records
   });
 };
 
