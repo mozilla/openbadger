@@ -54,8 +54,10 @@ function inflateBadge(badge, cb) {
 }
 
 function normalizeProgram(program) {
-  if (!(program.issuer && typeof(program.issuer) == "object"))
+  if (!(program.issuer && typeof(program.issuer) == "object")) {
+    log.fatal({program: program}, "PRE-CRASH: unpopulated program");
     throw new Error("expected populated program issuer");
+  }
 
   const issuer = program.issuer;
   const empty = util.empty;
