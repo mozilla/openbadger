@@ -410,6 +410,18 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api does not crash with orphaned programs', function (t) {
+    conmock({
+      handler: api.programs,
+      request: {}
+    }, function (err, mockRes, req) {
+      const programs = mockRes.body.programs;
+      t.ok(programs.length);
+      t.end();
+    });
+  });
+
+
   test('api can filter program listing', function (t) {
     const expect = fx['filterable-program'];
     conmock({
