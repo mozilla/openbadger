@@ -97,6 +97,7 @@ exports.badges = function badges(req, res) {
   }
   const result = { status: 'ok', badges : {} };
   const searchTerm = req.query.search;
+  const propertiesToMatch = ['name'];
   Badge.find(function (err, badges) {
     if (err) return handleError(err);
 
@@ -105,7 +106,7 @@ exports.badges = function badges(req, res) {
     });
 
     if (searchTerm) {
-      const searchFn = util.makeSearch(['name']);
+      const searchFn = util.makeSearch(propertiesToMatch);
       filteredBadges = filteredBadges.filter(searchFn(searchTerm));
     }
 
