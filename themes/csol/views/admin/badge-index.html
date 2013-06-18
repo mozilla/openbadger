@@ -49,6 +49,9 @@
         <ul class="dropdown-menu">
           <li><a href="/admin/badge/{{ badge.shortname }}/edit/"><i class="icon-pencil"></i> Edit Details</a></li>
           <li><a href="/admin/badge/{{ badge.shortname }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
+          <li>
+            <a class="js-delete-badge" href="/admin/badge/{{ badge.shortname }}"><i class="icon-trash"></i> Destroy</a>
+          </li>
         </ul>
       </div>
     </td>
@@ -79,6 +82,9 @@
 
 {% endif %}
 
+<h2>Undo Actions</h2>
+
+<p>If you've accidentally deleted something and want to bring it back, head to the <a href="undo">undo page</a>.</p>
 
 {% endblock %}
 

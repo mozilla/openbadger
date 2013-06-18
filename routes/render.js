@@ -3,6 +3,7 @@ const Program = require('../models/program');
 const Badge = require('../models/badge');
 const phrases = require('../lib/phrases');
 const logger = require('../lib/logger');
+
 /*
  * Administrative Pages
  */
@@ -223,6 +224,13 @@ exports.stats = function stats(req, res, next) {
     access: req.session.access,
     csrf: req.session._csrf,
     users: req.users
+  });
+};
+
+exports.undo = function undo(req, res, next) {
+  return res.render('admin/undo.html', {
+    csrf: req.session._csrf,
+    records: req.records
   });
 };
 

@@ -102,3 +102,5 @@ module.exports = function Deletable(model) {
 
   return model;
 };
+
+module.exports.Record = DeletionRecord;

@@ -4,6 +4,7 @@ var badge = require('./badge');
 var render = require('./render');
 var issuer = require('./issuer');
 var api = require('./api');
+var undo = require('./undo');
 var stats = require('./stats');
 
 const whitelists = exports.whitelists = {
@@ -53,6 +54,8 @@ exports.define = function defineRoutes(app) {
     redirectTo: '/login'
   }));
 
+  app.get('/admin/undo', [undo.records], render.undo);
+  app.post('/admin/undo/:undoId', undo);
   app.get('/admin/stats', [stats.monthly], render.stats);
 
   // Badge listing

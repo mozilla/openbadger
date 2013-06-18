@@ -93,12 +93,11 @@ exports.getUploadedImage = function getUploadedImage(options) {
   }
 };
 
-exports.destroy = function destroy(req, res) {
+exports.destroy = function destroy(req, res, next) {
   var badge = req.badge;
-  return badge.remove(function (err) {
-    if (err)
-      return res.send(500, err);
-    return res.redirect('/');
+  badge.undoablyDelete(function(err) {
+    if (err) return next(err);
+    return res.send(200, "Badge undoably deleted.");
   });
 };
 
