@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const env = require('../lib/environment');
 const util = require('../lib/util');
 const Issuer = require('./issuer');
+const Deletable = require('./deletable');
 const BadgeInstance = require('./badge-instance');
 const phraseGenerator = require('../lib/phrases');
 const async = require('async');
@@ -102,6 +103,7 @@ const BadgeSchema = new Schema({
     trim: true,
     required: true
   },
+  deleted: {type: Boolean, default: false},
   criteria: {
     content: {
       type: String,
@@ -162,7 +164,7 @@ const BadgeSchema = new Schema({
     type: [String]
   },
 });
-const Badge = db.model('Badge', BadgeSchema);
+const Badge = Deletable(db.model('Badge', BadgeSchema));
 
 Badge.KID = KID;
 Badge.TEEN = TEEN;

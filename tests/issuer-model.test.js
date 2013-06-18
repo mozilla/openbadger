@@ -32,6 +32,16 @@ test.applyFixtures({
       {email: 'two@example.org'},
     ],
   }),
+  'deleted-issuer': new Issuer({
+    _id: 'deleted-issuer',
+    name: 'Deleted Issuer',
+    contact: 'blah@example.org',
+    deleted: true,
+    accessList: [
+      {email: 'both@example.org'},
+      {email: 'two@example.org'},
+    ],
+  }),
   'program1': new Program({
     _id: 'program1',
     name: 'Program 1',
@@ -104,6 +114,38 @@ test.applyFixtures({
       console.dir(results);
       const names = results.map(function (o) { return o.name }).sort();
       t.same(names, ['Issuer One', 'Issuer Two']);
+    });
+  });
+
+  test("Issuer.find() finds only undeleted issuers by default", function(t) {
+    Issuer.find({_id: 'deleted-issuer'}, function(err, issuers) {
+      if (err) throw err;
+      t.equal(issuers.length, 0);
+      t.end();
+    });
+  });
+
+  test("Issuer.find() can find deleted issuers if needed", function(t) {
+    Issuer.find({_id: 'deleted-issuer', deleted: true}, function(err, issuers) {
+      if (err) throw err;
+      t.equal(issuers.length, 1);
+      t.end();
+    });
+  });
+
+  test("Issuer.findOne() finds only undeleted issuers by default", function(t) {
+    Issuer.findOne({_id: 'deleted-issuer'}, function(err, issuer) {
+      if (err) throw err;
+      t.equal(issuer, null);
+      t.end();
+    });
+  });
+
+  test("Issuer.findOne() can find deleted issuers if needed", function(t) {
+    Issuer.findOne({_id: 'deleted-issuer', deleted: true}, function(err, issuer) {
+      if (err) throw err;
+      t.ok(issuer);
+      t.end();
     });
   });
 

@@ -1,4 +1,5 @@
 const db = require('./');
+const Deletable = require('./deletable');
 const Schema = require('mongoose').Schema;
 const env = require('../lib/environment');
 const util = require('../lib/util');
@@ -42,6 +43,7 @@ const ProgramSchema = new Schema({
     trim: true,
     match: regex.email
   },
+  deleted: {type: Boolean, default: false},
   startDate: {
     type: Date
   },
@@ -57,7 +59,7 @@ const ProgramSchema = new Schema({
   }
 });
 
-const Program = db.model('Program', ProgramSchema);
+const Program = Deletable(db.model('Program', ProgramSchema));
 module.exports = Program;
 
 // Validators & Defaulters
