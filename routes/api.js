@@ -104,7 +104,7 @@ exports.badges = function badges(req, res) {
       return !badge.doNotList;
     });
 
-    if (req.query.search) {
+    if (searchTerm) {
       const searchFn = util.makeSearch(['name']);
       filteredBadges = filteredBadges.filter(searchFn(searchTerm));
     }
