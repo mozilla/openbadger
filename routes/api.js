@@ -54,8 +54,10 @@ function inflateBadge(badge, cb) {
 }
 
 function normalizeProgram(program) {
-  if (!(program.issuer && typeof(program.issuer) == "object"))
+  if (!(program.issuer && typeof(program.issuer) == "object")) {
+    log.fatal({program: program}, "PRE-CRASH: unpopulated program");
     throw new Error("expected populated program issuer");
+  }
 
   const issuer = program.issuer;
   const empty = util.empty;
@@ -620,15 +622,18 @@ function createFilterFn(query) {
   const prop = util.prop;
 
   return function filterProgram(program, cb) {
+    // immediately reject orphaned programs
+    if (!program.issuer)
+      return cb(false);
+
     if (!_.keys(query).length)
       return cb(true);
 
     program.findBadges(function (err, badges) {
-      if (err)
+      if (err) {
+        log.error(err, 'could not find badges for a program');
         return cb(false);
-      // remove orphaned programs
-      if (!program.issuer)
-        return cb(false);
+      }
       const organization = program.issuer.shortname;
       const categories = _.chain(badges)
         .map(prop('categories'))

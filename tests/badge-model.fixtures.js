@@ -28,6 +28,13 @@ module.exports = {
     url: 'http://example.org/program',
     image: IMAGE,
   }),
+  'orphaned-program': new Program({
+    _id: 'orphaned-program',
+    name: 'Orphaned Program',
+    issuer: null,
+    url: 'http://example.org/program',
+    image: IMAGE,
+  }),
   'filterable-program': new Program({
     _id: 'filterable-program',
     shortname: 'filterable-program',
