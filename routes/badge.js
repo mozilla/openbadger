@@ -22,7 +22,7 @@ function handleModelSaveError(err, res, next) {
       422,
       "A validation error occurred on the following fields: " +
       Object.keys(err.errors).sort().map(function(name) {
-        return name + " (" + err.errors[name].type + ")"
+        return name + " (" + err.errors[name].type + ")";
       }).join(", ") + "."
     );
   return next(err);
