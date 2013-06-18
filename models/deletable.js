@@ -73,7 +73,8 @@ module.exports = function Deletable(model) {
     if (typeof(record) == 'function') {
       callback = record;
       record = new DeletionRecord();
-      record.name = model.modelName + " " + this._id;
+      record.name = model.modelName + " " +
+                    JSON.stringify(this.name || this._id);
     }
     if (this.deleted)
       return callback(null, record);

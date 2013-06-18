@@ -181,7 +181,7 @@ test.applyFixtures({
           record.undo(function(err) {
             if (err) throw err;
 
-            t.equal(record.name, "Issuer issuer1");
+            t.equal(record.name, "Issuer \"Issuer One\"");
             async.forEach([Program, Badge, Issuer], function(model, cb) {
               model.find({deleted: true}, function(err, items) {
                 if (err) return cb(err);
