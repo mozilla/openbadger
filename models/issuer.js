@@ -111,19 +111,11 @@ Issuer.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
 };
 
-Issuer.prototype.markAsDeleted = function markAsDeleted(callback) {
+Issuer.prototype.getDeletableChildren = function getDeletableChildren(cb) {
   var self = this;
-
-  self.deleted = true;
-  async.series([
-    self.save.bind(self),
-    self.populate.bind(self, 'programs'),
-    function(cb) {
-      async.forEach(self.programs, function(program, cb) {
-        program.markAsDeleted(cb);
-      }, cb);
-    }
-  ], callback);
+  this.populate('programs', function(err) {
+    cb(err, self.programs);
+  });
 };
 
 module.exports = Issuer;

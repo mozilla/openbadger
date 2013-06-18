@@ -1,4 +1,5 @@
 const _ = require('underscore');
+const async = require('async');
 const test = require('./');
 const env = require('../lib/environment');
 const db = require('../models');
@@ -158,10 +159,14 @@ test.applyFixtures({
     });
   });
 
-  test("Issuer#markAsDeleted() works", function(t) {
+  test("Issuer#undoablyDelete() works", function(t) {
     t.equal(fixtures['issuer1'].deleted, false);
-    fixtures['issuer1'].markAsDeleted(function(err) {
+    fixtures['issuer1'].undoablyDelete(function(err, record) {
       if (err) throw err;
+      t.ok(!record.isModified(), "deletion record should be saved");
+      t.same(record.items.map(function(i) { return i.model; }), [
+        "Issuer", "Program", "Program", "Badge"
+      ]);
       t.equal(fixtures['issuer1'].deleted, true);
       Program.find({deleted: true}, function(err, programs) {
         if (err) throw err;
@@ -170,8 +175,26 @@ test.applyFixtures({
         Badge.find({deleted: true}, function(err, badges) {
           if (err) throw err;
           t.equal(badges.length, 1);
-          t.equal(badges[0].shortname, 'badge1');
-          t.end();
+          if (badges.length)
+            t.equal(badges[0].shortname, 'badge1');
+
+          record.undo(function(err) {
+            if (err) throw err;
+
+            t.equal(record.name, "Issuer issuer1");
+            async.forEach([Program, Badge, Issuer], function(model, cb) {
+              model.find({deleted: true}, function(err, items) {
+                if (err) return cb(err);
+                t.same(items.filter(function(item) {
+                  return !/deleted/.test(item._id);
+                }), []);
+                cb();
+              });
+            }, function(err) {
+              if (err) throw err;
+              t.end();
+            });
+          });
         });
       });
     });
