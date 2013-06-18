@@ -14,7 +14,7 @@ module.exports = function Deletable(model) {
       options = null;
     }
 
-    conditions = _.defaults(conditions, {deleted: false});
+    conditions = _.defaults(conditions, {deleted: {$ne: true}});
 
     return superClass.find.call(this, conditions, fields, options, callback);
   };
@@ -27,7 +27,7 @@ module.exports = function Deletable(model) {
       options = null;
     }
 
-    conditions = _.defaults(conditions, {deleted: false});
+    conditions = _.defaults(conditions, {deleted: {$ne: true}});
 
     return superClass.findOne.call(this, conditions, fields, options,
                                    callback);
