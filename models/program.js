@@ -3,6 +3,8 @@ const Deletable = require('./deletable');
 const Schema = require('mongoose').Schema;
 const env = require('../lib/environment');
 const util = require('../lib/util');
+const async = require('async');
+const Badge = require('./badge');
 
 const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/i
@@ -96,6 +98,15 @@ Program.prototype.absoluteUrl = function absoluteUrl(field) {
 };
 
 Program.prototype.findBadges = function findBadges(callback) {
-  const Badge = require('./badge');
   Badge.find({ program: this.id }, callback);
+};
+
+Program.prototype.markAsDeleted = function markAsDeleted(callback) {
+  var self = this;
+
+  self.deleted = true;
+  async.series([
+    self.save.bind(self),
+    Badge.update.bind(Badge, {program: self.id}, {deleted: true})
+  ], callback);
 };

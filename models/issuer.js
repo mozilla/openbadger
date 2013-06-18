@@ -1,5 +1,6 @@
 const db = require('./');
 const crypto = require('crypto');
+const async = require('async');
 const mongoose = require('mongoose');
 const env = require('../lib/environment');
 const util = require('../lib/util');
@@ -108,6 +109,21 @@ Issuer.prototype.relativeUrl = function relativeUrl(field) {
 
 Issuer.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
+};
+
+Issuer.prototype.markAsDeleted = function markAsDeleted(callback) {
+  var self = this;
+
+  self.deleted = true;
+  async.series([
+    self.save.bind(self),
+    self.populate.bind(self, 'programs'),
+    function(cb) {
+      async.forEach(self.programs, function(program, cb) {
+        program.markAsDeleted(cb);
+      }, cb);
+    }
+  ], callback);
 };
 
 module.exports = Issuer;

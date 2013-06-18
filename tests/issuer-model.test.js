@@ -4,6 +4,7 @@ const env = require('../lib/environment');
 const db = require('../models');
 const Issuer = require('../models/issuer');
 const Program = require('../models/program');
+const Badge = require('../models/badge');
 
 function validIssuer() {
   return new Issuer({
@@ -52,6 +53,14 @@ test.applyFixtures({
     name: 'Program 2',
     issuer: 'issuer1',
   }),
+  'badge1': new Badge({
+    _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
+    program: 'program1',
+    name: 'Basic Badge',
+    shortname: 'badge1',
+    description: 'For doing stuff.',
+    image: test.asset('sample.png'),
+  })
 }, function (fixtures) {
   test('Issuers without contacts can be saved', function (t) {
     var issuer = new Issuer({name: 'Bop'});
@@ -146,6 +155,25 @@ test.applyFixtures({
       if (err) throw err;
       t.ok(issuer);
       t.end();
+    });
+  });
+
+  test("Issuer#markAsDeleted() works", function(t) {
+    t.equal(fixtures['issuer1'].deleted, false);
+    fixtures['issuer1'].markAsDeleted(function(err) {
+      if (err) throw err;
+      t.equal(fixtures['issuer1'].deleted, true);
+      Program.find({deleted: true}, function(err, programs) {
+        if (err) throw err;
+
+        t.equal(programs.length, 2);
+        Badge.find({deleted: true}, function(err, badges) {
+          if (err) throw err;
+          t.equal(badges.length, 1);
+          t.equal(badges[0].shortname, 'badge1');
+          t.end();
+        });
+      });
     });
   });
 
