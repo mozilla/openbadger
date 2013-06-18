@@ -12,6 +12,7 @@ const BadgeInstance = require('../models/badge-instance');
 const Program = require('../models/program');
 const Issuer = require('../models/issuer');
 const mongoose = require('mongoose');
+const log = require('../lib/logger');
 
 function normalizeBadge(badge) {
   var badgeData = {
@@ -89,20 +90,30 @@ function normalizeProgram(program) {
 exports.jwtSecret = null;
 exports.limitedJwtSecret = null;
 
-/**
- * Get listing of all badges
- */
-
 exports.badges = function badges(req, res) {
-  var result = { status: 'ok', badges : {} };
+  function handleError(err) {
+    log.error(err);
+    return res.send(500, { status: 'error', error: err });
+  }
+  const result = { status: 'ok', badges : {} };
+  const searchTerm = req.query.search;
+  const propertiesToMatch = ['name'];
   Badge.find(function (err, badges) {
-    if (err)
-      return res.send(500, { status: 'error', error: err });
-    badges.filter(function (badge) {
+    if (err) return handleError(err);
+
+    var filteredBadges = badges.filter(function (badge) {
       return !badge.doNotList;
-    }).forEach(function (badge) {
+    });
+
+    if (searchTerm) {
+      const searchFn = util.makeSearch(propertiesToMatch);
+      filteredBadges = filteredBadges.filter(searchFn(searchTerm));
+    }
+
+    filteredBadges.forEach(function (badge) {
       result.badges[badge.shortname] = normalizeBadge(badge);
     });
+
     return res.send(200, result);
   });
 };
@@ -150,7 +161,7 @@ exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
   }, function (err, badges) {
     if (err) return res.json(500, {status: 'error', error: err });
     return res.json(200, {
-      status: 'okay',
+      status: 'ok',
       badges: badges.map(normalizeBadge),
     });
   });
@@ -644,6 +655,10 @@ function createFilterFn(query) {
 
       if (query.activity &&
           !_.contains(activityTypes, query.activity))
+        return cb(false);
+
+      if (query.search &&
+          !(new RegExp(query.search, 'i')).test(program.name))
         return cb(false);
 
       return cb(true);

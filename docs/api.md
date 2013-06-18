@@ -118,6 +118,10 @@ Get information about all existing badge classes.
 
 This is needed by applications to show information about available badges to users. It requires no authorization.
 
+### Request Parameters
+* **search**: (Optional) Filter out badges whose name isn't like the given string. "Likeness" is determined by generating a case-insensitive, unbounded regexp (i.e., `new Regexp(searchTerm, 'i')`).
+
+
 ### Example
 This endpoint returns `200 OK`:
 
@@ -481,25 +485,28 @@ This is needed by the CSOL About page to show the organizations involved in the 
 ## GET `/v2/programs`
 Get information about all existing programs.
 
-### Filters
-If specified, results should only include entries where the entry value matches or includes the filter value.
+### Request Parameters
+All request parameters are optional.
 
-  * `issuer` - issuer shortname
-  * `tags` - list of tags the entry must have all of\*\*
+* **search**: Filter out programs whose name isn't like the given string. "Likeness" is determined by generating a case-insensitive, unbounded regexp (i.e., `new Regexp(searchTerm, 'i')`).
+* **org**: Valid inputs are issuer shortnames.
+* **category**: Category, generally one of "science", "technology", "engineering", "arts" or "math".
+* **age**: Valid age ranges: "0-13", "13-18", "19-24".
+* **activity**: Either "offline" or "online"
 
-\*\* _This assumes CSOL filters like category, age range, badge type, etc. will all be tags within OpenBadger, rather than building more CSOL-specific data attributes into it. Perhaps [machine tags]!_
 
 ### Example
 ```javascript
 {
   "status": "ok",
-  "programs": {
-    "prog-a": {
+  "programs": [
+    {
+      "shortname": "prog-a",
       "image": "http://some.org/program/image",
       "name": "My Program",
     },
     ...
-  }
+  ]
 }
 ```
 

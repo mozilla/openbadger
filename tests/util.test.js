@@ -153,3 +153,27 @@ test('util.empty', function (t) {
   });
   t.end();
 });
+
+
+test('util.makeSearch', function (t) {
+  const items = [
+    {data: {name: 'ham', type: 'meat'}},
+    {data: {name: 'steak', type: 'meat'}},
+    {data: {name: 'sandwich', type: 'foodstuff', ingredients: ['ham', 'bread']}},
+    {data: {name: 'Ham Rove', type: 'politician'}},
+    {data: {name: 'Jimmy Carter', type: 'politician'}},
+    {data: {name: 'cornballer', type: 'product'}},
+    {data: {name: 'ShamWow!', type: 'product'}}
+  ];
+  const searchFn = util.makeSearch([
+    'data.name',
+    'data.ingredients',
+    'data.thing.non-existant'
+  ]);
+  const results = items
+    .filter(searchFn('ham'))
+    .map(util.prop('data', 'name'));
+  const expect = ['ham', 'sandwich', 'Ham Rove', 'ShamWow!'];
+  t.same(results, expect, 'results should match expectation');
+  t.end();
+});
