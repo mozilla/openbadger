@@ -31,7 +31,8 @@ exports.define = function defineRoutes(app) {
 
   app.all('/issuer*', user.requireAuth({
     level: 'issuer',
-    redirectTo: '/login'
+    redirectTo: '/login',
+    whitelist: ['/issuer/image/*']
   }));
 
   app.get('/issuer', [
