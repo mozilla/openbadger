@@ -398,6 +398,18 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api provides searchable program listing', function (t) {
+    conmock({
+      handler: api.programs,
+      request: { query: { search: 'no image' } }
+    }, function (err, mockRes, req) {
+      const programs = mockRes.body.programs;
+      t.same(programs.length, 1, 'should have just one result');
+      t.same(programs[0].shortname, 'no-image-program');
+      t.end();
+    });
+  });
+
   test('api can filter program listing', function (t) {
     const expect = fx['filterable-program'];
     conmock({
@@ -573,6 +585,20 @@ test.applyFixtures(badgeFixtures, function(fx) {
       });
     });
   });
+
+  test('api can give & search a list of badges', function (t) {
+    conmock({
+      handler: api.badges,
+      request: { query: { search: 'comment' }}
+    }, function (err, mockRes, req) {
+      t.ok(mockRes.body.badges['link-comment']);
+      t.ok(mockRes.body.badges['comment']);
+      t.notOk(mockRes.body.badges['offline-badge']);
+      t.notOk(mockRes.body.badges['random-badge']);
+      t.end();
+    });
+  });
+
 
   test('**badge recommendation stub**', function (t) {
     conmock({

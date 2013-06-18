@@ -171,7 +171,7 @@ test('util.makeSearch', function (t) {
     'data.thing.non-existant'
   ]);
   const results = items
-    .filter(searchFn(/ham/i))
+    .filter(searchFn('ham'))
     .map(util.prop('data', 'name'));
   const expect = ['ham', 'sandwich', 'Ham Rove', 'ShamWow!'];
   t.same(results, expect, 'results should match expectation');
