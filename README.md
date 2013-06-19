@@ -6,7 +6,7 @@ Badging.
 
 At this point, the v2.0 branch of this repository is primarily
 an administrative back-end for [CSOL-site][]. In the future,
-we'll likely create a v3.0 branch that brings in the best of the 
+we'll likely create a v3.0 branch that brings in the best of the
 v2.0 branch and the development branch (which was created for [Thimble][]).
 
   [CSOL-site]: https://github.com/mozilla/CSOL-site/
@@ -25,6 +25,7 @@ and mongo locally.
 ```bash
 export NODE_ENV="development"
 export THEME_DIR="themes/csol"
+export OPENBADGER_AWS_FAKE_S3_DIR="s3-fake-storage"
 export OPENBADGER_HOST="localhost"
 export OPENBADGER_PROTOCOL="http"
 export OPENBADGER_PORT=3000
@@ -51,6 +52,18 @@ this at `config.env`, do:
 $ source config.env
 ```
 
+## Using real S3 instead of fake S3
+
+For production builds, you'll want to modify the above sample configuration
+with the following:
+
+```bash
+unset OPENBADGER_AWS_FAKE_S3_DIR
+export OPENBADGER_AWS_KEY="aewgaewgaweg"
+export OPENBADGER_AWS_SECRET="zcvzncvzcbm"
+export OPENBADGER_AWS_BUCKET="bucket-o-s3"
+```
+
 ## Using memcached instead of redis for sessions
 In some cases (such as deploying on AWS) it might be easier to use memcached rather than redis.
 
@@ -59,6 +72,24 @@ export OPENBADGER_MEMCACHED_HOSTS="127.0.0.1:11211"
 ```
 
 Note the use of `HOSTS` in the plural – the memcached session store supports using multiple servers, so you can pass in an array of memcached instances if necessary.
+
+# Logging
+We use `bunyan` to generate rich logs in JSON format. We output these logs to `stdout` and do our best (through some monkey patching of the `console` object) to output everything else to `stderr`. So the *only* thing that should come through on `stdout` is the stream of log events, unless some component directly writes to `process.stdout` (which should be considered a bug).
+
+Our default `make` task (or `npm run-script start`) starts the server pipes stdout through a formatter, so you should see human-readable logs in the console instead of a stream of JSON objects. You can do this manually by doing
+`node app.js | ./node_modules/.bin/bunyan`.
+
+
+## Log aggregation with Graylog2
+If you want to aggregate logs with Graylog2 there is a minor amount of additional setup:
+
+```bash
+export GRAYLOG_HOST="graylog.example.org"    #defaults to localhost
+export GRAYLOG_PORT=12201                    #defaults to 11201
+export GRAYLOG_FACILITY="openbadger-whatevs" #defaults to openbadger
+```
+
+We've included a CLI tool, `bin/messina`, which takes a stream of JSON on stdin, converts it to [GELF](https://github.com/Graylog2/graylog2-docs/wiki/GELF) and sends it off to the configured Graylog2 server. It also pipes stdin to stdout, so you can chain commands: `node app.js | bin/messina | bunyan`. This is exactly what `npm run-script start-with-logs` does.
 
 # Installing deps & starting the server
 

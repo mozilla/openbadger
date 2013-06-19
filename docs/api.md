@@ -118,6 +118,10 @@ Get information about all existing badge classes.
 
 This is needed by applications to show information about available badges to users. It requires no authorization.
 
+### Request Parameters
+* **search**: (Optional) Filter out badges whose name isn't like the given string. "Likeness" is determined by generating a case-insensitive, unbounded regexp (i.e., `new Regexp(searchTerm, 'i')`).
+
+
 ### Example
 This endpoint returns `200 OK`:
 
@@ -369,13 +373,27 @@ Get information about an unclaimed badge.
 * **code**: The claimcode of the badge.
 
 ### Response Codes
-* `200`: Returns an object with `status` set to `ok` and `badge` set to an object containing information about the badge for the claim code. See the documentation of `/v2/badge/<shortname>` for an example of this object.
+* `200`: Returns an object with `status` set to `ok` and `badge` set to an object containing information about the badge for the claim code. See the documentation of `/v2/badge/<shortname>` for an example of this object. Additionally, `reservedFor` will be the email the claim code is reserved for, if any, and `evidenceItems` is the number of reserved evidence items the claim code has.
 * `409`: Claim code has already been used.
 * `404`: Unknown claim code.
 * `400 Bad Request`: Missing or invalid parameters.
 
+## GET `/v2/unclaimed/evidence`
+Return an evidence item of an unclaimed claim code.
+
+### Request Parameters
+* **code**: The unclaimed claimcode.
+* **n**: The evidence item number to retrieve. 0 is the first evidence item, 1 is the second, and so on.
+
+### Response Codes
+* `200`: Returns the evidence data with the appropriate mime type set.
+* `404`: Unknown claim code or evidence item number.
+* `400 Bad Request`: Missing or invalid parameters.
+
 ## POST `/v2/claim`
 Claim a badge via claim code.
+
+Note that this will destroy any temporary evidence associated with it, so be sure to retrieve it if needed beforehand.
 
 ### Request Parameters
 * **email**: The email address of the user to award the badge to.
@@ -467,25 +485,28 @@ This is needed by the CSOL About page to show the organizations involved in the 
 ## GET `/v2/programs`
 Get information about all existing programs.
 
-### Filters
-If specified, results should only include entries where the entry value matches or includes the filter value.
+### Request Parameters
+All request parameters are optional.
 
-  * `issuer` - issuer shortname
-  * `tags` - list of tags the entry must have all of\*\*
+* **search**: Filter out programs whose name isn't like the given string. "Likeness" is determined by generating a case-insensitive, unbounded regexp (i.e., `new Regexp(searchTerm, 'i')`).
+* **org**: Valid inputs are issuer shortnames.
+* **category**: Category, generally one of "science", "technology", "engineering", "arts" or "math".
+* **age**: Valid age ranges: "0-13", "13-18", "19-24".
+* **activity**: Either "offline" or "online"
 
-\*\* _This assumes CSOL filters like category, age range, badge type, etc. will all be tags within OpenBadger, rather than building more CSOL-specific data attributes into it. Perhaps [machine tags]!_
 
 ### Example
 ```javascript
 {
   "status": "ok",
-  "programs": {
-    "prog-a": {
+  "programs": [
+    {
+      "shortname": "prog-a",
       "image": "http://some.org/program/image",
       "name": "My Program",
     },
     ...
-  }
+  ]
 }
 ```
 

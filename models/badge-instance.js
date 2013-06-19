@@ -92,14 +92,12 @@ BadgeInstance.userHasBadge = function userHasBadge(user, shortname, callback) {
 BadgeInstance.prototype.makeAssertion = function makeAssertion(opts) {
   // expects a populated instance
   opts = opts || {};
-  const salt = opts.salt || util.randomString(32);
   return {
     uid: this._id,
     recipient: {
-      identity: util.sha256(this.user, salt),
+      identity: util.sha256(this.user, ''),
       type: 'email',
       hashed: true,
-      salt: salt,
     },
     badge: this.badge.absoluteUrl('json'),
     verify: {

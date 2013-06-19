@@ -1,5 +1,6 @@
 const _ = require('underscore');
 const async = require('async');
+const mime = require('mime');
 const jwt = require('jwt-simple');
 const urlutil = require('url');
 const env = require('../lib/environment');
@@ -11,6 +12,7 @@ const BadgeInstance = require('../models/badge-instance');
 const Program = require('../models/program');
 const Issuer = require('../models/issuer');
 const mongoose = require('mongoose');
+const log = require('../lib/logger');
 
 function normalizeBadge(badge) {
   var badgeData = {
@@ -52,8 +54,10 @@ function inflateBadge(badge, cb) {
 }
 
 function normalizeProgram(program) {
-  if (!(program.issuer && typeof(program.issuer) == "object"))
+  if (!(program.issuer && typeof(program.issuer) == "object")) {
+    log.fatal({program: program}, "PRE-CRASH: unpopulated program");
     throw new Error("expected populated program issuer");
+  }
 
   const issuer = program.issuer;
   const empty = util.empty;
@@ -88,20 +92,30 @@ function normalizeProgram(program) {
 exports.jwtSecret = null;
 exports.limitedJwtSecret = null;
 
-/**
- * Get listing of all badges
- */
-
 exports.badges = function badges(req, res) {
-  var result = { status: 'ok', badges : {} };
+  function handleError(err) {
+    log.error(err);
+    return res.send(500, { status: 'error', error: err });
+  }
+  const result = { status: 'ok', badges : {} };
+  const searchTerm = req.query.search;
+  const propertiesToMatch = ['name'];
   Badge.find(function (err, badges) {
-    if (err)
-      return res.send(500, { status: 'error', error: err });
-    badges.filter(function (badge) {
+    if (err) return handleError(err);
+
+    var filteredBadges = badges.filter(function (badge) {
       return !badge.doNotList;
-    }).forEach(function (badge) {
+    });
+
+    if (searchTerm) {
+      const searchFn = util.makeSearch(propertiesToMatch);
+      filteredBadges = filteredBadges.filter(searchFn(searchTerm));
+    }
+
+    filteredBadges.forEach(function (badge) {
       result.badges[badge.shortname] = normalizeBadge(badge);
     });
+
     return res.send(200, result);
   });
 };
@@ -149,7 +163,7 @@ exports.badgeRecommendations = function badgeRecommendations(req, res, next) {
   }, function (err, badges) {
     if (err) return res.json(500, {status: 'error', error: err });
     return res.json(200, {
-      status: 'okay',
+      status: 'ok',
       badges: badges.map(normalizeBadge),
     });
   });
@@ -367,9 +381,47 @@ function tryAwardingBadge(opts, res, successCb) {
 
 exports.getUnclaimedBadgeInfoFromCode = function(req, res, next) {
   getUnclaimedBadgeFromCode(req.query.code, req, res, next, function(badge) {
-    return res.json(200, {
+    var claim = badge.getClaimCode(req.query.code);
+    var result ={
       status: 'ok',
+      evidenceItems: claim.evidence.length,
       badge: normalizeBadge(badge)
+    };
+
+    if (claim.reservedFor) result.reservedFor = claim.reservedFor;
+    return res.json(200, result);
+  });
+};
+
+exports.getClaimCodeEvidence = function(req, res, next) {
+  var code = req.query.code;
+  var n = parseInt(req.query.n);
+
+  if (isNaN(n) || n < 0)
+    return res.send(400, {
+      status: 'error',
+      reason: 'n must be a non-negative integer'
+    });
+
+  getUnclaimedBadgeFromCode(code, req, res, next, function(badge) {
+    var claim = badge.getClaimCode(code);
+    if (n >= claim.evidence.length)
+      return res.send(404, {
+        status: 'error',
+        reason: 'evidence item number does not exist'
+      });
+    var evidence = claim.evidence[n];
+    Badge.temporaryEvidence.getReadStream(evidence, function(err, s) {
+      if (err) return res.json(500, {
+        status: 'error',
+        reason: 'cannot retrieve evidence'
+      });
+      res.type(evidence.mimeType);
+      var ext = mime.extension(evidence.mimeType);
+      var filename = 'evidence-' + n + (ext ? '.' + ext : '');
+      res.set('Content-Disposition',
+              'attachment; filename="' + filename + '"');
+      s.pipe(res);
     });
   });
 };
@@ -388,12 +440,14 @@ exports.awardBadgeFromClaimCode = function(req, res, next) {
       email: email,
       evidence: evidence
     }, res, function(success) {
-      badge.redeemClaimCode(code, email);
-      badge.save(function(err) {
+      async.series([
+        badge.redeemClaimCode.bind(badge, code, email),
+        badge.save.bind(badge)
+      ], function(err) {
         if (err)
           // Well, this is unfortunate, since we've already given them
           // the badge... Not sure what else we can do here, but at least
-          // this error condition is highly unlikely.
+          // this error condition is unlikely.
           return next(err);
         success();
       });
@@ -568,15 +622,18 @@ function createFilterFn(query) {
   const prop = util.prop;
 
   return function filterProgram(program, cb) {
+    // immediately reject orphaned programs
+    if (!program.issuer)
+      return cb(false);
+
     if (!_.keys(query).length)
       return cb(true);
 
     program.findBadges(function (err, badges) {
-      if (err)
+      if (err) {
+        log.error(err, 'could not find badges for a program');
         return cb(false);
-      // remove orphaned programs
-      if (!program.issuer)
-        return cb(false);
+      }
       const organization = program.issuer.shortname;
       const categories = _.chain(badges)
         .map(prop('categories'))
@@ -603,6 +660,10 @@ function createFilterFn(query) {
 
       if (query.activity &&
           !_.contains(activityTypes, query.activity))
+        return cb(false);
+
+      if (query.search &&
+          !(new RegExp(query.search, 'i')).test(program.name))
         return cb(false);
 
       return cb(true);
@@ -672,7 +733,7 @@ exports.program = function program(req, res) {
 };
 
 exports.testWebhook = function testWebhook(req, res) {
-  webhooks.notifyOfReservedClaim(req.body.email, req.body.claimCode, function(err, body) {
+  webhooks.notifyOfReservedClaim(req.body.email, req.body.claimCode, req.body.evidenceItems, function(err, body) {
     if (err)
       return res.json(502, {
         status: 'error',

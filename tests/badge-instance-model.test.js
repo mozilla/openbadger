@@ -54,15 +54,13 @@ test.applyFixtures({
     env.temp({ origin: 'https://example.org' }, function (done) {
       const instance = fixtures['instance'];
       const badge = fixtures['link-basic'];
-      const salt = 'deadsea';
       instance.populate('badge', function () {
         const expect = {
           uid: instance._id,
           recipient: {
-            identity: util.sha256(instance.user, salt),
+            identity: util.sha256(instance.user, ''),
             type: 'email',
             hashed: true,
-            salt: salt,
           },
           badge: badge.absoluteUrl('json'),
           verify: {
@@ -71,7 +69,7 @@ test.applyFixtures({
           },
           issuedOn: instance.issuedOnUnix()
         };
-        t.same(instance.makeAssertion({salt: salt}), expect);
+        t.same(instance.makeAssertion(), expect);
         t.end();
         return done();
       });

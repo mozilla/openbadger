@@ -31,7 +31,8 @@ exports.define = function defineRoutes(app) {
 
   app.all('/issuer*', user.requireAuth({
     level: 'issuer',
-    redirectTo: '/login'
+    redirectTo: '/login',
+    whitelist: ['/issuer/image/*']
   }));
 
   app.get('/issuer', [
@@ -45,6 +46,7 @@ exports.define = function defineRoutes(app) {
   ]);
   app.get('/issue/:badgeId', render.issueBadge);
   app.post('/issue/:badgeId', badge.issueMany);
+  app.post('/issue/:badgeId/with-evidence', badge.issueOneWithEvidence);
   addClaimManagementRoutes(app, '/issue/:badgeId/claims');
 
   app.all('/admin*', user.requireAuth({
@@ -186,6 +188,10 @@ exports.define = function defineRoutes(app) {
   app.get('/v2/unclaimed', [
     api.auth()
   ], api.getUnclaimedBadgeInfoFromCode);
+
+  app.get('/v2/unclaimed/evidence', [
+    api.auth()
+  ], api.getClaimCodeEvidence);
 
   app.post('/v2/claim', [
     api.auth()

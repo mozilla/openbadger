@@ -1,10 +1,11 @@
 {
   "name": "openbadger",
   "description": "Makin' badges",
-  "version": "2.0.0",
+  "version": "2.0.9",
   "private": true,
   "scripts": {
-    "start": "node app",
+    "start": "node app | bunyan",
+    "start-with-logs": "node app | bin/messina | bunyan",
     "test": "bin/test.js"
   },
   "dependencies": {
@@ -12,7 +13,6 @@
     "redis": "0.8.1",
     "request": "2.11.4",
     "habitat": "0.4.2",
-    "winston": "0.6.2",
     "connect-redis": "1.4.4",
     "mongoose": "3.6.7",
     "async": "0.1.22",
@@ -27,7 +27,10 @@
     "connect-memcached": "0.0.3",
     "nunjucks": "~0.1.8a",
     "newrelic": "~0.9.19",
-    "dataurl": "~0.1.0"
+    "dataurl": "~0.1.0",
+    "bunyan": "~0.21.3",
+    "gelf-stream": "~0.2.2",
+    "knox": "~0.8.3"
   },
   "devDependencies": {
     "tap": "~0.4.1",
