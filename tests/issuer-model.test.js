@@ -160,6 +160,18 @@ test.applyFixtures({
   });
 
   test("Issuer#undoablyDelete() works", function(t) {
+    function ensureDeleted(document, deleted, cb) {
+      document.constructor.findOne({
+        _id: document._id,
+        deleted: deleted
+      }, function(err, document) {
+        if (err) return cb(err);
+        t.ok(document, JSON.stringify(document.name) +
+                       " should " + (deleted ? '' : 'not') + " be deleted");
+        cb();
+      });
+    }
+
     t.equal(fixtures['issuer1'].deleted, false);
     fixtures['issuer1'].undoablyDelete(function(err, record) {
       if (err) throw err;
@@ -168,34 +180,33 @@ test.applyFixtures({
         "Issuer", "Program", "Program", "Badge"
       ]);
       t.equal(fixtures['issuer1'].deleted, true);
-      Program.find({deleted: true}, function(err, programs) {
+
+      async.series([
+        // These should all be marked as deleted.
+        ensureDeleted.bind(null, fixtures['issuer1'], true),
+        ensureDeleted.bind(null, fixtures['program1'], true),
+        ensureDeleted.bind(null, fixtures['program2'], true),
+        ensureDeleted.bind(null, fixtures['badge1'], true),
+
+        // Make sure unrelated documents weren't affected.
+        ensureDeleted.bind(null, fixtures['deleted-issuer'], true),
+        ensureDeleted.bind(null, fixtures['issuer2'], false),
+
+        // Now undo the deletion.
+        record.undo.bind(record),
+
+        // These should all be marked as not-deleted now.
+        ensureDeleted.bind(null, fixtures['issuer1'], false),
+        ensureDeleted.bind(null, fixtures['program1'], false),
+        ensureDeleted.bind(null, fixtures['program2'], false),
+        ensureDeleted.bind(null, fixtures['badge1'], false),
+
+        // Make sure unrelated documents weren't affected.
+        ensureDeleted.bind(null, fixtures['deleted-issuer'], true),
+        ensureDeleted.bind(null, fixtures['issuer2'], false),
+      ], function(err) {
         if (err) throw err;
-
-        t.equal(programs.length, 2);
-        Badge.find({deleted: true}, function(err, badges) {
-          if (err) throw err;
-          t.equal(badges.length, 1);
-          if (badges.length)
-            t.equal(badges[0].shortname, 'badge1');
-
-          record.undo(function(err) {
-            if (err) throw err;
-
-            t.equal(record.name, "Issuer \"Issuer One\"");
-            async.forEach([Program, Badge, Issuer], function(model, cb) {
-              model.find({deleted: true}, function(err, items) {
-                if (err) return cb(err);
-                t.same(items.filter(function(item) {
-                  return !/deleted/.test(item._id);
-                }), []);
-                cb();
-              });
-            }, function(err) {
-              if (err) throw err;
-              t.end();
-            });
-          });
-        });
+        t.end();
       });
     });
   });
