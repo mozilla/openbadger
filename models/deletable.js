@@ -16,7 +16,7 @@ const DeletionRecordSchema = new Schema({
 
 DeletionRecordSchema.methods.undo = function undoDeletion(cb) {
   var self = this;
-  async.forEach(this.items, function(item, cb) {
+  async.forEachSeries(this.items, function(item, cb) {
     deletableModels[item.model].findOneAndUpdate({
       _id: item.id
     }, {
@@ -89,7 +89,7 @@ module.exports = function Deletable(model) {
         if (err) return callback(err, record);
         self.getDeletableChildren(function(err, objects) {
           if (err) return callback(err, record);
-          async.forEach(objects, function(object, cb) {
+          async.forEachSeries(objects, function(object, cb) {
             object.undoablyDelete(record, cb);
           }, function(err) {
             callback(err, record);

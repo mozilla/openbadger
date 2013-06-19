@@ -176,7 +176,7 @@ test.applyFixtures({
       if (err) throw err;
       t.ok(!record.isModified(), "deletion record should be saved");
       t.same(record.items.map(function(i) { return i.model; }), [
-        "Issuer", "Program", "Program", "Badge"
+        "Issuer", "Program", "Badge", "Program"
       ]);
       t.equal(fixtures['issuer1'].deleted, true);
 
