@@ -257,5 +257,13 @@ module.exports = {
     categoryAward: 'science',
     categoryRequirement: 100,
     categoryWeight: 0
+  }),
+  'deleted-badge': new Badge({
+    program: 'program',
+    name : 'Deleted badge',
+    shortname: 'deleted-badge',
+    description: 'For doing lots of deleting.',
+    image: IMAGE,
+    deleted: true
   })
 };

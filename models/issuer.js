@@ -1,8 +1,10 @@
 const db = require('./');
 const crypto = require('crypto');
+const async = require('async');
 const mongoose = require('mongoose');
 const env = require('../lib/environment');
 const util = require('../lib/util');
+const Deletable = require('./deletable');
 const Schema = mongoose.Schema;
 
 const DEFAULT_SECRET_LENGTH = 64;
@@ -49,6 +51,7 @@ const IssuerSchema = new Schema({
     type: String,
     trim: true,
   },
+  deleted: {type: Boolean, default: false},
   description: {
     type: String,
     trim: true,
@@ -60,7 +63,7 @@ const IssuerSchema = new Schema({
   programs: [{ type: String, ref: 'Program' }]
 });
 
-const Issuer = db.model('Issuer', IssuerSchema);
+const Issuer = Deletable(db.model('Issuer', IssuerSchema));
 
 IssuerSchema.pre('validate', function defaultShortname(next) {
   if (this.shortname) return next();
@@ -106,6 +109,13 @@ Issuer.prototype.relativeUrl = function relativeUrl(field) {
 
 Issuer.prototype.absoluteUrl = function absoluteUrl(field) {
   return env.qualifyUrl(this.relativeUrl(field));
+};
+
+Issuer.prototype.getDeletableChildren = function getDeletableChildren(cb) {
+  var self = this;
+  this.populate('programs', function(err) {
+    cb(err, self.programs);
+  });
 };
 
 module.exports = Issuer;

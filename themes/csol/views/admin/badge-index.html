@@ -49,6 +49,9 @@
         <ul class="dropdown-menu">
           <li><a href="/admin/badge/{{ badge.shortname }}/edit/"><i class="icon-pencil"></i> Edit Details</a></li>
           <li><a href="/admin/badge/{{ badge.shortname }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
+          <li>
+            <a class="js-delete-item" href="/admin/badge/{{ badge.shortname }}" title="delete badge '{{ badge.name }}'"><i class="icon-trash"></i> Destroy</a>
+          </li>
         </ul>
       </div>
     </td>
@@ -68,7 +71,10 @@
 <h2>Issuers</h2>
 <ul class="unstyled">
 {% for issuer in issuers.sort() %}
-<li><a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a></li>
+<li>
+  <a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a>
+  <a class="js-delete-item" href="/admin/issuer/{{ issuer.id }}" title="delete issuer '{{ issuer.name }}'"><i class="icon-trash"></i></a>
+</li>
 {% endfor %}
 </ul>
 {% else %}
@@ -79,6 +85,22 @@
 
 {% endif %}
 
+{% if undoRecords.length %}
+
+<h2>History</h2>
+
+<ul>
+{% for record in undoRecords %}
+  <li>
+    <form action="/admin/undo/{{ record._id }}" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      Deletion of <strong>{{ record.name }}</strong> on {{ record.creationDate }}
+      <button type="submit" class="btn btn-mini">Undo</button>
+    </form>
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
 
 {% endblock %}
 

@@ -4,6 +4,7 @@ var badge = require('./badge');
 var render = require('./render');
 var issuer = require('./issuer');
 var api = require('./api');
+var undo = require('./undo');
 var stats = require('./stats');
 
 const whitelists = exports.whitelists = {
@@ -54,6 +55,7 @@ exports.define = function defineRoutes(app) {
     redirectTo: '/login'
   }));
 
+  app.post('/admin/undo/:undoId', undo);
   app.get('/admin/stats', [stats.monthly], render.stats);
 
   // Badge listing
@@ -61,6 +63,7 @@ exports.define = function defineRoutes(app) {
   var indexMiddleware = [
     badge.findAll,
     issuer.findAll,
+    undo.findAll
   ];
 
   app.get('/admin', indexMiddleware, render.badgeIndex);
@@ -106,6 +109,7 @@ exports.define = function defineRoutes(app) {
   app.post('/admin/issuer/:issuerId', [
     issuer.getUploadedImage()
   ], issuer.update);
+  app.delete('/admin/issuer/:issuerId', issuer.destroy);
   app.get('/admin/issuer/:issuerId/program', render.newProgramForm);
   app.post('/admin/issuer/:issuerId/program', [
     issuer.getUploadedImage()
@@ -115,7 +119,7 @@ exports.define = function defineRoutes(app) {
   app.post('/admin/program/:programId', [
     issuer.getUploadedImage()
   ], issuer.updateProgram);
-
+  app.delete('/admin/program/:programId', issuer.destroyProgram);
 
   // Creating new behaviors
   // ----------------------
