@@ -403,6 +403,23 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('destroying badges works', function(t) {
+    var badgeModel = fx['no-image-badge'];
+    t.equal(badgeModel.deleted, false);
+    conmock({
+      handler: badge.destroy,
+      request: {
+        badge: badgeModel
+      }      
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body, 'Badge undoably deleted.');
+      t.equal(badgeModel.deleted, true);
+      t.end();
+    });    
+  });
+
   test('shutting down #', function (t) {
     db.close(); t.end();
   });
