@@ -160,12 +160,13 @@ test.applyFixtures({
 
   test("Issuer#undoablyDelete() works", function(t) {
     function ensureDeleted(document, deleted, cb) {
+      var name = document.name;
       document.constructor.findOne({
         _id: document._id,
         deleted: deleted
       }, function(err, document) {
         if (err) return cb(err);
-        t.ok(document, JSON.stringify(document.name) +
+        t.ok(document, JSON.stringify(name) +
                        " should " + (deleted ? '' : 'not') + " be deleted");
         cb();
       });
