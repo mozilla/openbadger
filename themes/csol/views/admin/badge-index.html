@@ -82,22 +82,21 @@
 
 {% endif %}
 
-<h2>Undo Actions</h2>
+{% if undoRecords.length %}
 
-{% if undoRecords.length == 0 %}
-  <p>There are no actions to undo at this time.</p>
-{% else %}
-  <ul>
-  {% for record in undoRecords %}
-    <li>
-      <form action="/admin/undo/{{ record._id }}" method="post">
-        <input type="hidden" name="csrf" value="{{ csrf }}">
-        Deletion of <strong>{{ record.name }}</strong> on {{ record.creationDate }}
-        <button type="submit" class="btn btn-mini">Undo</button>
-      </form>
-    </li>
-  {% endfor %}
-  </ul>
+<h2>History</h2>
+
+<ul>
+{% for record in undoRecords %}
+  <li>
+    <form action="/admin/undo/{{ record._id }}" method="post">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      Deletion of <strong>{{ record.name }}</strong> on {{ record.creationDate }}
+      <button type="submit" class="btn btn-mini">Undo</button>
+    </form>
+  </li>
+{% endfor %}
+</ul>
 {% endif %}
 
 {% endblock %}
