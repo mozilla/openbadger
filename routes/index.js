@@ -118,7 +118,7 @@ exports.define = function defineRoutes(app) {
   app.post('/admin/program/:programId', [
     issuer.getUploadedImage()
   ], issuer.updateProgram);
-
+  app.delete('/admin/program/:programId', issuer.destroyProgram);
 
   // Creating new behaviors
   // ----------------------

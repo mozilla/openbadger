@@ -23,6 +23,23 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });    
   });
 
+  test('destroying programs works', function(t) {
+    var programModel = fx['no-image-program'];
+    t.equal(programModel.deleted, false);
+    conmock({
+      handler: issuer.destroyProgram,
+      request: {
+        program: programModel
+      }
+    }, function(err, mockRes, req) {
+      if (err) throw err;
+      t.equal(mockRes.status, 200);
+      t.equal(mockRes.body, 'Program undoably deleted.');
+      t.equal(programModel.deleted, true);
+      t.end();
+    });    
+  });
+
   test('shutting down #', function (t) {
     db.close(); t.end();
   });

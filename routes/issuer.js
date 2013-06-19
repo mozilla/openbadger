@@ -159,6 +159,13 @@ exports.updateProgram = function updateProgram(req, res, next) {
   });
 };
 
+exports.destroyProgram = function destroyProgram(req, res, next) {
+  req.program.undoablyDelete(function(err) {
+    if (err) return next(err);
+    return res.send(200, "Program undoably deleted.");
+  });
+};
+
 exports.meta = function meta(req, res, next) {
   req.program.populate('issuer', function(err) {
     if (err)
