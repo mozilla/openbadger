@@ -108,6 +108,7 @@ exports.define = function defineRoutes(app) {
   app.post('/admin/issuer/:issuerId', [
     issuer.getUploadedImage()
   ], issuer.update);
+  app.delete('/admin/issuer/:issuerId', issuer.destroy);
   app.get('/admin/issuer/:issuerId/program', render.newProgramForm);
   app.post('/admin/issuer/:issuerId/program', [
     issuer.getUploadedImage()

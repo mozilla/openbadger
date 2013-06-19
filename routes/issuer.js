@@ -76,6 +76,13 @@ function makeIssuer(issuer, form, image) {
   return issuer;
 };
 
+exports.destroy = function destroy(req, res, next) {
+  req.issuer.undoablyDelete(function(err) {
+    if (err) return next(err);
+    return res.send(200, "Issuer undoably deleted.");
+  });
+};
+
 exports.create = function create(req, res, next) {
   const form = req.body;
   const accessList = handleAccessList(form.accessList);

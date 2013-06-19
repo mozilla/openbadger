@@ -71,7 +71,10 @@
 <h2>Issuers</h2>
 <ul class="unstyled">
 {% for issuer in issuers.sort() %}
-<li><a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a></li>
+<li>
+  <a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a>
+  <a class="js-delete-item" href="/admin/issuer/{{ issuer.id }}" title="delete issuer '{{ issuer.name }}'"><i class="icon-trash"></i></a>
+</li>
 {% endfor %}
 </ul>
 {% else %}
