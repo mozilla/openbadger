@@ -121,7 +121,6 @@ test.applyFixtures({
       t.same(fixtures['issuer2'].name, results[0].name);
     });
     Issuer.findByAccess('both@example.org', function (err, results) {
-      console.dir(results);
       const names = results.map(function (o) { return o.name }).sort();
       t.same(names, ['Issuer One', 'Issuer Two']);
     });
