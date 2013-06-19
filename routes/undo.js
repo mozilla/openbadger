@@ -4,6 +4,8 @@ module.exports = function(req, res, next) {
   DeletionRecord.findOne({
     _id: req.param('undoId')
   }, function(err, record) {
+    if (err && err.name == 'CastError' && err.type == 'ObjectId')
+      return res.send(404);
     if (err) return next(err);
     if (!record) return res.send(404);
     record.undo(function(err) {
