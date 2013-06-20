@@ -52,6 +52,15 @@ this at `config.env`, do:
 $ source config.env
 ```
 
+## Adding sample data
+
+If you want to add some sample data so you don't need to create issuers,
+programs, and badges from scratch, you can use the following command:
+
+```bash
+node bin/import-sample-data.js
+```
+
 ## Using real S3 instead of fake S3
 
 For production builds, you'll want to modify the above sample configuration
