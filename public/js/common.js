@@ -11,15 +11,13 @@
 
   $(document.body).on('click', '.js-delete-item', function(e) {
     var $this = $(this);
-    var seriously = window.confirm('Seriously ' + this.title + '?');
-    if (seriously)
-      $.ajax({
-        url: this.href,
-        type: 'DELETE',
-        data: {csrf: csrfToken},
-        success: function() { window.location.reload(); },
-        error: function() { alert('Alas, an error occurred.'); }
-      });
+    $.ajax({
+      url: this.href,
+      type: 'DELETE',
+      data: {csrf: csrfToken},
+      success: function() { window.location.reload(); },
+      error: function() { alert('Alas, an error occurred.'); }
+    });
     return (e.preventDefault(), false);    
   });
 })(jQuery);

@@ -54,6 +54,16 @@
           </div>
         </div>
         <div id="main" class="container">
+          {% if messages and messages().length %}
+            <br>
+            {% for message in messages() %}
+              <div class="alert alert-{{ message.category }}">
+                <a class="close" data-dismiss="alert" href="#">&times;</a>
+                {% set msgInfo = message.info %}
+                {% include message.template %}
+              </div>
+            {% endfor %}
+          {% endif %}
           {% block main %}{% endblock %}
         </div> <!-- /container -->
       </div>

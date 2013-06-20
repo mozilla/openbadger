@@ -93,9 +93,9 @@
 <ul>
 {% for record in undoRecords %}
   <li>
-    <form action="/admin/undo/{{ record._id }}" method="post">
+    <form class="invisi-form" action="/admin/undo/{{ record._id }}" method="post">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      Deletion of <strong>{{ record.name }}</strong> on {{ record.creationDate }}
+      Deletion of <strong>{{ record.name|stupidSafe }}</strong> on {{ record.creationDate }}
       <button type="submit" class="btn btn-mini">Undo</button>
     </form>
   </li>

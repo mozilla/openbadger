@@ -1,3 +1,4 @@
+const _ = require('underscore');
 const DeletionRecord = require('../models/deletable').Record;
 
 module.exports = function(req, res, next) {
@@ -21,4 +22,22 @@ module.exports.findAll = function(req, res, next) {
     req.undoRecords = records;
     next();
   });
+};
+
+module.exports.undoablyDelete = function(prop) {
+  return function(req, res, next) {
+    var document = req[prop];
+    var modelName = document.constructor.modelName;
+    document.undoablyDelete(function(err, record) {
+      if (err) return next(err);
+      req.flash('info', {
+        template: 'messages/deletion.html',
+        info: {
+          name: record.name,
+          id: record._id
+        }
+      });
+      res.send(200, modelName + " undoably deleted.");
+    });
+  };
 };
