@@ -3,6 +3,7 @@ const Program = require('../models/program');
 const Badge = require('../models/badge');
 const phrases = require('../lib/phrases');
 const logger = require('../lib/logger');
+
 /*
  * Administrative Pages
  */
@@ -125,6 +126,7 @@ exports.badgeIndex = function (req, res) {
     access: req.session.access,
     csrf: req.session._csrf,
     badges: req.badges,
+    undoRecords: req.undoRecords,
     behaviors: req.behaviors
   });
 };

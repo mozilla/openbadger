@@ -72,6 +72,14 @@ module.exports = {
     description: 'desc',
     image: IMAGE,
   }),
+  'do-not-list-badge': new Badge({
+    program: 'program',
+    name: 'Do Not List',
+    shortname: 'do-not-list-badge',
+    description: 'desc',
+    image: IMAGE,
+    doNotList: true,
+  }),
   'link-basic': new Badge({
     _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
     program: 'program',
@@ -257,5 +265,13 @@ module.exports = {
     categoryAward: 'science',
     categoryRequirement: 100,
     categoryWeight: 0
+  }),
+  'deleted-badge': new Badge({
+    program: 'program',
+    name : 'Deleted badge',
+    shortname: 'deleted-badge',
+    description: 'For doing lots of deleting.',
+    image: IMAGE,
+    deleted: true
   })
 };

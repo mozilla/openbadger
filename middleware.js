@@ -1,3 +1,4 @@
+const _ = require('underscore');
 const env = require('./lib/environment');
 const util = require('./lib/util');
 const log = require('./lib/logger');
@@ -140,4 +141,27 @@ function parseWhitelist(array) {
   });
 }
 
-exports.flash = flash;
+function makeGetFlashMessages(req) {
+  var cached = null;
+
+  return function() {
+    if (!cached) {
+      cached = [];
+      ['error', 'success', 'info'].forEach(function(category) {
+        req.flash(category).forEach(function(info) {
+          cached.push(_.extend({category: category}, info));
+        });
+      });
+    }
+    return cached;
+  };
+};
+
+exports.flash = function flashWithMessages() {
+  var flashMiddleware = flash();
+
+  return function(req, res, next) {
+    res.locals.messages = makeGetFlashMessages(req);
+    return flashMiddleware(req, res, next);
+  };
+};

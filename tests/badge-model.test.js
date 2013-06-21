@@ -585,7 +585,37 @@ test.applyFixtures(fixtures, function () {
     t.end();
   });
 
+  test("Badge.find() finds only undeleted badges by default", function(t) {
+    Badge.find({shortname: 'deleted-badge'}, function(err, badges) {
+      if (err) throw err;
+      t.equal(badges.length, 0);
+      t.end();
+    });
+  });
 
+  test("Badge.find() can find deleted badges if needed", function(t) {
+    Badge.find({shortname: 'deleted-badge', deleted: true}, function(err, badges) {
+      if (err) throw err;
+      t.equal(badges.length, 1);
+      t.end();
+    });
+  });
+
+  test("Badge.findOne() finds only undeleted badges by default", function(t) {
+    Badge.findOne({shortname: 'deleted-badge'}, function(err, badge) {
+      if (err) throw err;
+      t.equal(badge, null);
+      t.end();
+    });
+  });
+
+  test("Badge.findOne() can find deleted badges if needed", function(t) {
+    Badge.findOne({shortname: 'deleted-badge', deleted: true}, function(err, badge) {
+      if (err) throw err;
+      t.ok(badge);
+      t.end();
+    });
+  });
 
   // necessary to stop the test runner
   test('shutting down #', function (t) {

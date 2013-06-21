@@ -1,51 +1,106 @@
 {% extends "admin/base.html" %}
 {% block main %}
 
-<h1>Issuers (<a href="/admin/issuer">Create a new issuer</a>)</h1>
-<ul class="issuer-list">
-{% for issuer in issuers %}
+<h1>Badges</h1>
+
+<div>
+  <form action="?" method="get" class="form-search" style="float: right;">
+    <input type="text" name="search" class="input-large search-query" placeholder="badge, program, or issuer name" {% if search %}value="{{search}}"{% endif %}>
+    <input class="btn" type="submit" value="Search">
+  </form>
+
+{% if search %}
+
+  <a href="?"><button class="btn btn-danger">Clear Search</button></a>
+
+{% else %}
+  {% include "admin/pagination.html" %}
+{% endif %}
+</div>
+<hr>
+
+{% if badges.length %}
+<table class="badge-list">
+<tbody>
+<tr>
+<th class="oper view"></th>
+<th class="orga">Organization</th>
+<th class="prog">Program</th>
+<th class="badg">Badge</th>
+<th class="oper all"></th>
+</tr>
+
+{% for badge in badges %}
+  <tr>
+    <td class="oper view">
+      <a class="badge-name" href="/admin/badge/{{ badge.shortname }}"><i class="icon-eye-open"></i></a>
+    </td>
+    <td class="orga">
+      <a href="/admin/issuer/{{ badge.program.issuer.id | e}}">{{ badge.program.issuer.name | e}}</a>
+    </td>
+    <td class="prog">
+      <a href="/admin/program/{{ badge.program.id | e}}">{{ badge.program.name | e}}</a>
+    </td>
+    <td class="badg">
+      <a href="/admin/badge/{{ badge.shortname | e}}">{{ badge.name }}</a>
+    </td>
+    <td class="oper all">
+      <div class="btn-group">
+        <a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          <li><a href="/admin/badge/{{ badge.shortname }}/edit/"><i class="icon-pencil"></i> Edit Details</a></li>
+          <li><a href="/admin/badge/{{ badge.shortname }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
+          <li>
+            <a class="js-delete-item" href="/admin/badge/{{ badge.shortname }}" title="delete badge '{{ badge.name }}'"><i class="icon-trash"></i> Destroy</a>
+          </li>
+        </ul>
+      </div>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+
+{% if not search %}
+  <hr>
+  {% include "admin/pagination.html" %}
+{% endif %}
+
+
+{% if issuers.length and not search %}
+<h2>Issuers</h2>
+<ul class="unstyled">
+{% for issuer in issuers.sort() %}
 <li>
-  <a href="/admin/issuer/{{ issuer._id }}"> {{ issuer.name | e}} </a>
-  ({{ issuer.programs.length }} program(s))
+  <a href="/admin/issuer/{{ issuer.id }}">{{ issuer.name }}</a>
+  <a class="js-delete-item" href="/admin/issuer/{{ issuer.id }}" title="delete issuer '{{ issuer.name }}'"><i class="icon-trash"></i></a>
 </li>
 {% endfor %}
 </ul>
+{% else %}
 
-<h1>Badges (<a href="/admin/badge">Create a new badge</a>)</h1>
-<ul class="badge-list">
-{% for badge in badges %}
+  {% if not search %}
+    <p>No Issuers found.</p>
+  {% endif %}
+
+{% endif %}
+
+{% if undoRecords.length %}
+
+<h2>History</h2>
+
+<ul>
+{% for record in undoRecords %}
   <li>
-    <form method="post" action="/admin/badge/{{ badge.shortname }}" class="remove-form js-remove-badge">
-      <input type="hidden" name="_method" value="delete">
+    <form class="invisi-form" action="/admin/undo/{{ record._id }}" method="post">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-
-      <a class="badge-name" href="/admin/badge/{{ badge.shortname }}">
-        <img class="badge-image" src="{{ badge.relativeUrl('image') }}">
-        {{ badge.name }}</a>
-
-      (<code>{{ badge.shortname }}</code>)
-      <br>{{ badge.description | stupidSafe }}
-
-      <br>
-      <div class="btn-group">
-        <a href="#" class="btn btn-primary btn-small edit-link">Manage</a>
-        <a class="btn btn-primary btn-small dropdown-toggle" data-toggle="dropdown" href="#"><span class="caret"></span></a>
-        <ul class="dropdown-menu">
-          <li><a href="/admin/badge/{{ badge.shortname }}"><i class="icon-wrench"></i> Manage Triggers</a></li>
-          <li><a href="/admin/badge/{{ badge.shortname }}/edit/"><i class="icon-pencil"></i> Edit Details</a></li>
-          <li><a href="/admin/badge/{{ badge.shortname }}/claims/"><i class="icon-th-large"></i> Claim Codes</a></li>
-          <li class="divider"></li>
-          <li><a href="#" class="js-delete-badge"><i class="icon-trash"></i> Delete</a></li>
-        </ul>
-      </div>
-
+      Deletion of <strong>{{ record.name|stupidSafe }}</strong> on {{ record.creationDate }}
+      <button type="submit" class="btn btn-mini">Undo</button>
     </form>
   </li>
 {% endfor %}
 </ul>
+{% endif %}
 
-{% endblock %}
-
-{% block footer %}
-<script src="/js/badge-index.js"></script>
 {% endblock %}

@@ -4,6 +4,7 @@ const Issuer = require('../models/issuer');
 const Program = require('../models/program');
 const async = require('async');
 const util = require('../lib/util');
+const undoablyDelete = require('./undo').undoablyDelete;
 
 const method = util.method;
 const prop = util.prop;
@@ -75,6 +76,8 @@ function makeIssuer(issuer, form, image) {
     issuer.image = image;
   return issuer;
 };
+
+exports.destroy = undoablyDelete('issuer');
 
 exports.create = function create(req, res, next) {
   const form = req.body;
@@ -151,6 +154,8 @@ exports.updateProgram = function updateProgram(req, res, next) {
     return res.redirect(303, '/admin');
   });
 };
+
+exports.destroyProgram = undoablyDelete('program');
 
 exports.meta = function meta(req, res, next) {
   req.program.populate('issuer', function(err) {

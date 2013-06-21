@@ -1,9 +1,11 @@
 const _ = require('underscore');
+const async = require('async');
 const test = require('./');
 const env = require('../lib/environment');
 const db = require('../models');
 const Issuer = require('../models/issuer');
 const Program = require('../models/program');
+const Badge = require('../models/badge');
 
 function validIssuer() {
   return new Issuer({
@@ -32,6 +34,16 @@ test.applyFixtures({
       {email: 'two@example.org'},
     ],
   }),
+  'deleted-issuer': new Issuer({
+    _id: 'deleted-issuer',
+    name: 'Deleted Issuer',
+    contact: 'blah@example.org',
+    deleted: true,
+    accessList: [
+      {email: 'both@example.org'},
+      {email: 'two@example.org'},
+    ],
+  }),
   'program1': new Program({
     _id: 'program1',
     name: 'Program 1',
@@ -42,6 +54,14 @@ test.applyFixtures({
     name: 'Program 2',
     issuer: 'issuer1',
   }),
+  'badge1': new Badge({
+    _id: 'bba3989d4825d81b5587f96b7d8ba6941d590fff',
+    program: 'program1',
+    name: 'Basic Badge',
+    shortname: 'badge1',
+    description: 'For doing stuff.',
+    image: test.asset('sample.png'),
+  })
 }, function (fixtures) {
   test('Issuers without contacts can be saved', function (t) {
     var issuer = new Issuer({name: 'Bop'});
@@ -101,9 +121,93 @@ test.applyFixtures({
       t.same(fixtures['issuer2'].name, results[0].name);
     });
     Issuer.findByAccess('both@example.org', function (err, results) {
-      console.dir(results);
       const names = results.map(function (o) { return o.name }).sort();
       t.same(names, ['Issuer One', 'Issuer Two']);
+    });
+  });
+
+  test("Issuer.find() finds only undeleted issuers by default", function(t) {
+    Issuer.find({_id: 'deleted-issuer'}, function(err, issuers) {
+      if (err) throw err;
+      t.equal(issuers.length, 0);
+      t.end();
+    });
+  });
+
+  test("Issuer.find() can find deleted issuers if needed", function(t) {
+    Issuer.find({_id: 'deleted-issuer', deleted: true}, function(err, issuers) {
+      if (err) throw err;
+      t.equal(issuers.length, 1);
+      t.end();
+    });
+  });
+
+  test("Issuer.findOne() finds only undeleted issuers by default", function(t) {
+    Issuer.findOne({_id: 'deleted-issuer'}, function(err, issuer) {
+      if (err) throw err;
+      t.equal(issuer, null);
+      t.end();
+    });
+  });
+
+  test("Issuer.findOne() can find deleted issuers if needed", function(t) {
+    Issuer.findOne({_id: 'deleted-issuer', deleted: true}, function(err, issuer) {
+      if (err) throw err;
+      t.ok(issuer);
+      t.end();
+    });
+  });
+
+  test("Issuer#undoablyDelete() works", function(t) {
+    function ensureDeleted(document, deleted, cb) {
+      var name = document.name;
+      document.constructor.findOne({
+        _id: document._id,
+        deleted: deleted
+      }, function(err, document) {
+        if (err) return cb(err);
+        t.ok(document, JSON.stringify(name) +
+                       " should " + (deleted ? '' : 'not') + " be deleted");
+        cb();
+      });
+    }
+
+    t.equal(fixtures['issuer1'].deleted, false);
+    fixtures['issuer1'].undoablyDelete(function(err, record) {
+      if (err) throw err;
+      t.ok(!record.isModified(), "deletion record should be saved");
+      t.same(record.items.map(function(i) { return i.model; }), [
+        "Issuer", "Program", "Badge", "Program"
+      ]);
+      t.equal(fixtures['issuer1'].deleted, true);
+
+      async.series([
+        // These should all be marked as deleted.
+        ensureDeleted.bind(null, fixtures['issuer1'], true),
+        ensureDeleted.bind(null, fixtures['program1'], true),
+        ensureDeleted.bind(null, fixtures['program2'], true),
+        ensureDeleted.bind(null, fixtures['badge1'], true),
+
+        // Make sure unrelated documents weren't affected.
+        ensureDeleted.bind(null, fixtures['deleted-issuer'], true),
+        ensureDeleted.bind(null, fixtures['issuer2'], false),
+
+        // Now undo the deletion.
+        record.undo.bind(record),
+
+        // These should all be marked as not-deleted now.
+        ensureDeleted.bind(null, fixtures['issuer1'], false),
+        ensureDeleted.bind(null, fixtures['program1'], false),
+        ensureDeleted.bind(null, fixtures['program2'], false),
+        ensureDeleted.bind(null, fixtures['badge1'], false),
+
+        // Make sure unrelated documents weren't affected.
+        ensureDeleted.bind(null, fixtures['deleted-issuer'], true),
+        ensureDeleted.bind(null, fixtures['issuer2'], false),
+      ], function(err) {
+        if (err) throw err;
+        t.end();
+      });
     });
   });
 

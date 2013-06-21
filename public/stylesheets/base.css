@@ -1,0 +1,28 @@
+table.badge-list {
+  width:100%;
+}
+table.badge-list th {
+  text-align: left;
+}
+table.badge-list td,
+table.badge-list th {
+  padding:5px;
+}
+table.badge-list th {
+  border-bottom:1px solid #c0c0c0;
+}
+table.badge-list tr:nth-child(even) {
+  background-color: #eee;
+}
+table.badge-list img {
+  width:150px;
+  display:block;
+}
+table.badge-list td.imag {
+  width:160px;
+}
+form.invisi-form {
+  /* Bootstrap gives forms 20px bottom margin by default, but sometimes
+   * we just want to put a form in a normal block. */
+  margin: 0;
+}

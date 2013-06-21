@@ -611,6 +611,15 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api does not list `doNotList` badges', function (t) {
+    conmock({
+      handler: api.badges,
+      request: { query: { search: 'comment' }}
+    }, function (err, mockRes, req) {
+      t.notOk(mockRes.body.badges['do-not-list-badge']);
+      t.end();
+    });
+  });
 
   test('**badge recommendation stub**', function (t) {
     conmock({
