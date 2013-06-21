@@ -93,13 +93,7 @@ exports.getUploadedImage = function getUploadedImage(options) {
   }
 };
 
-exports.destroy = function destroy(req, res, next) {
-  var badge = req.badge;
-  badge.undoablyDelete(function(err) {
-    if (err) return next(err);
-    return res.send(200, "Badge undoably deleted.");
-  });
-};
+exports.destroy = require('./undo').undoablyDelete('badge');
 
 exports.addBehavior = function addBehavior(req, res) {
   var form = req.body;

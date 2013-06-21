@@ -121,7 +121,6 @@ test.applyFixtures({
       t.same(fixtures['issuer2'].name, results[0].name);
     });
     Issuer.findByAccess('both@example.org', function (err, results) {
-      console.dir(results);
       const names = results.map(function (o) { return o.name }).sort();
       t.same(names, ['Issuer One', 'Issuer Two']);
     });
@@ -161,12 +160,13 @@ test.applyFixtures({
 
   test("Issuer#undoablyDelete() works", function(t) {
     function ensureDeleted(document, deleted, cb) {
+      var name = document.name;
       document.constructor.findOne({
         _id: document._id,
         deleted: deleted
       }, function(err, document) {
         if (err) return cb(err);
-        t.ok(document, JSON.stringify(document.name) +
+        t.ok(document, JSON.stringify(name) +
                        " should " + (deleted ? '' : 'not') + " be deleted");
         cb();
       });
@@ -177,7 +177,7 @@ test.applyFixtures({
       if (err) throw err;
       t.ok(!record.isModified(), "deletion record should be saved");
       t.same(record.items.map(function(i) { return i.model; }), [
-        "Issuer", "Program", "Program", "Badge"
+        "Issuer", "Program", "Badge", "Program"
       ]);
       t.equal(fixtures['issuer1'].deleted, true);
 

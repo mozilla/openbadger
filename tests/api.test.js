@@ -611,6 +611,27 @@ test.applyFixtures(badgeFixtures, function(fx) {
     });
   });
 
+  test('api endpoint for all badges does not list `doNotList` badges', function (t) {
+    conmock({
+      handler: api.badges,
+    }, function (err, mockRes, req) {
+      t.notOk(mockRes.body.badges['do-not-list-badge']);
+      t.end();
+    });
+  });
+
+  test('api endpoint for a specific program does not list `doNotList` badges', function (t) {
+    conmock({
+      handler: api.program,
+      request: { params: { programShortName: 'some-program' }}
+    }, function (err, mockRes, req) {
+      const badges = mockRes.body.program.earnableBadges;
+      t.notOk(badges['do-not-list-badge'], 'shoud not list badge');
+      t.ok(badges['link-comment']);
+      t.ok(badges['comment']);
+      t.end();
+    });
+  });
 
   test('**badge recommendation stub**', function (t) {
     conmock({

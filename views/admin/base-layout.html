@@ -4,20 +4,19 @@
     <meta charset="utf-8">
     <title>OpenBadger</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf" content="{{ csrf }}">
     <meta name="description" content="">
     <meta name="author" content="">
     <!-- Le styles -->
-    <link href="/stylesheets/bootstrap.css" rel="stylesheet">
     <link href="/stylesheets/base.css" rel="stylesheet">
-    <link href="/stylesheets/csol.css" rel="stylesheet">
+    <link href="/stylesheets/bootstrap.css" rel="stylesheet">
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <script src="/js/jquery.min.js"></script>
     <link href="/stylesheets/admin.css" rel="stylesheet">
-    <script type="text/javascript" src="https://login.persona.org/include.js"></script>
-    <link rel="stylesheet" href="/stylesheets/persona-buttons.css">
+    {% block theme_header %}{% endblock %}
     {% block header %}{% endblock %}
   </head>
   <body class="{% block page%}{% endblock %}">
@@ -40,15 +39,6 @@
                   <li {{ page | activize('new-badge') }}>
                     <a href="/admin/badge">New Badge</a>
                   </li>
-                  <li {{ page | activize('new-behavior') }}>
-                    <a href="/admin/behavior">New Behavior</a>
-                  </li>
-                  <li class="">
-                    <a href="" class="js-logout-link">Logout</a>
-                    <form method="post" action="/logout" class="logout-form js-logout-form">
-                      <input type="hidden" name="csrf" value="{{ csrf }}">
-                    </form>
-                  </li>
                   {% endif %}
                   {% if user %}
                   <li class="">
@@ -57,7 +47,6 @@
                       <input type="hidden" name="csrf" value="{{ csrf }}">
                     </form>
                   </li>
-                  {% else %}
                   {% endif %}
                 </ul>
               </div><!--/.nav-collapse -->
@@ -65,44 +54,23 @@
           </div>
         </div>
         <div id="main" class="container">
-          {% block body %}{% endblock %}
+          {% if messages and messages().length %}
+            <br>
+            {% for message in messages() %}
+              <div class="alert alert-{{ message.category }}">
+                <a class="close" data-dismiss="alert" href="#">&times;</a>
+                {% set msgInfo = message.info %}
+                {% include message.template %}
+              </div>
+            {% endfor %}
+          {% endif %}
+          {% block main %}{% endblock %}
         </div> <!-- /container -->
       </div>
     </div>
-    <div class="wrapper secondary footer">
-      <div class="inner-wrapper">
-        <div class="container">
-          <div class="upper clearfix">
-            <ul class="pull-left">
-              <li><a href="mailto:summeroflearning@cityofchicago.org">summeroflearning@cityofchicago.org</a></li>
-              <li><span>&copy; 2013</span></li>
-            </ul>
-            <ul class="pull-right">
-              <li><a href="#">About</a></li>
-              <li><a href="#">Terms</a></li>
-              <li><a href="#">Privacy</a></li>
-              <li><a href="#">VPAT</a></li>
-            </ul>
-          </div>
-          <div class="lower clearfix">
-            <p class="pull-left">
-              More than 100 organizations across the city have joined forces to integrate learning into summer activities for youth of all ages in every Chicago neighborhood.
-              <br><br>
-              With your help, we'll launch the largest citywide summer learning campaign in the nation.
-            </p>
-            <ul class="pull-right">
-              <li><a class="logo chi" href="#">City of Chicago</a></li>
-              <li><a class="logo mac" href="#">MacArthur Foundation</a></li>
-              <li><a class="logo moz" href="#">Mozilla</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
+    {% block theme_footer %}{% endblock %}
     <script src="/js/bootstrap.js"></script>
     <script src="/js/common.js"></script>
-    {% block footer %}
-    <script src="/js/login.js"></script>
-    {% endblock %}
+    {% block footer %}{% endblock %}
   </body>
 </html>

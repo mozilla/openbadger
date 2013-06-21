@@ -405,11 +405,17 @@ test.applyFixtures(badgeFixtures, function(fx) {
 
   test('destroying badges works', function(t) {
     var badgeModel = fx['no-image-badge'];
+    t.plan(7);
     t.equal(badgeModel.deleted, false);
     conmock({
       handler: badge.destroy,
       request: {
-        badge: badgeModel
+        badge: badgeModel,
+        flash: function(category, args) {
+          t.equal(category, "info");
+          t.equal(args.info.name, "Badge \"Program with no image\"");
+          t.ok(args.info.id);
+        }
       }      
     }, function(err, mockRes, req) {
       if (err) throw err;
