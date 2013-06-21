@@ -753,7 +753,7 @@ Badge.getRecommendations = function (opts, callback) {
       const query = {
         _id: { '$nin': earnedBadgeIds },
         type: 'skill',
-        activityType: 'online',
+        activityType: { '$ne': 'offline' },
       };
 
       const exclude = { image: 0 };
