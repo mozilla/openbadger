@@ -16,6 +16,8 @@ const KID = '0-13';
 const TEEN = '13-18';
 const ADULT = '19-24';
 
+const ALL_AGES = [KID, TEEN, ADULT];
+
 const TemporaryEvidenceSchema = new Schema({
   path: {
     type: String,
@@ -718,11 +720,7 @@ Badge.getRecommendations = function (opts, callback) {
 
   const email = opts.email;
   const limit = opts.limit || Infinity;
-  const userAgeRange = opts.ageRange;
-
-  function onlineBias(badge) {
-    return badge.activityType == 'offline' ? 1 : 0;
-  }
+  const userAgeRange = opts.ageRange || ALL_AGES;
 
   // #TODO:
   //   * Be smarter about recommending badges that will complete a
@@ -791,7 +789,6 @@ Badge.getRecommendations = function (opts, callback) {
         const result = (filtered.length
                         ? filtered
                         : _.shuffle(allBadges))
-          .sort(onlineBias)
           .filter(prop('program', 'issuer'))
           .slice(0, limit);
 
