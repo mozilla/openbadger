@@ -214,8 +214,8 @@ test.applyFixtures({
               'no badges from inactive programs');
 
       // offline related
-      t.equal(lastElem(names), 'offline-science',
-              'should recommend offline badges last');
+      t.equal(contains(names, 'offline-science'), false,
+              'should not recommend offline badges');
 
       t.end();
     });

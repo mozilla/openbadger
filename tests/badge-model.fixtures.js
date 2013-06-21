@@ -108,6 +108,7 @@ module.exports = {
   'comment': new Badge({
     program: 'program',
     name : 'Commenting badge',
+    type: 'skill',
     shortname: 'comment',
     description: 'For doing lots of comments.',
     image: IMAGE,
@@ -197,6 +198,7 @@ module.exports = {
   'science1': new Badge({
     program: 'program',
     name: 'science1',
+    type: 'skill',
     shortname: 'science1',
     description: 'science1',
     image: IMAGE,
