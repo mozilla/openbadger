@@ -1,7 +1,7 @@
 {
   "name": "openbadger",
   "description": "Makin' badges",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "private": true,
   "scripts": {
     "start": "node app | bunyan",
