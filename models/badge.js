@@ -750,7 +750,11 @@ Badge.getRecommendations = function (opts, callback) {
         .filter(prop('badge', 'categoryAward'))
         .map(prop('badge', 'categoryAward'));
 
-      const query = {_id: { '$nin': earnedBadgeIds }};
+      const query = {
+        _id: { '$nin': earnedBadgeIds },
+        type: 'skill',
+        activityType: 'online',
+      };
 
       const exclude = { image: 0 };
 
@@ -764,7 +768,6 @@ Badge.getRecommendations = function (opts, callback) {
           .filter(function (b) {
             const programIsActive = isProgramActive(b.program);
             const noAgeInappropriate = _.contains(b.ageRange, userAgeRange);
-            const noParticipation = b.type !== 'participation';
             const noCategoryBadges = !b.categoryAward;
             const noneFromEarnedCategories =
               !_.intersection(b.categories, completedCategories).length;
@@ -772,7 +775,6 @@ Badge.getRecommendations = function (opts, callback) {
               _.intersection(b.categories, onTrackCategories).length;
             return (true
                     && noCategoryBadges
-                    && noParticipation
                     && noneFromEarnedCategories
                     && onlyOnTrack
                     && noAgeInappropriate
