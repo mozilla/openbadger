@@ -34,6 +34,7 @@ var templateEnv = template.buildEnvironment({
 
 templateEnv.express(app);
 
+app.locals.PERSONA_INCLUDE_JS_URL = "https://login.persona.org/include.js";
 api.jwtSecret = env.get('jwt_secret');
 api.limitedJwtSecret = env.get('limited_jwt_secret');
 
@@ -60,6 +61,13 @@ app.configure(function () {
 });
 
 app.configure('development', function () {
+  if ('OPENBADGER_ENABLE_STUBBYID' in process.env) {
+    app.locals.PERSONA_INCLUDE_JS_URL = '/js/stubbyid.js';
+    require('./lib/persona').verify = function(assertion, subdomain, cb) {
+      if (typeof subdomain == 'function') cb = subdomain;
+      cb(null, assertion);
+    };
+  }
   app.get('/500', render.nextError);
   app.use(express.errorHandler());
 });

@@ -61,6 +61,20 @@ programs, and badges from scratch, you can use the following command:
 node bin/import-sample-data.js
 ```
 
+## Using the Persona simulator
+
+When developing locally without internet access, or trying out logging in
+as multiple different email addresses, you may find it useful to enable
+simulation of the Persona service via [stubbyid.js][]. When enabled, a
+dialog box asking for your email address, with no password prompt, is all
+that's required to log in as any user.
+
+This feature can be used only when `NODE_ENV=development`, and can be
+enabled by setting the `OPENBADGER_ENABLE_STUBBYID` environment variable to
+any value (even the empty string).
+
+  [stubbyid.js]: http://toolness.github.io/stubbyid/
+
 ## Using real S3 instead of fake S3
 
 For production builds, you'll want to modify the above sample configuration
