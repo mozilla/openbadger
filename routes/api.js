@@ -717,7 +717,10 @@ exports.program = function program(req, res) {
         return res.send(500, "There was an error retrieving issuer info");
       var programData = normalizeProgram(program);
       programData.earnableBadges = {};
-      Badge.find({program: program._id}, function(err, badges) {
+      Badge.find({
+        program: program._id,
+        doNotList: {'$ne': true }
+      }, function(err, badges) {
         if (err)
           return res.send(500, "There was an error getting earnable badges");
         badges.forEach(function(badge) {
