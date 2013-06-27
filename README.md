@@ -41,7 +41,7 @@ export OPENBADGER_MONGO_PORT=27017
 export OPENBADGER_MONGO_DB="openbadger"
 export OPENBADGER_CLAIM_URL_TEXT='csol.org/claim'
 export OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
-export OPENBADGER_NOTIFICATION_WEBHOOK="http://localhost:3000/notify/claim"
+export OPENBADGER_NOTIFICATION_WEBHOOK="http://localhost:3000/notify/"
 ```
 
 You can either paste that directly into your terminal, or you can put
@@ -267,7 +267,7 @@ heroku config:add OPENBADGER_MONGO_HOST="your-mongo-host.org"
 heroku config:add OPENBADGER_MONGO_PORT=27017
 heroku config:add OPENBADGER_MONGO_DB="openbadger"
 heroku config:add OPENBADGER_ADMINS='["*@mozilla(foundation)?.org"]'
-heroku config:add OPENBADGER_NOTIFICATION_WEBHOOK="http://localhost:3000/notify/claim"
+heroku config:add OPENBADGER_NOTIFICATION_WEBHOOK="http://localhost:3000/notify/"
 ```
 
 # Deploying to Heroku
