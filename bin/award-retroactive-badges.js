@@ -11,22 +11,20 @@ BadgeInstance.distinct('user', null, function(err, emails) {
     console.log('Checking for earned badges for %s', email);
     Badge.awardCategoryBadges( {email: email, sendEmail: true}, function(err, instances) {
       if (err) {
-        callback(err);
+        return callback(err);
       }
 
       async.forEach(instances, function(instance, cb) {
         instance.populate('badge', function (err) {
           if (err) {
            console.log("Couldn't populate badge instance %s", instance.id);
-            cb(err);
+           return cb(err);
           }
 
           console.log('Awarded badge %s to %s', instance.badge.shortname, email);
           webhooks.notifyOfAwardedBadge(email, instance.badge.shortname, cb);
         });
-      }, function(err) {
-        callback(err);
-      });
+      }, callback);
     });
   }, function(err) {
     if (err) {
