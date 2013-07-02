@@ -7,7 +7,7 @@ env.temp({
 }, function (reset) {
 
   test('env.qualifyUrl', function (t) {
-    var expect = 'https://example.org:443/rad?level=maximum';
+    var expect = 'https://example.org:443/rad%3Flevel=maximum';
     var result = env.qualifyUrl('/rad?level=maximum');
     t.same(result, expect);
     t.end();
