@@ -39,8 +39,6 @@ module.exports = Work;
 
 
 Work.getTask = function getTask(query, callback) {
-  const ASCENDING_ORDER = 1;
-
   if (typeof query == 'string')
     query = { type: query };
   query = _.extend(query, { status: 'waiting' });
