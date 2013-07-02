@@ -1,7 +1,8 @@
 const _ = require('underscore');
 const db = require('./');
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const async = require('async');
+const Schema = require('mongoose').Schema;
+
 
 const WorkSchema = new Schema({
   _id: {
@@ -39,7 +40,11 @@ module.exports = Work;
 
 Work.getTask = function getTask(query, callback) {
   const ASCENDING_ORDER = 1;
+
+  if (typeof query == 'string')
+    query = { type: query };
   query = _.extend(query, { status: 'waiting' });
+
   Work.findOneAndUpdate(query, { status: 'started' })
     .sort('created')
     .exec(function (err, task) {
@@ -52,6 +57,16 @@ Work.getTask = function getTask(query, callback) {
       });
     });
 
+};
+
+Work.reset = function reset(query, outerCallback) {
+  Work.find(query, function (err, tasks) {
+    if (err) return outerCallback(err);
+    async.mapSeries(tasks, function (task, innerCallback) {
+      task.status = 'waiting';
+      task.save(innerCallback);
+    }, outerCallback);
+  });
 };
 
 Work.runQueue = function runQueue(query, workFn, callback) {
