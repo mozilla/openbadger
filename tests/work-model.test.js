@@ -73,22 +73,6 @@ test.applyFixtures({
     }
   }),
 }, function (fx) {
-  test('find work manually', function (t) {
-    Work.findOneAndUpdate(
-      {type: 'email'},
-      {status: 'started'},
-      {created: 1},
-      function (err, task) {
-        t.same(task._id, 'first');
-        t.same(task.status, 'started');
-
-        // reset
-        Work.findByIdAndUpdate(task._id, {status: 'waiting'}, function () {
-          t.end();
-        });
-    });
-  });
-
   test('Work#getTask: find work to do', function (t) {
     Work.getTask({type: 'email'}, function (err, task, complete) {
       t.same(task._id, 'first');
