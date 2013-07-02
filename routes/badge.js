@@ -3,6 +3,7 @@ const fs = require('fs');
 const logger = require('../lib/logger');
 const Badge = require('../models/badge');
 const BadgeInstance = require('../models/badge-instance');
+const Work = require('../models/work');
 const util = require('../lib/util');
 const async = require('async');
 
@@ -304,11 +305,18 @@ exports.issueMany = function issueMany(req, res, next) {
     .trim()
     .split('\n')
     .map(util.method('trim'));
-  const reserveEmail = reserveAndNotify.bind(null, badge, null);
-  // We're doing this in series rather than parallel to avoid a
-  // mongoose versioning error. For more information, see:
-  // http://tgriff3.com/post/44230656391/versioning-in-mongoose
-  async.mapSeries(emails, reserveEmail, function (err, results) {
+
+  function addTask(email, callback) {
+    new Work({
+      type: 'issue-badge',
+      data: {
+        badge: badge.id,
+        email: email
+      }
+    }).save(callback);
+  }
+
+  async.map(emails, addTask, function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');
