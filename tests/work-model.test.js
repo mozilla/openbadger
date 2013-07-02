@@ -99,9 +99,31 @@ test.applyFixtures({
 
     }, function (err, results) {
       t.same(results, [1,2,3], 'should have expected values');
-      t.end();
+
+      // cleanup
+      Work.reset({type: 'task'}, t.end.bind(t));
     });
   });
+
+  test('Work#runQueue: stop on first error', function (t) {
+    const expectedError = new Error('ghosts cloggin up the gears');
+    Work.runQueue('task', function (task, next) {
+
+      return next(expectedError);
+
+    }, function (err, results) {
+      t.same(err, expectedError);
+      Work.findById('t1', function (err, task) {
+        t.same(task.status, 'error');
+        Work.findById('t2', function (err, task) {
+          t.same(task.status, 'waiting');
+
+          Work.reset({type: 'task'}, t.end.bind(t));
+        });
+      });
+    });
+  });
+
 
   test('shutting down #', function (t) {
     db.close(); t.end();
