@@ -2,7 +2,7 @@ const _ = require('underscore');
 const db = require('./');
 const async = require('async');
 const Schema = require('mongoose').Schema;
-
+const util = require('../lib/util');
 
 const WorkSchema = new Schema({
   _id: {
@@ -70,12 +70,16 @@ Work.reset = function reset(query, outerCallback) {
 };
 
 Work.runQueue = function runQueue(query, workFn, callback) {
+  // workFn gets called with two args: (task, nextFn)
+  // nextFn expects two args: (err, result)
+  // callback gets called with two args: (err, results)
+
   const results = [];
 
-  function next(markCompleted) {
-    return function (err, result) {
-      if (err) return markCompleted('error', callback.bind(null, err));
-      markCompleted('done', function (err) {
+  function makeNextFn(taskComplete) {
+    return function next(err, result) {
+      if (err) return taskComplete('error', callback.bind(null, err));
+      taskComplete('done', function (err) {
         if (err) return callback(err);
         results.push(result);
         return getNextTask();
@@ -84,12 +88,42 @@ Work.runQueue = function runQueue(query, workFn, callback) {
   }
 
   function getNextTask() {
-    Work.getTask(query, function (err, task, complete) {
+    Work.getTask(query, function (err, task, taskComplete) {
       if (err) return callback(err);
       if (!task) return callback(null, results);
-      return workFn(task, next(complete));
+      return workFn(task, makeNextFn(taskComplete));
     });
   }
 
   getNextTask();
+};
+
+Work.processIssueQueue = function processIssueQueue(callback) {
+  const Badge = require('./badge');
+  const queueName = 'issue-badge';
+
+  const isEmail = util.isEmail;
+
+  Work.runQueue(queueName, function (task, next) {
+    const email = task.data.email;
+    const badgeId = task.data.badge;
+
+    Badge.findById(badgeId, function (err, badge) {
+      if (err) return next(err);
+      if (!isEmail(email))
+        return next(null, {email: email, status: 'invalid'});
+      badge.reserveAndNotify({
+        email: email,
+      }, function (err, claimCode) {
+        if (err) return next(err);
+        if (!claimCode)
+          return next(null, {email: email, status: 'dupe'});
+        return next(null, {
+          email: email,
+          status: 'ok',
+          claimCode: claimCode
+        });
+      });
+    });
+  }, callback);
 };

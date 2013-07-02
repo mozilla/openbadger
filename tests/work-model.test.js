@@ -3,6 +3,7 @@ const db = require('../models');
 const util = require('../lib/util');
 const env = require('../lib/environment');
 const Work = require('../models/work');
+const Badge = require('../models/badge');
 
 test.applyFixtures({
   'email1': new Work({
@@ -45,6 +46,30 @@ test.applyFixtures({
     created: new Date('2013-07-04'),
     data: {
       value: 3,
+    }
+  }),
+  'badge': new Badge({
+    _id: 'b1',
+    program: 'program',
+    name: 'Badge',
+    shortname: 'badge',
+    description: 'desc',
+    image: new Buffer(1),
+  }),
+  'issue1': new Work({
+    _id: 'i1',
+    type: 'issue-badge',
+    data: {
+      email: 'user-one@example.org',
+      badge: 'b1',
+    }
+  }),
+  'issue2': new Work({
+    _id: 'i2',
+    type: 'issue-badge',
+    data: {
+      email: 'user-two@example.org',
+      badge: 'b1',
     }
   }),
 }, function (fx) {
@@ -108,22 +133,27 @@ test.applyFixtures({
   test('Work#runQueue: stop on first error', function (t) {
     const expectedError = new Error('ghosts cloggin up the gears');
     Work.runQueue('task', function (task, next) {
-
       return next(expectedError);
-
     }, function (err, results) {
       t.same(err, expectedError);
       Work.findById('t1', function (err, task) {
         t.same(task.status, 'error');
         Work.findById('t2', function (err, task) {
           t.same(task.status, 'waiting');
-
           Work.reset({type: 'task'}, t.end.bind(t));
         });
       });
     });
   });
 
+
+  test('Work#processIssueQueue: process the `issue-badge` queue', function (t) {
+    Work.processIssueQueue(function (err, results) {
+      t.notOk(err, 'no errors');
+      t.same(results.map(util.prop('status')), ['ok', 'ok']);
+      t.end();
+    });
+  });
 
   test('shutting down #', function (t) {
     db.close(); t.end();
