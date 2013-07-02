@@ -14,7 +14,6 @@ const WorkSchema = new Schema({
     type: String,
     trim: true,
     required: true,
-    'enum': ['email']
   },
   created: {
     type: Date,
@@ -38,18 +37,44 @@ const Work = db.model('Work', WorkSchema);
 module.exports = Work;
 
 
-Work.getTask = function (query, callback) {
+Work.getTask = function getTask(query, callback) {
   const ASCENDING_ORDER = 1;
   query = _.extend(query, { status: 'waiting' });
-  Work.findOneAndUpdate(
-    query,
-    { status: 'started' },
-    { created: ASCENDING_ORDER },
-    function (err, task) {
+  Work.findOneAndUpdate(query, { status: 'started' })
+    .sort('created')
+    .exec(function (err, task) {
       if (err) return callback(err);
-      return callback(null, task, function complete(cb) {
+      return callback(null, task, function complete(status, cb) {
+        if (typeof status == 'function')
+          cb = status, status = 'done';
         if (!task) return cb();
-        Work.findByIdAndUpdate(task._id, { status: 'done' }, cb);
+        Work.findByIdAndUpdate(task._id, { status: status }, cb);
       });
     });
+
+};
+
+Work.runQueue = function runQueue(query, workFn, callback) {
+  const results = [];
+
+  function next(markCompleted) {
+    return function (err, result) {
+      if (err) return markCompleted('error', callback.bind(null, err));
+      markCompleted('done', function (err) {
+        if (err) return callback(err);
+        results.push(result);
+        return getNextTask();
+      });
+    };
+  }
+
+  function getNextTask() {
+    Work.getTask(query, function (err, task, complete) {
+      if (err) return callback(err);
+      if (!task) return callback(null, results);
+      return workFn(task, next(complete));
+    });
+  }
+
+  getNextTask();
 };

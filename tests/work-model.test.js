@@ -8,6 +8,7 @@ test.applyFixtures({
   'email1': new Work({
     _id: 'first',
     type: 'email',
+    created: new Date('2013-07-02'),
     data: {
       email: 'user@example.org',
       contents: 'hi hi hi',
@@ -16,11 +17,36 @@ test.applyFixtures({
   'email2': new Work({
     _id: 'second',
     type: 'email',
+    created: new Date('2013-07-03'),
     data: {
       email: 'user@example.org',
       contents: 'bye bye bye',
     }
-  })
+  }),
+  'task1': new Work({
+    _id: 't1',
+    type: 'task',
+    created: new Date('2013-07-02'),
+    data: {
+      value: 1,
+    }
+  }),
+  'task2': new Work({
+    _id: 't2',
+    type: 'task',
+    created: new Date('2013-07-03'),
+    data: {
+      value: 2,
+    }
+  }),
+  'task3': new Work({
+    _id: 't3',
+    type: 'task',
+    created: new Date('2013-07-04'),
+    data: {
+      value: 3,
+    }
+  }),
 }, function (fx) {
   test('find work manually', function (t) {
     Work.findOneAndUpdate(
@@ -38,12 +64,12 @@ test.applyFixtures({
     });
   });
 
-  test('find work to do', function (t) {
+  test('Work#getTask: find work to do', function (t) {
     Work.getTask({type: 'email'}, function (err, task, complete) {
       t.same(task._id, 'first');
       console.log('sending email', task.data.contents);
-      complete(function (err, task) {
-        t.same(task.status, 'done');
+      complete('error', function (err, task) {
+        t.same(task.status, 'error');
         Work.getTask({type: 'email'}, function (err, task, complete) {
           t.same(task._id, 'second');
           t.end();
@@ -52,7 +78,7 @@ test.applyFixtures({
     });
   });
 
-  test('fail gracefully when there is no work', function (t) {
+  test('Work#getTask: fail gracefully when there is no work', function (t) {
     Work.getTask({type: 'nope nope nope'}, function (err, task, complete) {
       t.notOk(err, 'no errors');
       t.notOk(task, 'no tasks');
@@ -64,6 +90,18 @@ test.applyFixtures({
     });
   });
 
+  test('Work#runQueue: given a function, apply that function to the queue in series', function (t) {
+    Work.runQueue({type: 'task'}, function (task, next) {
+      // simulate work
+      process.nextTick(function () {
+        return next(null, task.data.value);
+      });
+
+    }, function (err, results) {
+      t.same(results, [1,2,3], 'should have expected values');
+      t.end();
+    });
+  });
 
   test('shutting down #', function (t) {
     db.close(); t.end();
