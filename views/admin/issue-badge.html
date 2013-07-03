@@ -4,11 +4,7 @@
 
 {% if results %}
   <h2>Results</h2>
-  <ul>
-  {% for result in results %}
-    <li>{{ result.email | e }}: {{ result.status }}</li>
-  {% endfor %}
-  </ul>
+  <h3>Number of badges queued to be issued: {{ results.length }}</h3>
 {% endif %}
 
 <form method="post" action="?">
