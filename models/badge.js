@@ -289,6 +289,65 @@ Badge.getAllClaimCodes = function getAllClaimCodes(callback) {
   });
 };
 
+Badge.awardCategoryBadges = function awardCategoryBadges(options, callback) {
+  const email = options.email;
+  var categories = options.categories;
+
+  function setupCategories(setupCallback) {
+    if (!categories) {
+      Badge.distinct('categories', null, function(err, values) {
+        categories = values;
+        setupCallback(err);
+      });
+    }
+    else {
+      setupCallback();
+    }
+  }
+
+  setupCategories(function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    async.concatSeries(categories, function(category, catCb) {
+      async.waterfall([
+        function getCategoryBadges(callback) {
+          const query = {categoryAward: category};
+          Badge.find(query, callback);
+        },
+        function filterByScore(badges, callback) {
+          BadgeInstance.findByCategory(email, category, function (err, instances) {
+            if (err) return callback(err);
+            const score = instances.reduce(function (sum, inst) {
+              return (sum += inst.badge.categoryWeight, sum);
+            }, 0);
+            const eligible = badges.filter(function (badge) {
+              return score >= badge.categoryRequirement;
+            });
+            return callback(null, eligible);
+          });
+        },
+        function filterByOwned(badges, callback) {
+          async.filter(badges, function (badge, cb) {
+            const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
+            doesNotOwnBadge(email, badge.shortname, function (err, result) {
+              return cb(result);
+            });
+          }, function (results) { callback(null, results) });
+        },
+        function awardBadges(badges, callback) {
+          const newOpts = { user: email };
+          async.map(badges, util.method('award', newOpts), callback);
+        },
+      ], catCb);
+    }, function(err, instances) {
+      if (err) return callback(err);
+      return callback(null, instances);
+    });
+  });
+}
+
 // Instance methods
 // ----------------
 
@@ -560,49 +619,11 @@ Badge.prototype.award = function award(options, callback) {
         return callback();
       return callback(err);
     }
-    if (options.sendEmail) {
-      console.log('WRITE SEND EMAIL CODE');
-      // #TODO: add email code here
-    }
+
     if (!checkForCategoryBadges)
       return callback(null, instance, []);
 
-    // The following section is for awarding category-level badges. We
-    // have to determine whether the badge that was just awarded
-    // combined with the badges the user already has is enough to award
-    // the category level badge.
-    async.concatSeries(categories, function(category, catCb) {
-      async.waterfall([
-        function getCategoryBadges(callback) {
-          const query = {categoryAward: category};
-          Badge.find(query, callback);
-        },
-        function filterByScore(badges, callback) {
-          BadgeInstance.findByCategory(email, category, function (err, instances) {
-            if (err) return callback(err);
-            const score = instances.reduce(function (sum, inst) {
-              return (sum += inst.badge.categoryWeight, sum);
-            }, 0);
-            const eligible = badges.filter(function (badge) {
-              return score >= badge.categoryRequirement;
-            });
-            return callback(null, eligible);
-          });
-        },
-        function filterByOwned(badges, callback) {
-          async.filter(badges, function (badge, cb) {
-            const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
-            doesNotOwnBadge(email, badge.shortname, function (err, result) {
-              return cb(result);
-            });
-          }, function (results) { callback(null, results) });
-        },
-        function awardBadges(badges, callback) {
-          const newOpts = { user: email, sendEmail: true };
-          async.map(badges, util.method('award', newOpts), callback);
-        },
-      ], catCb);
-    }, function(err, instances) {
+    Badge.awardCategoryBadges( { email: email, categories: categories }, function(err, instances) {
       if (err) return callback(err);
       return callback(null, instance, instances);
     });
