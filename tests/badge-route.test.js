@@ -6,7 +6,9 @@ const badgeFixtures = require('./badge-model.fixtures');
 
 const db = require('../models');
 const badge = require('../routes/badge');
+
 const Badge = require('../models/badge');
+const Work = require('../models/work');
 
 test.applyFixtures(badgeFixtures, function(fx) {
   test('getting open claim codes as txt works', function(t) {
@@ -51,7 +53,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
       if (err) throw err;
       t.equal(mockRes.status, 400);
       t.end();
-    });    
+    });
   });
 
   test('txt bulk action returns redirect', function(t) {
@@ -66,7 +68,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(mockRes.status, 303);
       t.equal(mockRes.path, '../unclaimed.txt?batchName=foo%20bar');
       t.end();
-    });    
+    });
   });
 
   test('adding no claim codes does nothing', function(t) {
@@ -211,7 +213,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 422);
-      t.same(mockRes.body, 
+      t.same(mockRes.body,
              "A validation error occurred on the following fields: " +
              "description (required), image (required), " +
              "name (required), shortname (required).");
@@ -233,7 +235,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 422);
-      t.same(mockRes.body, 
+      t.same(mockRes.body,
              "A validation error occurred on the following fields: " +
              "image (maxLength).");
       t.end();
@@ -354,7 +356,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
           flashes.push({type: type, results: results});
         },
         body: {
-          emails: 'blarg@goose.org\nnarg@moose.org'
+          emails: ['blarg@goose.org','narg@moose.org'].join('\n')
         }
       }
     }, function(err, mockRes, req) {
@@ -376,13 +378,17 @@ test.applyFixtures(badgeFixtures, function(fx) {
       t.equal(flashes[0].results.length, 2);
       var success = flashes[0].results[0];
       var success2 = flashes[0].results[1];
-      t.equal(success.email, 'blarg@goose.org');
-      t.equal(success.status, 'ok');
-      t.equal(typeof(success.claimCode), 'string');
-      t.equal(success2.email, 'narg@moose.org');
-      t.equal(success2.status, 'ok');
-      t.equal(typeof(success2.claimCode), 'string');      
-      t.end();
+      t.equal(success.data.email, 'blarg@goose.org');
+      t.equal(success.status, 'waiting');
+      t.equal(success2.data.email, 'narg@moose.org');
+      t.equal(success2.status, 'waiting');
+
+      Work.processIssueQueue(function (err, results) {
+        t.equal(typeof(results[0].claimCode), 'string');
+        t.equal(typeof(results[1].claimCode), 'string');
+        t.end();
+      });
+
     });
   });
 
@@ -393,7 +399,7 @@ test.applyFixtures(badgeFixtures, function(fx) {
       request: {
         badge: badgeModel,
         params: {code: badgeModel.claimCodes[0].code}
-      }      
+      }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.fntype, 'redirect');
@@ -416,14 +422,14 @@ test.applyFixtures(badgeFixtures, function(fx) {
           t.equal(args.info.name, "Badge \"Program with no image\"");
           t.ok(args.info.id);
         }
-      }      
+      }
     }, function(err, mockRes, req) {
       if (err) throw err;
       t.equal(mockRes.status, 200);
       t.equal(mockRes.body, 'Badge undoably deleted.');
       t.equal(badgeModel.deleted, true);
       t.end();
-    });    
+    });
   });
 
   test('shutting down #', function (t) {
