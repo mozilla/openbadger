@@ -102,7 +102,6 @@ Program.prototype.findBadges = function findBadges(callback) {
   Badge.find({ program: this.id }, callback);
 };
 
-function unary(fn) { return function (arg1) { fn(arg1) } }
 
 Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
   const self = this;
@@ -110,6 +109,10 @@ Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
   // We are doing everything for sideffects, we don't care about passing
   // values down the waterfall, so we use `unary(cb)` to ensure the
   // callback only gets the potential error value.
+  function unary(fn) {
+    return function (arg1) { fn(arg1) };
+  }
+
   async.waterfall([
     function populateIssuer(cb) {
       self.populate('issuer', unary(cb));
@@ -117,16 +120,7 @@ Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
     function removeFromOldIssuer(cb) {
       const oldIssuer = self.issuer;
       if (!oldIssuer) return cb();
-
-      // #TODO: make this an issuer instance method?
-      //  something like issuer.removeProgram(program);
-      oldIssuer.programs = oldIssuer.programs.filter(function (prog) {
-        if (prog.id)
-          return prog.id !== self.id;
-        return prog !== self.id;
-      });
-
-      return oldIssuer.save(unary(cb));
+      oldIssuer.removeProgram(self, unary(cb));
     },
     function addToNewIssuer(cb) {
       newIssuer.programs.push(self);

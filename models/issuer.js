@@ -118,4 +118,16 @@ Issuer.prototype.getDeletableChildren = function getDeletableChildren(cb) {
   });
 };
 
+Issuer.prototype.removeProgram = function removeProgram(programToRemove, callback) {
+  const needle = typeof programToRemove == 'string'
+    ? programToRemove
+    : programToRemove.id;
+  this.programs = this.programs.filter(function (program) {
+    return (typeof program == 'string'
+            ? needle !== program
+            : needle !== program.id);
+  });
+  this.save(callback);
+};
+
 module.exports = Issuer;
