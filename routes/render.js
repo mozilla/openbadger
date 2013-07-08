@@ -86,6 +86,7 @@ exports.editProgramForm = function (req, res) {
     page: 'edit-program',
     editing: true,
     program:  req.program,
+    issuers: req.issuers,
     user: req.session.user,
     access: req.session.access,
     csrf: req.session._csrf,

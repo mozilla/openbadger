@@ -115,8 +115,11 @@ exports.define = function defineRoutes(app) {
     issuer.getUploadedImage()
   ], issuer.newProgram);
   app.all('/admin/program/:programId*', issuer.findProgramById);
-  app.get('/admin/program/:programId', render.editProgramForm);
+  app.get('/admin/program/:programId', [
+    issuer.findAll
+  ],render.editProgramForm);
   app.post('/admin/program/:programId', [
+    issuer.findById,
     issuer.getUploadedImage()
   ], issuer.updateProgram);
   app.delete('/admin/program/:programId', issuer.destroyProgram);

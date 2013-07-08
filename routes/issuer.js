@@ -5,6 +5,7 @@ const Program = require('../models/program');
 const async = require('async');
 const util = require('../lib/util');
 const undoablyDelete = require('./undo').undoablyDelete;
+const log = require('../lib/logger');
 
 const method = util.method;
 const prop = util.prop;
@@ -133,9 +134,14 @@ exports.newProgram = function newProgram(req, res, next) {
 
 exports.updateProgram = function updateProgram(req, res, next) {
   const form = req.body;
-  const issuer = req.issuer;
   const program = req.program;
   const image = req.image;
+  const newIssuer = req.issuer;
+
+  function done(err) {
+    if (err) return next(err);
+    return res.redirect(303, '/admin');
+  }
 
   _.extend(program, {
     name: form.name,
@@ -149,10 +155,10 @@ exports.updateProgram = function updateProgram(req, res, next) {
   if (image.length)
     program.image = image;
 
-  program.save(function (err) {
-    if (err) return next(err);
-    return res.redirect(303, '/admin');
-  });
+  if (program.issuer == newIssuer.id)
+    return program.save(done);
+
+  program.changeIssuerAndSave(newIssuer, done);
 };
 
 exports.destroyProgram = undoablyDelete('program');

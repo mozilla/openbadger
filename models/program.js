@@ -106,9 +106,9 @@ Program.prototype.findBadges = function findBadges(callback) {
 Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
   const self = this;
 
-  // We are doing everything for sideffects, we don't care about passing
-  // values down the waterfall, so we use `unary(cb)` to ensure the
-  // callback only gets the potential error value.
+  // We don't care about passing values down the waterfall, so we use
+  // `unary(cb)` to make sure that the final callback only gets the
+  // potential error value.
   function unary(fn) {
     return function (arg1) { fn(arg1) };
   }
@@ -132,6 +132,8 @@ Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
     }
   ], callback);
 };
+
+Program.prototype.changeIssuerAndSave = Program.prototype.changeIssuer;
 
 Program.prototype.getDeletableChildren = function getDeletableChildren(cb) {
   this.findBadges(cb);
