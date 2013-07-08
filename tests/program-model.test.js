@@ -60,14 +60,14 @@ test.applyFixtures({
     });
   });
 
-  test('Program#changeIssuer: normal functionality', function (t) {
+  test('Program#changeIssuerAndSave: normal functionality', function (t) {
     const program = fx['program'];
     const oldIssuer = fx['issuer'];
     const newIssuer = fx['issuer2'];
 
     t.same(program.issuer.id, oldIssuer.id);
 
-    program.changeIssuer(newIssuer, function (err) {
+    program.changeIssuerAndSave(newIssuer, function (err) {
       const issuers = [oldIssuer.id, newIssuer.id];
       async.map(issuers, Issuer.findById.bind(Issuer), function (err, iss) {
         const oldPrograms = [].slice.call(iss[0].programs);
@@ -80,10 +80,10 @@ test.applyFixtures({
     });
   });
 
-  test('Program#changeIssuer: do not crash with orphaned program', function (t) {
+  test('Program#changeIssuerAndSave: do not crash with orphaned program', function (t) {
     const program = fx['orphaned-program'];
     const newIssuer = fx['issuer2'];
-    program.changeIssuer(newIssuer, function (err) {
+    program.changeIssuerAndSave(newIssuer, function (err) {
       t.same(program.issuer.id, newIssuer.id);
       t.end();
     });

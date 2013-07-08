@@ -103,7 +103,7 @@ Program.prototype.findBadges = function findBadges(callback) {
 };
 
 
-Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
+Program.prototype.changeIssuerAndSave = function changeIssuerAndSave(newIssuer, callback) {
   const self = this;
 
   // We don't care about passing values down the waterfall, so we use
@@ -132,8 +132,6 @@ Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
     }
   ], callback);
 };
-
-Program.prototype.changeIssuerAndSave = Program.prototype.changeIssuer;
 
 Program.prototype.getDeletableChildren = function getDeletableChildren(cb) {
   this.findBadges(cb);
