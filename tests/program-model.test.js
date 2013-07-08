@@ -18,11 +18,11 @@ test.applyFixtures({
     issuer: 'issuer1',
     url: 'https://example.org/program',
   }),
-}, function (fixtures) {
+}, function (fx) {
 
   test('Finding a program and an issuer', function (t) {
-    const program = fixtures['program'];
-    const issuer = fixtures['issuer'];
+    const program = fx['program'];
+    const issuer = fx['issuer'];
     Program.findOne({'_id': program._id})
       .populate('issuer')
       .exec(function (err, result) {
@@ -32,8 +32,8 @@ test.applyFixtures({
   });
 
   test('Generating issuer json', function (t) {
-    const issuer = fixtures['issuer'];
-    const program = fixtures['program'];
+    const issuer = fx['issuer'];
+    const program = fx['program'];
     const expect =  {
       name: issuer.name,
       org: program.name,
