@@ -5,6 +5,7 @@ const env = require('../lib/environment');
 const util = require('../lib/util');
 const async = require('async');
 const Badge = require('./badge');
+const Issuer = require('./issuer');
 
 const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/i
@@ -99,6 +100,43 @@ Program.prototype.absoluteUrl = function absoluteUrl(field) {
 
 Program.prototype.findBadges = function findBadges(callback) {
   Badge.find({ program: this.id }, callback);
+};
+
+function unary(fn) { return function (arg1) { fn(arg1) } }
+
+Program.prototype.changeIssuer = function changeIssuer(newIssuer, callback) {
+  const self = this;
+
+  // We are doing everything for sideffects, we don't care about passing
+  // values down the waterfall, so we use `unary(cb)` to ensure the
+  // callback only gets the potential error value.
+  async.waterfall([
+    function populateIssuer(cb) {
+      self.populate('issuer', unary(cb));
+    },
+    function removeFromOldIssuer(cb) {
+      const oldIssuer = self.issuer;
+      if (!oldIssuer) return cb();
+
+      // #TODO: make this an issuer instance method?
+      //  something like issuer.removeProgram(program);
+      oldIssuer.programs = oldIssuer.programs.filter(function (prog) {
+        if (prog.id)
+          return prog.id !== self.id;
+        return prog !== self.id;
+      });
+
+      return oldIssuer.save(unary(cb));
+    },
+    function addToNewIssuer(cb) {
+      newIssuer.programs.push(self);
+      newIssuer.save(unary(cb));
+    },
+    function addNewIssuerToSelf(cb) {
+      self.issuer = newIssuer;
+      self.save(unary(cb));
+    }
+  ], callback);
 };
 
 Program.prototype.getDeletableChildren = function getDeletableChildren(cb) {
