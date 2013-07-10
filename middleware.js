@@ -38,6 +38,28 @@ exports.logger = function () {
   };
 };
 
+
+exports.noFrame = function noFrame() {
+  return function (req, res, next) {
+    res.setHeader('X-Frame-Options', 'DENY');
+    return next();
+  };
+};
+
+exports.strictTransport = function strictTransport() {
+
+  function setStrictTransport(req, res, next) {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+    return next();
+  }
+
+  function doNothing(_, _, next) {
+    return next();
+  }
+
+  return env.isHttps() ? setStrictTransport : doNothing;
+};
+
 exports.getSessionStore = function getSessionStore(env) {
   const redisOpts = env.get('redis');
   const memcachedOpts = env.get('memcached');
