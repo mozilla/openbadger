@@ -412,7 +412,7 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
 
 Badge.prototype.getClaimCode = function getClaimCode(code) {
   const codes = this.claimCodes;
-  const normalizedCode = code.trim().replace(/ /g, '-').toLowerCase();
+  const normalizedCode = code.trim().replace(/ /g, '-');
   var idx = codes.length;
   while (idx--) {
     if (codes[idx].code === normalizedCode)
