@@ -326,7 +326,7 @@ exports.issueMany = function issueMany(req, res, next) {
 exports.findByClaimCode = function findByClaimCode(options) {
   return function (req, res, next) {
     var code = req.body.code;
-    var normalizedCode = code.trim().replace(/ +/g, '-').toLowerCase();
+    var normalizedCode = code.trim().replace(/ +/g, '-');
     Badge.findByClaimCode(normalizedCode, function (err, badge) {
       if (err) return next(err);
       if (!badge)
