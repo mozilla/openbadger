@@ -257,6 +257,7 @@ This endpoint returns `200 OK`:
     "isRead": true,
     "issuedOn": 1370001406,
     "assertionUrl": "/badge/assertion/43e22fa0f2b6d8ca1c06867010ccd36f8402640a",
+    "evidence": "http://csol.iremix.cc/medal/97445/evidence.html?1374160995",
     "badgeClass": {
       "name": "Link Badge, basic",
       "description": "For doing links.",

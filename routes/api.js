@@ -284,7 +284,6 @@ exports.user = function user(req, res) {
       var instance = info.badges[shortname];
       result.badges[shortname] = {
         assertionUrl: instance.absoluteUrl('assertion'),
-        evidence: instance.evidence,
         isRead: instance.seen,
         issuedOn: instance.issuedOnUnix(),
         badgeClass: {
