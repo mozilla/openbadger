@@ -50,7 +50,7 @@ test.applyFixtures({
     issuer: 'issuer',
     shortname: 'in-progress',
     startDate: new Date('2013-06-01'),
-    endDate: new Date('2013-07-15'),
+    endDate: new Date('2099-07-15'),
     name: 'In Progress',
   }),
   'ended-program': new Program({
