@@ -104,6 +104,7 @@ Work.processIssueQueue = function processIssueQueue(callback) {
 
   Work.runQueue(queueName, function (task, next) {
     const email = task.data.email;
+    const issuedBy = task.data.issuedBy;
     const badgeId = task.data.badge;
 
     Badge.findById(badgeId, function (err, badge) {
@@ -112,6 +113,7 @@ Work.processIssueQueue = function processIssueQueue(callback) {
         return next(null, {email: email, status: 'invalid'});
       badge.reserveAndNotify({
         email: email,
+        issuedBy: issuedBy,
       }, function (err, claimCode) {
         if (err) return next(err);
         if (!claimCode)
