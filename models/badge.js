@@ -53,6 +53,11 @@ const ClaimCodeSchema = new Schema({
     required: false,
     trim: true,
   },
+  issuedBy: {
+    type: String,
+    required: false,
+    trim: true,
+  },
   reservedFor: {
     type: String,
     required: false,
@@ -289,6 +294,65 @@ Badge.getAllClaimCodes = function getAllClaimCodes(callback) {
   });
 };
 
+Badge.awardCategoryBadges = function awardCategoryBadges(options, callback) {
+  const email = options.email;
+  var categories = options.categories;
+
+  function setupCategories(setupCallback) {
+    if (!categories) {
+      Badge.distinct('categories', null, function(err, values) {
+        categories = values;
+        setupCallback(err);
+      });
+    }
+    else {
+      setupCallback();
+    }
+  }
+
+  setupCategories(function(err) {
+    if (err) {
+      return callback(err);
+    }
+
+    async.concatSeries(categories, function(category, catCb) {
+      async.waterfall([
+        function getCategoryBadges(callback) {
+          const query = {categoryAward: category};
+          Badge.find(query, callback);
+        },
+        function filterByScore(badges, callback) {
+          BadgeInstance.findByCategory(email, category, function (err, instances) {
+            if (err) return callback(err);
+            const score = instances.reduce(function (sum, inst) {
+              return (sum += inst.badge.categoryWeight, sum);
+            }, 0);
+            const eligible = badges.filter(function (badge) {
+              return score >= badge.categoryRequirement;
+            });
+            return callback(null, eligible);
+          });
+        },
+        function filterByOwned(badges, callback) {
+          async.filter(badges, function (badge, cb) {
+            const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
+            doesNotOwnBadge(email, badge.shortname, function (err, result) {
+              return cb(result);
+            });
+          }, function (results) { callback(null, results) });
+        },
+        function awardBadges(badges, callback) {
+          const newOpts = { user: email };
+          async.map(badges, util.method('award', newOpts), callback);
+        },
+      ], catCb);
+    }, function(err, instances) {
+      if (err) return callback(err);
+      return callback(null, instances);
+    });
+  });
+}
+
 // Instance methods
 // ----------------
 
@@ -309,6 +373,7 @@ function inArray(array, thing) {
  *   - `codes`: Array of claim codes to add
  *   - `limit`: Maximum number of codes to add. [default: Infinity]
  *   - `multi`: Whether or not the claim is multi-use
+ *   - `issuedBy`: The user that issued the claim code
  *   - `reservedFor`: Who the claim code is reserved for
  *   - `batchName`: Batch name of the claim code
  *   - `alreadyClean`: Boolean whether or not items are already unique
@@ -351,6 +416,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
         code: code,
         multi: options.multi,
         batchName: options.batchName,
+        issuedBy: options.issuedBy,
         reservedFor: options.reservedFor
       });
     }.bind(this));
@@ -369,6 +435,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
  *   - `count`: how many codes to generate
  *   - `codeGenerator`: function to generate random codes (optional)
  *   - `batchName`: batch name to give to each generated code
+ *   - `issuedBy` : the user that issued the claim code
  *   - `reservedFor`: email address to reserve the claim code for.
  *       count=1 is implicit when this is non-falsy.
  * @param {Function} callback
@@ -380,6 +447,7 @@ Badge.prototype.addClaimCodes = function addClaimCodes(options, callback) {
 
 Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callback) {
   const codeGenerator = options.codeGenerator || phraseGenerator;
+  const issuedBy = options.issuedBy;
   const reservedFor = options.reservedFor;
   const batchName = options.batchName;
   const accepted = [];
@@ -396,6 +464,7 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
     self.addClaimCodes({
       codes: phrases,
       limit: numLeft,
+      issuedBy: issuedBy,
       reservedFor: reservedFor,
       batchName: batchName,
       alreadyClean: true,
@@ -412,7 +481,7 @@ Badge.prototype.generateClaimCodes = function generateClaimCodes(options, callba
 
 Badge.prototype.getClaimCode = function getClaimCode(code) {
   const codes = this.claimCodes;
-  const normalizedCode = code.trim().replace(/ /g, '-').toLowerCase();
+  const normalizedCode = code.trim().replace(/ /g, '-');
   var idx = codes.length;
   while (idx--) {
     if (codes[idx].code === normalizedCode)
@@ -508,6 +577,7 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(info, callback) {
 
   const self = this;
   var email = info.email;
+  var issuedBy = info.issuedBy;
   var files = info.evidenceFiles || [];
 
   BadgeInstance.findOne({
@@ -516,7 +586,7 @@ Badge.prototype.reserveAndNotify = function reserveAndNotify(info, callback) {
     if (err) return callback(err);
     if (instance)
       return callback(null, null);
-    self.generateClaimCodes({reservedFor: email}, function(err, accepted) {
+    self.generateClaimCodes({reservedFor: email, issuedBy: issuedBy}, function(err, accepted) {
       if (err) return callback(err);
       var claimCode = accepted[0];
       var claim = self.getClaimCode(claimCode);
@@ -560,49 +630,11 @@ Badge.prototype.award = function award(options, callback) {
         return callback();
       return callback(err);
     }
-    if (options.sendEmail) {
-      console.log('WRITE SEND EMAIL CODE');
-      // #TODO: add email code here
-    }
+
     if (!checkForCategoryBadges)
       return callback(null, instance, []);
 
-    // The following section is for awarding category-level badges. We
-    // have to determine whether the badge that was just awarded
-    // combined with the badges the user already has is enough to award
-    // the category level badge.
-    async.concatSeries(categories, function(category, catCb) {
-      async.waterfall([
-        function getCategoryBadges(callback) {
-          const query = {categoryAward: category};
-          Badge.find(query, callback);
-        },
-        function filterByScore(badges, callback) {
-          BadgeInstance.findByCategory(email, category, function (err, instances) {
-            if (err) return callback(err);
-            const score = instances.reduce(function (sum, inst) {
-              return (sum += inst.badge.categoryWeight, sum);
-            }, 0);
-            const eligible = badges.filter(function (badge) {
-              return score >= badge.categoryRequirement;
-            });
-            return callback(null, eligible);
-          });
-        },
-        function filterByOwned(badges, callback) {
-          async.filter(badges, function (badge, cb) {
-            const doesNotOwnBadge = util.negate(BadgeInstance.userHasBadge);
-            doesNotOwnBadge(email, badge.shortname, function (err, result) {
-              return cb(result);
-            });
-          }, function (results) { callback(null, results) });
-        },
-        function awardBadges(badges, callback) {
-          const newOpts = { user: email, sendEmail: true };
-          async.map(badges, util.method('award', newOpts), callback);
-        },
-      ], catCb);
-    }, function(err, instances) {
+    Badge.awardCategoryBadges( { email: email, categories: categories }, function(err, instances) {
       if (err) return callback(err);
       return callback(null, instance, instances);
     });

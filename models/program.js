@@ -5,6 +5,7 @@ const env = require('../lib/environment');
 const util = require('../lib/util');
 const async = require('async');
 const Badge = require('./badge');
+const Issuer = require('./issuer');
 
 const regex = {
   email: /[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?/i
@@ -99,6 +100,37 @@ Program.prototype.absoluteUrl = function absoluteUrl(field) {
 
 Program.prototype.findBadges = function findBadges(callback) {
   Badge.find({ program: this.id }, callback);
+};
+
+
+Program.prototype.changeIssuerAndSave = function changeIssuerAndSave(newIssuer, callback) {
+  const self = this;
+
+  // We don't care about passing values down the waterfall, so we use
+  // `unary(cb)` to make sure that the final callback only gets the
+  // potential error value.
+  function unary(fn) {
+    return function (arg1) { fn(arg1) };
+  }
+
+  async.waterfall([
+    function populateIssuer(cb) {
+      self.populate('issuer', unary(cb));
+    },
+    function removeFromOldIssuer(cb) {
+      const oldIssuer = self.issuer;
+      if (!oldIssuer) return cb();
+      oldIssuer.removeProgram(self, unary(cb));
+    },
+    function addToNewIssuer(cb) {
+      newIssuer.programs.push(self);
+      newIssuer.save(unary(cb));
+    },
+    function addNewIssuerToSelf(cb) {
+      self.issuer = newIssuer;
+      self.save(unary(cb));
+    }
+  ], callback);
 };
 
 Program.prototype.getDeletableChildren = function getDeletableChildren(cb) {

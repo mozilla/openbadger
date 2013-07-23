@@ -34,6 +34,11 @@ test.applyFixtures({
       {email: 'two@example.org'},
     ],
   }),
+  'rm-program-issuer': new Issuer({
+    _id: 'rm-program-issuer',
+    name: 'Detachable Programs',
+    programs: ['program1', 'program2'],
+  }),
   'deleted-issuer': new Issuer({
     _id: 'deleted-issuer',
     name: 'Deleted Issuer',
@@ -208,6 +213,16 @@ test.applyFixtures({
         if (err) throw err;
         t.end();
       });
+    });
+  });
+
+  test('Issuer#removeProgram: by program object', function (t) {
+    const issuer = fixtures['rm-program-issuer'];
+    const program = fixtures['program1'];
+    t.same(issuer.programs.length, 2);
+    issuer.removeProgram(program, function (err) {
+      t.same(issuer.programs.length, 1);
+      t.end();
     });
   });
 

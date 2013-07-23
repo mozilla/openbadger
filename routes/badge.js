@@ -3,6 +3,7 @@ const fs = require('fs');
 const logger = require('../lib/logger');
 const Badge = require('../models/badge');
 const BadgeInstance = require('../models/badge-instance');
+const Work = require('../models/work');
 const util = require('../lib/util');
 const async = require('async');
 
@@ -175,14 +176,16 @@ exports.addClaimCodes = function addClaimCodes(req, res, next) {
     badge.addClaimCodes({
       codes: codes,
       multi: !!form.multi,
-      batchName: form.batchName
+      batchName: form.batchName,
+      issuedBy: req.session.user,
     }, goBack);
   } else if (form.quantity) {
     var count = parseInt(form.quantity);
     if (count > 0) {
       badge.generateClaimCodes({
         count: count,
-        batchName: form.batchName
+        batchName: form.batchName,
+        issuedBy: req.session.user,
       }, goBack);
     } else
       goBack();
@@ -261,11 +264,12 @@ exports.awardToUser = function awardToUser(req, res, next) {
   });
 };
 
-function reserveAndNotify(badge, evidenceFiles, email, callback) {
+function reserveAndNotify(badge, evidenceFiles, email, issuedBy, callback) {
   if (!util.isEmail(email))
     return callback(null, {email: email, status: 'invalid'});
   badge.reserveAndNotify({
     email: email,
+    issuedBy: issuedBy,
     evidenceFiles: evidenceFiles
   }, function (err, claimCode) {
     if (err) return callback(err);
@@ -281,6 +285,7 @@ function reserveAndNotify(badge, evidenceFiles, email, callback) {
 
 exports.issueOneWithEvidence = function issueOneWithEvidence(req, res, next) {
   const badge = req.badge;
+  const issuedBy = req.session.user;
   var email = req.body.email.trim();
   var files = req.files.evidence;
 
@@ -290,7 +295,7 @@ exports.issueOneWithEvidence = function issueOneWithEvidence(req, res, next) {
   } else
     files = [];
 
-  reserveAndNotify(badge, files, email, function(err, result) {
+  reserveAndNotify(badge, files, email, issuedBy, function(err, result) {
     if (err) return next(err);
     req.flash('results', [result]);
     return res.redirect(303, 'back');
@@ -299,16 +304,25 @@ exports.issueOneWithEvidence = function issueOneWithEvidence(req, res, next) {
 
 exports.issueMany = function issueMany(req, res, next) {
   const badge = req.badge;
+  const issuedBy = req.session.user;
   const post = req.body;
   const emails = post.emails
     .trim()
     .split('\n')
     .map(util.method('trim'));
-  const reserveEmail = reserveAndNotify.bind(null, badge, null);
-  // We're doing this in series rather than parallel to avoid a
-  // mongoose versioning error. For more information, see:
-  // http://tgriff3.com/post/44230656391/versioning-in-mongoose
-  async.mapSeries(emails, reserveEmail, function (err, results) {
+
+  function addTask(email, callback) {
+    new Work({
+      type: 'issue-badge',
+      data: {
+        badge: badge.id,
+        email: email,
+        issuedBy: issuedBy,
+      }
+    }).save(callback);
+  }
+
+  async.map(emails, addTask, function (err, results) {
     if (err) return next(err);
     req.flash('results', results);
     return res.redirect(303, 'back');
@@ -318,7 +332,7 @@ exports.issueMany = function issueMany(req, res, next) {
 exports.findByClaimCode = function findByClaimCode(options) {
   return function (req, res, next) {
     var code = req.body.code;
-    var normalizedCode = code.trim().replace(/ +/g, '-').toLowerCase();
+    var normalizedCode = code.trim().replace(/ +/g, '-');
     Badge.findByClaimCode(normalizedCode, function (err, badge) {
       if (err) return next(err);
       if (!badge)

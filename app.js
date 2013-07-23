@@ -24,7 +24,8 @@ var healthChecker = healthCheck({
   checks: {
     database: healthCheck.checker(require('./models').healthCheck),
     s3: healthCheck.checker(require('./lib/s3').healthCheck),
-    sessionStorage: healthCheck.sessionStorageChecker(sessionStore)
+    sessionStorage: healthCheck.sessionStorageChecker(sessionStore),
+    webhooks: healthCheck.checker(require('./lib/webhooks').healthCheck)
   }
 });
 var templateEnv = template.buildEnvironment({
@@ -53,6 +54,8 @@ app.configure(function () {
   ])}));
   app.use(middleware.cors({whitelist: routes.whitelists.CORS}));
   app.use(middleware.noCache({whitelist: routes.whitelists.NO_CACHE}));
+  app.use(middleware.strictTransport());
+  app.use(middleware.noFrame());
 
   app.use(app.router);
 

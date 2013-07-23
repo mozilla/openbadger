@@ -475,13 +475,13 @@ test.applyFixtures(badgeFixtures, function(fx) {
 
   test('api can be used to test webhook success', function(t) {
     t.plan(7);
-    webhooks.webhookUrl = 'http://mywebhook/blah';
+    webhooks.webhookUrl = 'http://mywebhook/blah/';
     webhooks.jwtSecret = 'somekindasecret';
     sinon.stub(webhooks.request, 'post', function(options, cb) {
       var auth = jwt.decode(options.json.auth, 'somekindasecret');
       t.same(auth.prn, 'test@test.com');
       t.ok(auth.exp > Date.now());
-      t.same(options.url, 'http://mywebhook/blah');
+      t.same(options.url, 'http://mywebhook/blah/claim');
       t.same(options.json.email, "test@test.com");
       t.same(options.json.claimCode, "TESTING");
       t.equal(options.json.isTesting, true);

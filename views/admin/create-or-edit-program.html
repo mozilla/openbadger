@@ -15,6 +15,28 @@
       New Program
     {% endif %}
   </legend>
+
+  {% if issuers %}
+    <div>
+      <label for="issuer">Issuing Organization</label>
+
+      <select id="issuer" name="issuerId">
+        {% for issuer in issuers %}
+        <option
+           value="{{ issuer.id }}"
+           {% if issuer.id == program.issuer %}
+           selected
+           {% endif %}>
+
+          {{ issuer.name|e }}
+        </option>
+        {% endfor %}
+      </select>
+      <hr>
+    </div>
+  {% endif %}
+
+
   <div>
     <label for="name">Name</label>
     <input
