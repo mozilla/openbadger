@@ -97,21 +97,9 @@ exports.badges = function badges(req, res) {
     log.error(err);
     return res.send(500, { status: 'error', error: err });
   }
-
-  function sendResults(filteredBadges) {
-    filteredBadges.forEach(function (badge) {
-      if (badge.program && typeof(badge.program) == "object")
-        badge.program = badge.populated('program');
-
-      result.badges[badge.shortname] = normalizeBadge(badge);
-    });
-
-    return res.send(200, result);
-  }
-
   const result = { status: 'ok', badges : {} };
   const searchTerm = req.query.search;
-  const propertiesToMatch = ['name', 'description', 'program.name', 'program.issuer.name'];
+  const propertiesToMatch = ['name'];
   Badge.find(function (err, badges) {
     if (err) return handleError(err);
 
@@ -120,20 +108,15 @@ exports.badges = function badges(req, res) {
     });
 
     if (searchTerm) {
-      Badge.populate(filteredBadges, { path: 'program' }, function (err, filteredBadges) {
-        if (err) return handleError(err);
-        Program.populate(filteredBadges, { path: 'program.issuer', model: Issuer }, function (err, filteredBadges) {
-          if (err) return handleError(err);
+      const searchFn = util.makeSearch(propertiesToMatch);
+      filteredBadges = filteredBadges.filter(searchFn(searchTerm));
+    }
 
-          const searchFn = util.makeSearch(propertiesToMatch);
-          filteredBadges = filteredBadges.filter(searchFn(searchTerm));
-          sendResults(filteredBadges);
-        });
-      });
-    }
-    else {
-      sendResults(filteredBadges);
-    }
+    filteredBadges.forEach(function (badge) {
+      result.badges[badge.shortname] = normalizeBadge(badge);
+    });
+
+    return res.send(200, result);
   });
 };
 
@@ -680,16 +663,9 @@ function createFilterFn(query) {
           !_.contains(activityTypes, query.activity))
         return cb(false);
 
-      if (query.search) {
-        if (!(new RegExp(query.search, 'i')).test(program.name))
-        {
-          const badgePropertiesToMatch = ['name', 'description'];
-          const badgeSearchFn = util.makeSearch(badgePropertiesToMatch);
-          if (!badges.some(badgeSearchFn(query.search))) {
-            return cb(false);
-          }
-        }
-      }
+      if (query.search &&
+          !(new RegExp(query.search, 'i')).test(program.name))
+        return cb(false);
 
       return cb(true);
     });
