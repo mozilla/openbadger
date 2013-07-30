@@ -110,7 +110,7 @@ exports.badges = function badges(req, res) {
       query = {_id : { '$in' : badgeIds }};
     }
 
-    Badge.find(query, function (err, badges) {
+    Badge.find(query, '-image', function (err, badges) {
       badges.forEach(function (badge) {
         if (badge.program && typeof(badge.program) == "object")
           badge.program = badge.populated('program');
@@ -728,6 +728,7 @@ function createFilterFn(query) {
 };
 
 exports.programs = function programs(req, res) {
+  var startTime = new Date().getTime();
   const filterProgram = createFilterFn(req.query);
 
   function sendError(err, msg) {
@@ -744,6 +745,7 @@ exports.programs = function programs(req, res) {
         return sendError(err, "There was an error retrieving the list of programs");
 
       async.filter(programs, filterProgram, function (programs) {
+        console.log(new Date().getTime() - startTime);
         return res.json(200, {
           status: 'ok',
           programs: programs.map(function (program) {
