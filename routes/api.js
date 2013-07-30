@@ -99,7 +99,7 @@ exports.badges = function badges(req, res) {
   }
 
   function sendResults(filteredBadges) {
-    var query = {};
+    var query = { doNotList : false };
 
     if (filteredBadges) {
       var badgeIds = [];
@@ -107,7 +107,7 @@ exports.badges = function badges(req, res) {
         badgeIds.push(badge._id);
       });
 
-      query = {_id : { '$in' : badgeIds }};
+      query['_id'] = { '$in' : badgeIds };
     }
 
     Badge.find(query, '-image', function (err, badges) {
@@ -131,7 +131,7 @@ exports.badges = function badges(req, res) {
 
   if (searchTerm || category || ageGroup || badgeType || activityType) {
     const propertiesToMatch = ['name', 'description', 'program.name', 'program.issuer.name'];
-    query = {}
+    var query = { doNotList : false };
 
     if (category) query['categories'] = { '$in' : [category] };
     if (ageGroup) query['ageRange'] = { '$in' : [ageGroup] };
