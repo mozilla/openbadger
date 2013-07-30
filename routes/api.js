@@ -97,27 +97,75 @@ exports.badges = function badges(req, res) {
     log.error(err);
     return res.send(500, { status: 'error', error: err });
   }
-  const result = { status: 'ok', badges : {} };
-  const searchTerm = req.query.search;
-  const propertiesToMatch = ['name'];
-  Badge.find(function (err, badges) {
-    if (err) return handleError(err);
 
-    var filteredBadges = badges.filter(function (badge) {
-      return !badge.doNotList;
-    });
+  function sendResults(filteredBadges) {
+    var query = {};
 
-    if (searchTerm) {
-      const searchFn = util.makeSearch(propertiesToMatch);
-      filteredBadges = filteredBadges.filter(searchFn(searchTerm));
+    if (filteredBadges) {
+      var badgeIds = [];
+      filteredBadges.forEach(function (badge) {
+        badgeIds.push(badge._id);
+      });
+
+      query = {_id : { '$in' : badgeIds }};
     }
 
-    filteredBadges.forEach(function (badge) {
-      result.badges[badge.shortname] = normalizeBadge(badge);
-    });
+    Badge.find(query, function (err, badges) {
+      badges.forEach(function (badge) {
+        if (badge.program && typeof(badge.program) == "object")
+          badge.program = badge.populated('program');
 
-    return res.send(200, result);
-  });
+        result.badges[badge.shortname] = normalizeBadge(badge);
+      });
+
+      return res.send(200, result);
+    });
+  }
+
+  const result = { status: 'ok', badges : {} };
+  const searchTerm = req.query.search,
+        category = req.query.category,
+        ageGroup = req.query.ageGroup,
+        badgeType = req.query.badgeType,
+        activityType = req.query.activityType;
+
+  if (searchTerm || category || ageGroup || badgeType || activityType) {
+    const propertiesToMatch = ['name', 'description', 'program.name', 'program.issuer.name'];
+    query = {}
+
+    if (category) query['categories'] = { '$in' : [category] };
+    if (ageGroup) query['ageRange'] = { '$in' : [ageGroup] };
+    if (badgeType) query['type'] = { '$in' : [badgeType] };
+    if (activityType) query['activityType'] = { '$in' : [activityType] };
+
+    Badge.find(query, 'name description program', function (err, badges) {
+      if (err) return handleError(err);
+
+      var filteredBadges = badges.filter(function (badge) {
+        return !badge.doNotList;
+      });
+
+      if (searchTerm) {
+        Badge.populate(filteredBadges, { path: 'program', select: 'name issuer'}, function (err, filteredBadges) {
+          if (err) return handleError(err);
+          Program.populate(filteredBadges, { path: 'program.issuer', select: 'name', model: Issuer }, function (err, filteredBadges) {
+            if (err) return handleError(err);
+
+            const searchFn = util.makeSearch(propertiesToMatch);
+            filteredBadges = filteredBadges.filter(searchFn(searchTerm));
+            sendResults(filteredBadges);
+          });
+        });
+      }
+      else {
+        sendResults(filteredBadges);
+      }
+    });
+  }
+  else {
+    // if we're not doing any searching, we can be a little more efficient.
+    sendResults();
+  }
 };
 
 exports.badge = function badge(req, res) {
@@ -663,9 +711,16 @@ function createFilterFn(query) {
           !_.contains(activityTypes, query.activity))
         return cb(false);
 
-      if (query.search &&
-          !(new RegExp(query.search, 'i')).test(program.name))
-        return cb(false);
+      if (query.search) {
+        if (!(new RegExp(query.search, 'i')).test(program.name))
+        {
+          const badgePropertiesToMatch = ['name', 'description'];
+          const badgeSearchFn = util.makeSearch(badgePropertiesToMatch);
+          if (!badges.some(badgeSearchFn(query.search))) {
+            return cb(false);
+          }
+        }
+      }
 
       return cb(true);
     });
