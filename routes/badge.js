@@ -308,7 +308,7 @@ exports.issueMany = function issueMany(req, res, next) {
   const post = req.body;
   const emails = post.emails
     .trim()
-    .split('\n')
+    .split(/[,; \n]/)
     .map(util.method('trim'));
 
   function addTask(email, callback) {
