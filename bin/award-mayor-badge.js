@@ -25,6 +25,10 @@ Badge.findOne( { 'shortname' : MAYOR_BADGE_SHORTNAME }, function(err, mayorBadge
     return handleError(err);
   }
 
+  if (mayorBadge == null) {
+    return handleError( { message : "Couldn't find the mayor's badge with shortname " + MAYOR_BADGE_SHORTNAME } );
+  }
+
   Badge.find( { 'shortname' : { '$in' : REQUIRED_BADGES } }, function(err, requiredBadges) {
     if (err) {
       return handleError(err);
