@@ -25,7 +25,7 @@ Badge.findOne( { 'shortname' : MAYOR_BADGE_SHORTNAME }, function(err, mayorBadge
     return handleError(err);
   }
 
-  if (mayorBadge == null) {
+  if (mayorBadge === null) {
     return handleError( { message : "Couldn't find the mayor's badge with shortname " + MAYOR_BADGE_SHORTNAME } );
   }
 
@@ -53,7 +53,7 @@ Badge.findOne( { 'shortname' : MAYOR_BADGE_SHORTNAME }, function(err, mayorBadge
                 return handleError(err);
               }
 
-              if (instance != null) {
+              if (instance !== undefined) {
                 console.log("Awarded mayor's badge to " + email);
               }
 
