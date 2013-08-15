@@ -99,42 +99,73 @@ exports.badges = function badges(req, res) {
   }
 
   function sendResults(filteredBadges) {
-    filteredBadges.forEach(function (badge) {
-      if (badge.program && typeof(badge.program) == "object")
-        badge.program = badge.populated('program');
+    var query = { doNotList : false };
 
-      result.badges[badge.shortname] = normalizeBadge(badge);
+    if (filteredBadges) {
+      var badgeIds = [];
+      filteredBadges.forEach(function (badge) {
+        badgeIds.push(badge._id);
+      });
+
+      query['_id'] = { '$in' : badgeIds };
+    }
+
+    Badge.find(query, '-image', function (err, badges) {
+      badges.forEach(function (badge) {
+        if (badge.program && typeof(badge.program) == "object")
+          badge.program = badge.populated('program');
+
+        result.badges[badge.shortname] = normalizeBadge(badge);
+      });
+
+      return res.send(200, result);
     });
-
-    return res.send(200, result);
   }
 
   const result = { status: 'ok', badges : {} };
-  const searchTerm = req.query.search;
-  const propertiesToMatch = ['name', 'description', 'program.name', 'program.issuer.name'];
-  Badge.find(function (err, badges) {
-    if (err) return handleError(err);
+  const searchTerm = req.query.search,
+        category = req.query.category,
+        ageGroup = req.query.ageGroup,
+        badgeType = req.query.badgeType,
+        activityType = req.query.activityType;
 
-    var filteredBadges = badges.filter(function (badge) {
-      return !badge.doNotList;
-    });
+  if (searchTerm || category || ageGroup || badgeType || activityType) {
+    const propertiesToMatch = ['name', 'description', 'program.name', 'program.issuer.name'];
+    var query = { doNotList : false };
 
-    if (searchTerm) {
-      Badge.populate(filteredBadges, { path: 'program' }, function (err, filteredBadges) {
-        if (err) return handleError(err);
-        Program.populate(filteredBadges, { path: 'program.issuer', model: Issuer }, function (err, filteredBadges) {
-          if (err) return handleError(err);
+    if (category) query['categories'] = { '$in' : [category] };
+    if (ageGroup) query['ageRange'] = { '$in' : [ageGroup] };
+    if (badgeType) query['type'] = { '$in' : [badgeType] };
+    if (activityType) query['activityType'] = { '$in' : [activityType] };
 
-          const searchFn = util.makeSearch(propertiesToMatch);
-          filteredBadges = filteredBadges.filter(searchFn(searchTerm));
-          sendResults(filteredBadges);
-        });
+    Badge.find(query, 'name description program', function (err, badges) {
+      if (err) return handleError(err);
+
+      var filteredBadges = badges.filter(function (badge) {
+        return !badge.doNotList;
       });
-    }
-    else {
-      sendResults(filteredBadges);
-    }
-  });
+
+      if (searchTerm) {
+        Badge.populate(filteredBadges, { path: 'program', select: 'name issuer'}, function (err, filteredBadges) {
+          if (err) return handleError(err);
+          Program.populate(filteredBadges, { path: 'program.issuer', select: 'name', model: Issuer }, function (err, filteredBadges) {
+            if (err) return handleError(err);
+
+            const searchFn = util.makeSearch(propertiesToMatch);
+            filteredBadges = filteredBadges.filter(searchFn(searchTerm));
+            sendResults(filteredBadges);
+          });
+        });
+      }
+      else {
+        sendResults(filteredBadges);
+      }
+    });
+  }
+  else {
+    // if we're not doing any searching, we can be a little more efficient.
+    sendResults();
+  }
 };
 
 exports.badge = function badge(req, res) {
@@ -697,6 +728,7 @@ function createFilterFn(query) {
 };
 
 exports.programs = function programs(req, res) {
+  var startTime = new Date().getTime();
   const filterProgram = createFilterFn(req.query);
 
   function sendError(err, msg) {
@@ -713,6 +745,7 @@ exports.programs = function programs(req, res) {
         return sendError(err, "There was an error retrieving the list of programs");
 
       async.filter(programs, filterProgram, function (programs) {
+        console.log(new Date().getTime() - startTime);
         return res.json(200, {
           status: 'ok',
           programs: programs.map(function (program) {

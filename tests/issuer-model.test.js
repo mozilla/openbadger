@@ -105,29 +105,37 @@ test.applyFixtures({
   });
 
   test('Issuer#hasAccess', function (t) {
-    const issuer = new Issuer({
-      accessList: [
-        {email: 'one@example.org'},
-        {email: 'two@example.org'},
-      ]
+    env.temp({
+      admins: []
+    }, function (reset) {
+      const issuer = new Issuer({
+        accessList: [
+          {email: 'one@example.org'},
+          {email: 'two@example.org'},
+        ]
+      });
+      t.same(issuer.hasAccess('one@example.org'), true);
+      t.same(issuer.hasAccess('two@example.org'), true);
+      t.same(issuer.hasAccess('three@example.org'), false);
+      t.end();
     });
-    t.same(issuer.hasAccess('one@example.org'), true);
-    t.same(issuer.hasAccess('two@example.org'), true);
-    t.same(issuer.hasAccess('three@example.org'), false);
-    t.end();
   });
 
   test('Issuer.findByAccess', function (t) {
-    t.plan(3);
-    Issuer.findByAccess('one@example.org', function (err, results) {
-      t.same(fixtures['issuer1'].name, results[0].name);
-    });
-    Issuer.findByAccess('two@example.org', function (err, results) {
-      t.same(fixtures['issuer2'].name, results[0].name);
-    });
-    Issuer.findByAccess('both@example.org', function (err, results) {
-      const names = results.map(function (o) { return o.name }).sort();
-      t.same(names, ['Issuer One', 'Issuer Two']);
+    env.temp({
+      admins: []
+    }, function (reset) {
+      t.plan(3);
+      Issuer.findByAccess('one@example.org', function (err, results) {
+        t.same(fixtures['issuer1'].name, results[0].name);
+      });
+      Issuer.findByAccess('two@example.org', function (err, results) {
+        t.same(fixtures['issuer2'].name, results[0].name);
+      });
+      Issuer.findByAccess('both@example.org', function (err, results) {
+        const names = results.map(function (o) { return o.name }).sort();
+        t.same(names, ['Issuer One', 'Issuer Two']);
+      });
     });
   });
 

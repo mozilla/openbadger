@@ -72,12 +72,16 @@ IssuerSchema.pre('validate', function defaultShortname(next) {
 });
 
 Issuer.findByAccess = function findByAccess(email, callback) {
+  if (env.isAdmin(email)) {
+    return Issuer.find({}, callback);
+  }
+
   const query = {accessList: {'$elemMatch': {email: email }}};
   return Issuer.find(query, callback);
 };
 
 Issuer.prototype.hasAccess = function hasAccess(email) {
-  return this.accessList.some(function (acl) {
+  return env.isAdmin(email) || this.accessList.some(function (acl) {
     return acl.email === email;
   });
 };
