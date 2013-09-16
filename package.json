@@ -26,7 +26,7 @@
     "underscore": "~1.4.4",
     "connect-memcached": "0.0.3",
     "nunjucks": "~0.1.8a",
-    "newrelic": "~0.9.19",
+    "newrelic": "~0.10.3",
     "dataurl": "~0.1.0",
     "bunyan": "~0.21.3",
     "gelf-stream": "~0.2.2",
