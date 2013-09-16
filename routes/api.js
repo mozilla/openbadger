@@ -110,7 +110,7 @@ exports.badges = function badges(req, res) {
       query['_id'] = { '$in' : badgeIds };
     }
 
-    Badge.find(query, '-image', function (err, badges) {
+    Badge.find(query, '-image -claimCodes', function (err, badges) {
       badges.forEach(function (badge) {
         if (badge.program && typeof(badge.program) == "object")
           badge.program = badge.populated('program');
