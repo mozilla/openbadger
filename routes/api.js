@@ -728,7 +728,6 @@ function createFilterFn(query) {
 };
 
 exports.programs = function programs(req, res) {
-  var startTime = new Date().getTime();
   const filterProgram = createFilterFn(req.query);
 
   function sendError(err, msg) {
@@ -745,7 +744,6 @@ exports.programs = function programs(req, res) {
         return sendError(err, "There was an error retrieving the list of programs");
 
       async.filter(programs, filterProgram, function (programs) {
-        console.log(new Date().getTime() - startTime);
         return res.json(200, {
           status: 'ok',
           programs: programs.map(function (program) {

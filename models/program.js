@@ -99,7 +99,7 @@ Program.prototype.absoluteUrl = function absoluteUrl(field) {
 };
 
 Program.prototype.findBadges = function findBadges(callback) {
-  Badge.find({ program: this.id }, callback);
+  Badge.find({ program: this.id }, '-image -claimCodes', callback);
 };
 
 
