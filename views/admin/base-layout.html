@@ -39,6 +39,9 @@
                   <li {{ page | activize('new-badge') }}>
                     <a href="/admin/badge">New Badge</a>
                   </li>
+                  <li {{ page | activize('issue-badge') }}>
+                    <a href="/issuer">Issue Badges</a>
+                  </li>
                   {% endif %}
                   {% if user %}
                   <li class="">
