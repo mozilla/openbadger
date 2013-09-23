@@ -1,0 +1,66 @@
+{% extends "public/layout.html" %}
+{% block head %}
+  <link rel="stylesheet" href="/stylesheets/criteria.css">
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="span7">
+      <h2>Chicago Summer of Learning Badges</h2>
+    </div>
+    <div class="span10">
+      <p>
+        Badges are digital records of skills, achievements and participation.
+      </p>
+      {% if not user %}
+<h1>
+  <a href="#" class="persona-button dark js-persona-login">
+    <span>Sign in with your Email</span>
+  </a>
+</h1>
+
+<form method="post" action="/login" class="js-persona-form">
+  <input type="hidden" name="assertion" value="" class="js-persona-input">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+</form>
+      {% endif %}
+    </div>
+  </div>
+
+{% if badges %}
+<table class="badge-list">
+<tbody>
+<tr>
+<th class="imag"></th>
+<th class="orga">Organization</th>
+<th class="prog">Program</th>
+<th class="badg">Badge</th>
+<th class="desc">Description</th>
+</tr>
+
+{% for badge in badges %}
+  <tr>
+    <td class="imag">
+      <img class="img badge" src="{{ badge.relativeUrl('image')}}">
+    </td>
+    <td class="orga">
+      <p>{{ badge.program.issuer.name | e}}</p>
+    </td>
+    <td class="prog">
+      <p>{{ badge.program.name | e}}</p>
+    </td>
+    <td class="badg">
+      <p><a href="/issue/{{ badge.id | e}}">{{ badge.name }}</a></p>
+    </td>
+    <td class="desc">
+      {% if badge.criteria.content %}
+        {{ badge.criteria.content | markdown }}
+      {% else %}
+        {{ badge.description | stupidSafe }}
+      {% endif %}
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+{% endblock %}

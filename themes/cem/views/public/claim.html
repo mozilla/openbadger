@@ -1,0 +1,30 @@
+{% extends "public/layout.html" %}
+{% block head %}
+  <link rel="stylesheet" href="/stylesheets/criteria.css">
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="span7">
+      <h2>Mozilla Webmaker Badges</h2>
+    </div>
+  </div>
+  <div class="media card">
+    <div class="bd">
+      <hgroup>
+        <h3>What's your claim code?</h3>
+      </hgroup>
+      <p class="notice">Spaces, dashes and lettercase don't matter, just type in the words</p>
+
+      <form method="post" class="claim-form" action="">
+        {% if missing %}
+          <p><strong class="error">Sorry, could not find a badge with that code.</strong></p>
+        {% endif %}
+
+        <input id="name" type="hidden" name="csrf" value="{{ csrf }}">
+        <input tabindex="1" type="text" name="code" placeholder="Enter your claim code" class="input" value="{{ code | default('') | e }}">
+        <input tabindex="2" type="submit" value="Get your badge!" class="button">
+      </form>
+
+    </div>
+  </div>
+{% endblock %}
