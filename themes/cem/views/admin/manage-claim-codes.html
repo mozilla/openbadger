@@ -10,8 +10,11 @@
   <!-- Provide your own codes -->
   <div class="tab-pane active" id="provide">
     <form method="post" action="?">
+      <span class="help-block">
+        One code per line, please. Your code should not contain any
+        spaces and should be unique among all badges.
+      </span>
       <textarea rows="5" width="100" placeholder="{{ exampleCode }}" name="codes"></textarea>
-      <span class="help-block">One code per line, please.</span>
       <p>
         <label class="checkbox">Multi-use
           <input type="checkbox" name="multi">
@@ -24,6 +27,26 @@
       <div class="form-actions">
         <input type="hidden" name="csrf" value="{{ csrf }}">
         <input type="submit" value="Add codes" class="btn btn-primary">
+      </div>
+    </form>
+  </div>
+  <!-- Auto-generate codes -->
+  <div class="tab-pane" id="generate">
+    <form method="post" action="?">
+      <label>Number of codes</label>
+      <input type="number" name="quantity" value="5" required>
+      <label>Batch name</label>
+      <input type="text" name="batchName">
+      <span class="help-block">
+        If you give a name to this batch of claim codes, you will be
+        able to easily print out all the claim codes in the batch,
+        track statistics on them, and more. A useful batch name might be
+        the name of the event where you hand out the claim codes, e.g.
+        "World Environment Day event".
+      </span>
+      <div class="form-actions">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="submit" value="Generate codes" class="btn btn-primary">
       </div>
     </form>
   </div>
