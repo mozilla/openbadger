@@ -1,0 +1,29 @@
+{% extends "public/layout.html" %}
+{% block head %}
+  <link rel="stylesheet" href="/stylesheets/criteria.css">
+{% endblock %}
+{% block body %}
+  <div class="row">
+    <div class="span7">
+      <h2>Mozilla Webmaker Badges</h2>
+    </div>
+  </div>
+  <div class="media card">
+    <img class="img badge" src="{{ badge.relativeUrl('image')}}">
+    <div class="bd">
+      <hgroup>
+        <h1>{{ badge.name }}</h1>
+      </hgroup>
+      <dl class="dl-horizontal narrow-dt">
+        <dt>Description:</dt>
+        <dd>
+          {% if badge.criteria.content %}
+            {{ badge.criteria.content | markdown }}
+          {% else %}
+            {{ badge.description | stupidSafe }}
+          {% endif %}
+        </dd>
+      </dl>
+    </div>
+  </div>
+{% endblock %}
