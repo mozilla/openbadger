@@ -29,15 +29,15 @@
     "dataurl": "~0.1.0",
     "bunyan": "~0.21.3",
     "gelf-stream": "~0.2.2",
-    "knox": "~0.8.3"
+    "knox": "~0.8.3",
+    "mime": "~1.2.5",
+    "colors": "0.6.0"
   },
   "devDependencies": {
     "tap": "~0.4.1",
-    "colors": "0.6.0",
     "sinon": "1.7.2",
     "supertest": "0.6.0",
-    "prompt": "0.2.9",
-    "mime": "~1.2.5"
+    "prompt": "0.2.9"
   },
   "engines": {
     "node": "~0.8.0",
