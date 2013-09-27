@@ -15,3 +15,5 @@ config.env
 public/.DS_Store
 /s3-fake-storage
 /surgery
+*.env
+*#*
