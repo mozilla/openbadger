@@ -9,7 +9,7 @@
     <!-- Le styles -->
     <link href="/stylesheets/bootstrap.css" rel="stylesheet">
     <link href="/stylesheets/base.css" rel="stylesheet">
-    <link href="/stylesheets/csol.css" rel="stylesheet">
+    <link href="/stylesheets/cem.css" rel="stylesheet">
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -21,54 +21,60 @@
     {% block header %}{% endblock %}
   </head>
   <body class="{% block page%}{% endblock %}">
+    <div id="header">
+      <div class="container">
+        <h1>Connected Educators</h1>
+        <p>Helping educators thrive in a connected world</p>
+      </div>
+    </div>
     <div class="wrapper primary">
       <div class="inner-wrapper">
-        <div class="navbar navbar-static-top">
-          <div class="navbar-inner">
-            <div class="container">
-              <a class="brand" href="{{ access | userHome }}">
-                OpenBadger
-              </a>
-              <div class="nav-wrap">
-                <ul class="nav">
-                  <li {{ page | activize('home') }}>
-                    <a href="{{ access | userHome }}">Home</a></li>
-                  {% if access == "super" %}
-                  <li {{ page | activize('new-issuer') }}>
-                    <a href="/admin/issuer">New Issuer</a>
-                  </li>
-                  <li {{ page | activize('new-badge') }}>
-                    <a href="/admin/badge">New Badge</a>
-                  </li>
-                  <li {{ page | activize('new-behavior') }}>
-                    <a href="/admin/behavior">New Behavior</a>
-                  </li>
-                  <li class="">
-                    <a href="" class="js-logout-link">Logout</a>
-                    <form method="post" action="/logout" class="logout-form js-logout-form">
-                      <input type="hidden" name="csrf" value="{{ csrf }}">
-                    </form>
-                  </li>
-                  {% endif %}
-                  {% if user %}
-                  <li class="">
-                    <a href="" class="js-logout-link">Logout</a>
-                    <form method="post" action="/logout" class="logout-form js-logout-form">
-                      <input type="hidden" name="csrf" value="{{ csrf }}">
-                    </form>
-                  </li>
-                  {% else %}
-                  {% endif %}
-                </ul>
-              </div><!--/.nav-collapse -->
-            </div>
+        <div id="top-panel">
+          <div class="container">
+            <nav class="top-bar">
+              <ul class="nav top-bar-section left">
+                <li {{ page | activize('home') }}>
+                  <a href="{{ access | userHome }}">Home</a></li>
+                {% if access == "super" %}
+                <li {{ page | activize('new-issuer') }}>
+                  <a href="/admin/issuer">New Issuer</a>
+                </li>
+                <li {{ page | activize('new-badge') }}>
+                  <a href="/admin/badge">New Badge</a>
+                </li>
+                {#
+                <li {{ page | activize('new-behavior') }}>
+                  <a href="/admin/behavior">New Behavior</a>
+                </li>
+                <li class="">
+                  <a href="" class="js-logout-link">Log Out</a>
+                  <form method="post" action="/logout" class="logout-form js-logout-form">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                  </form>
+                </li>
+                #}
+                {% endif %}
+                {% if user %}
+                <li class="">
+                  <a href="" class="js-logout-link">Log Out</a>
+                  <form method="post" action="/logout" class="logout-form js-logout-form">
+                    <input type="hidden" name="csrf" value="{{ csrf }}">
+                  </form>
+                </li>
+                {% else %}
+                {% endif %}
+              </ul>
+            </nav>
+            <h2>Connected Educators Badges</h2>
           </div>
         </div>
         <div id="main" class="container">
           {% block body %}{% endblock %}
+          {% block main %}{% endblock %}
         </div> <!-- /container -->
       </div>
     </div>
+    {#
     <div class="wrapper secondary footer">
       <div class="inner-wrapper">
         <div class="container">
@@ -86,9 +92,6 @@
           </div>
           <div class="lower clearfix">
             <p class="pull-left">
-              More than 100 organizations across the city have joined forces to integrate learning into summer activities for youth of all ages in every Chicago neighborhood.
-              <br><br>
-              With your help, we'll launch the largest citywide summer learning campaign in the nation.
             </p>
             <ul class="pull-right">
               <li><a class="logo chi" href="#">City of Chicago</a></li>
@@ -99,6 +102,7 @@
         </div>
       </div>
     </div>
+    #}
     <script src="/js/bootstrap.js"></script>
     <script src="/js/common.js"></script>
     {% block footer %}

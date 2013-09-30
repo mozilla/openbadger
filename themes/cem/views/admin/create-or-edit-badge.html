@@ -36,7 +36,7 @@
     </div>
 
     <div>
-      {{ badge | imageForBadge }}
+      {% if editing %}{{ badge | imageForBadge }}{% endif %}
       <label for="name">Name</label>
       <input
           id="name"
@@ -110,7 +110,7 @@
     </div>
 
     <div>
-      <label for="image">New Image</label>
+      <label for="image">{% if editing %}New {% endif %}Image</label>
       <input
           type="file"
           name="image"
@@ -124,7 +124,9 @@
     </div>
 
     <div class="form-actions">
-      <button id="update-badge" type="submit" class="btn btn-primary">Update</button>
+      <button id="update-badge" type="submit" class="btn btn-primary">
+        {%- if editing %}Update{% else %}Save{% endif -%}
+      </button>
     </div>
   </form>
 {% endblock %}
