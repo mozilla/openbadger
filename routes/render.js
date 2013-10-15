@@ -3,6 +3,7 @@ const Program = require('../models/program');
 const Badge = require('../models/badge');
 const phrases = require('../lib/phrases');
 const logger = require('../lib/logger');
+const async = require('async');
 
 /*
  * Administrative Pages
@@ -115,21 +116,30 @@ exports.newBehaviorForm = function (req, res) {
 };
 
 exports.badgeIndex = function (req, res) {
-  return res.render('admin/badge-index.html', {
-    page: 'home',
+  // get the count of issued badges for each badge
+  async.map(req.badges,
+            function(badge, callback) {
+              badge.issuedBadgesCount(function(err, count) {
+                badge.issuedCount = count;
+                callback(err, badge);
+              });
+            }, function (err, badges) {
+              return res.render('admin/badge-index.html', {
+                page: 'home',
 
-    limit: req.limit,
-    pageNumber: req.page,
-    search: req.query.search,
+                limit: req.limit,
+                pageNumber: req.page,
+                search: req.query.search,
 
-    issuers: req.issuers,
-    user: req.session.user,
-    access: req.session.access,
-    csrf: req.session._csrf,
-    badges: req.badges,
-    undoRecords: req.undoRecords,
-    behaviors: req.behaviors
-  });
+                issuers: req.issuers,
+                user: req.session.user,
+                access: req.session.access,
+                csrf: req.session._csrf,
+                badges: req.badges,
+                undoRecords: req.undoRecords,
+                behaviors: req.behaviors
+              });
+            });
 };
 
 exports.showBadge = function (req, res) {
