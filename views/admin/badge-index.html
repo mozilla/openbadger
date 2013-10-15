@@ -27,6 +27,7 @@
 <th class="orga">Organization</th>
 <th class="prog">Program</th>
 <th class="badg">Badge</th>
+<th class="count">Claimed</th>
 <th class="oper all"></th>
 </tr>
 
@@ -43,6 +44,9 @@
     </td>
     <td class="badg">
       <a href="/admin/badge/{{ badge.shortname | e}}">{{ badge.name }}</a>
+    </td>
+    <td class="count">
+      {{badge.issuedCount}}
     </td>
     <td class="oper all">
       <div class="btn-group">

@@ -76,6 +76,7 @@ const ClaimCodeSchema = new Schema({
   },
 });
 
+
 const BadgeSchema = new Schema({
   _id: {
     type: String,
@@ -171,6 +172,13 @@ const BadgeSchema = new Schema({
     type: [String]
   },
 });
+
+BadgeSchema.methods.issuedBadgesCount = function(callback) {
+  BadgeInstance.count({badge:this._id}, function(err, count) {
+    callback(err, count);
+  });
+};
+
 const Badge = Deletable(db.model('Badge', BadgeSchema));
 
 Badge.KID = KID;
