@@ -1,0 +1,117 @@
+{% extends "admin/base.html" %}
+{% block main %}
+<h1>{{ badge.name }}</h1>
+<legend>Add new codes</legend>
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#provide" data-toggle="tab">Manual Entry</a></li>
+</ul>
+<div class="tab-content">
+
+  <!-- Provide your own codes -->
+  <div class="tab-pane active" id="provide">
+    <form method="post" action="?">
+      <span class="help-block">
+        One code per line, please. Your code should not contain any
+        spaces and should be unique among all badges.
+      </span>
+      <textarea rows="5" width="100" placeholder="{{ exampleCode }}" name="codes"></textarea>
+      <p>
+        <label class="checkbox">Multi-use
+          <input type="checkbox" name="multi">
+        </label>
+        <span class="help-block">
+          Multi-use codes can be claimed many times. If this box isn't
+          checked, each code can only be used once.
+        </span>
+      </p>
+      <div class="form-actions">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="submit" value="Add codes" class="btn btn-primary">
+      </div>
+    </form>
+  </div>
+  <!-- Auto-generate codes -->
+  <div class="tab-pane" id="generate">
+    <form method="post" action="?">
+      <label>Number of codes</label>
+      <input type="number" name="quantity" value="5" required>
+      <label>Batch name</label>
+      <input type="text" name="batchName">
+      <span class="help-block">
+        If you give a name to this batch of claim codes, you will be
+        able to easily print out all the claim codes in the batch,
+        track statistics on them, and more. A useful batch name might be
+        the name of the event where you hand out the claim codes, e.g.
+        "World Environment Day event".
+      </span>
+      <div class="form-actions">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <input type="submit" value="Generate codes" class="btn btn-primary">
+      </div>
+    </form>
+  </div>
+
+</div>
+
+{% if codes.length %}
+<h2>Existing Codes</h2>
+  <table class="table table-hover table-bordered">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Batch Name</th>
+        <th>Claimed By</th>
+        <th>Reserved For</th>
+        <th>Actions</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% for claim in codes %}
+      <tr>
+        <td>{{ claim.code }}</td>
+        <td>
+          {% if claim.batchName %}
+          {{ claim.batchName }}
+          {% else %}
+          <em>none</em>
+          {% endif %}
+        </td>
+        <td>
+          {% if claim.multi %}
+            *multi*
+          {% else %}
+            {{ claim.claimedBy | default('<em>open</em>') }}
+          {% endif %}
+        </td>
+        <td>
+          {% if claim.reservedFor %}
+          {{claim.reservedFor}}
+          {% else %}
+          anyone
+          {% endif %}
+          {% if claim.evidence.length %}
+          <p class="muted">{{ claim.evidence.length }} evidence item(s)</p>
+          {% endif %}
+        </td>
+        <td>
+          <form method="post" action="{{ claim.code }}" class="claim-action js-claim-action">
+            <input type="hidden" name="csrf" value="{{ csrf }}">
+            <input type="hidden" name="_method" value="" class="js-claim-action-method">
+
+            <button class="btn btn-link btn-small" data-method="delete">delete</button>
+            {% if claim.claimedBy %}
+            |
+            <button class="btn btn-link btn-small" data-method="patch">release</button>
+          {% endif %}
+          </form>
+        </td>
+      <tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<script src="/js/claims.js"></script>
+{% endblock %}
