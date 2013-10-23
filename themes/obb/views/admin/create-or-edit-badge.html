@@ -1,0 +1,142 @@
+{% extends "admin/base.html" %}
+
+{% block main %}
+  <form method="post" action="?" enctype="multipart/form-data">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <legend>
+      {% if editing %}
+        Edit Badge: {{ badge.name }}
+      {% else %}
+        New Badge
+      {% endif %}
+    </legend>
+
+    <div>
+      <label for="program">Program</label>
+      <select id="program" name="program">
+        <option>Select a Program</option>
+        {% for issuer in issuers %}
+        <optgroup label="{{issuer.name | e}}">
+          {% for program in issuer.programs %}
+            <option
+               {% if badge.program.id == program.id %}
+                 selected
+               {% endif %}
+               value="{{program.id}}">
+
+               {{program.name | e}}
+            </option>
+          {% endfor %}
+        </optgroup>
+        {% endfor %}
+      </select>
+      <span class="help-block">
+        The program this badge is associated with.
+      </span>
+    </div>
+
+    <div>
+      {% if editing %}{{ badge | imageForBadge }}{% endif %}
+      <label for="name">Name</label>
+      <input
+          id="name"
+          type="text"
+          name="name"
+          value="{{ badge.name | default('') }}"
+          placeholder="My Very Fancy Badge"
+          required>
+      <span class="help-block">
+        This is the name for your badge, it should be descriptive, but
+        also awesome.
+      </span>
+    </div>
+
+    <div>
+      <label for="description">Description</label>
+      <textarea
+          id="description"
+          rows="5"
+          name="description"
+          required>{{ badge.description | default('')}}</textarea>
+      <span class="help-block">
+        <p>The description can be divided into short description and long
+        description, separating the two with an asterix.</p>
+
+        <p>Everything above the asterix is the short description,</p>
+
+        <p>*</p>
+
+        <p>Everything below is the long description.</p>
+      </span>
+    </div>
+
+    <div>
+      <label for="criteria">Criteria</label>
+      <textarea
+          id="criteria"
+          rows="5"
+          name="criteria"
+          required>{{ badge.criteria.content | default('')}}</textarea>
+      <span class="help-block">
+        The criteria text for the badge. This can be markdown, but don't
+        go crazy, okay? Keep it simple. That also means you'll have to escape
+        markup by wrapping it in backticks: <code>`&lt;strong&gt;`</code>
+      </span>
+    </div>
+
+    <div>
+      <label for="tags">Tags</label>
+      <input type="text" name="tags" id="tags" value="{{badge.tags | join(', ') | e}}">
+      <span class="help-block">
+        Tags for the badge. Individual tags should be comma separated.
+      </span>
+    </div>
+
+    <div>
+      <label for="timeToEarn">Time to Earn</label>
+      <select id="timeToEarn" name="timeToEarn">
+        <option value="hours" {{ badge.timeToEarn | selected('hours') }}>hours</option>
+        <option value="days" {{ badge.timeToEarn | selected('days') }}>days</option>
+        <option value="weeks" {{ badge.timeToEarn | selected('weeks') }}>weeks</option>
+        <option value="months" {{ badge.timeToEarn | selected('months') }}>months</option>
+        <option value="years" {{ badge.timeToEarn | selected('years') }}>longer</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="checkbox">
+        <input name="list" type="checkbox" {% if badge.doNotList == false %}checked{% endif %}>
+        List in APIs
+      </label>
+      <span class="help-block">
+        Whether or not this badge should be shown when an API call is
+        made to list all of the badges. In most cases, this should be
+        left checked.
+      </span>
+    </div>
+
+    <div>
+      <label for="image">{% if editing %}New {% endif %}Image</label>
+      <input
+          type="file"
+          name="image"
+          accept="image/png"
+          {% if not editing%} required {% endif %}>
+      <span class="help-block">
+        The image to use for the badge. It should be the greatest image
+        known to man.
+        {% if editing %} Leave blank to keep old image. {% endif %}
+      </span>
+    </div>
+
+    <div class="form-actions">
+      <button id="update-badge" type="submit" class="btn btn-primary">
+        {%- if editing %}Update{% else %}Save{% endif -%}
+      </button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block footer %}
+<script src="/js/admin.js"></script>
+{% endblock %}
