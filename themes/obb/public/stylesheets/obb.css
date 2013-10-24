@@ -1,0 +1,114 @@
+html, body {
+  height: 100%;
+}
+#main {
+  clear: both;
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  margin-bottom: -100px;
+}
+#main #main_footer {
+  height: 100px;
+}
+#footer {
+  clear: both;
+  position: relative;
+  height: 100px;
+}
+body {
+  font-family: 'Open Sans', sans-serif;
+  color: #373737;
+}
+#header {
+  background: #e6e7e8;
+  border-top: solid 2px #FFF;
+  border-bottom: solid 6px #5fc9e5;
+  position: relative;
+  margin-bottom: 1em;
+}
+#footer {
+  position: relative;
+  border-top: solid 6px #5fc9e5;
+  padding: 20px 0;
+  background-color: #000;
+}
+#footer::before, #footer::after {
+  top: -6px;
+}
+#header::before, #header::after,
+#footer::before, #footer::after {
+  content: "";
+  height: 6px;
+  width: 33.33%;
+  position: absolute;
+  left: 33.33%;
+  background: #b1cf37;
+}
+#header::after,
+#footer::after {
+  left: 66.66%;
+  background: #f48123;
+}
+#header::before, #header::after,
+#footer::before, #footer::after {
+  bottom: -6px;
+}
+#header .constrained,
+#footer .constrained {
+  max-width: 950px;
+  padding: 0 25px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+#header h1 {
+  display: block;
+  font-size: 2em;
+  -webkit-margin-before: 0.67em;
+  -webkit-margin-after: 0.67em;
+  -webkit-margin-start: 0px;
+  -webkit-margin-end: 0px;
+  font-weight: bold;
+  margin: 0;
+  padding: 25px 0;
+}
+#header a, #footer a {
+  text-decoration: none;
+  color: #073A5A;
+}
+#home, #footer .footnote a {
+  display: block;
+  width: 300px;
+  height: 80px;
+  background: url("../img/obb-logo.png");
+  text-indent: -100%;
+  overflow: hidden;
+  margin-left: -14px;
+}
+#tabzilla {
+  margin-top: -25px;
+}
+#footer .footnote a {
+  background-position: 0 -80px;
+}
+#footer a {
+  color: inherit;
+}
+#header nav, #footer nav {
+  float: right;
+  margin-top: -45px;
+}
+#footer nav ul {
+  margin: -1em 0 0;
+  padding: 0;
+  list-style: none;
+  line-height: 1em;
+}
+#footer nav li {
+  float: left;
+  margin-left: 1.5em;
+  color:white;
+}
+#footer a {
+  text-decoration: none;
+}
