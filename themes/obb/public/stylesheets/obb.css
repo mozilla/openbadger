@@ -112,3 +112,6 @@ body {
 #footer a {
   text-decoration: none;
 }
+#footer nav ul#menu-footer-menu-2 li {
+  margin-top:1em;
+}
