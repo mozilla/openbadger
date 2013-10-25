@@ -24,7 +24,7 @@ and mongo locally.
 
 ```bash
 export NODE_ENV="development"
-export THEME_DIR="themes/csol"
+export THEME_DIR="themes/obb"
 export OPENBADGER_AWS_FAKE_S3_DIR="s3-fake-storage"
 export OPENBADGER_HOST="localhost"
 export OPENBADGER_PROTOCOL="http"
