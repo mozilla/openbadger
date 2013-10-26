@@ -1,25 +1,22 @@
 html, body {
   height: 100%;
+  font-family: 'Open Sans', sans-serif;
+  color: #373737;
 }
-#main {
-  clear: both;
+#primary {
   min-height: 100%;
   height: auto !important;
-  height: 100%;
-  margin-bottom: -100px;
+  margin-bottom: -150px;
 }
-#main #main_footer {
-  height: 100px;
+#primary .inner-wrapper {
+  padding: 0px 0px 150px 0px;
 }
 #footer {
   clear: both;
   position: relative;
-  height: 100px;
+  overflow: hidden;
 }
-body {
-  font-family: 'Open Sans', sans-serif;
-  color: #373737;
-}
+
 #header {
   background: #e6e7e8;
   border-top: solid 2px #FFF;
@@ -28,7 +25,6 @@ body {
   margin-bottom: 1em;
 }
 #footer {
-  position: relative;
   border-top: solid 6px #5fc9e5;
   padding: 20px 0;
   background-color: #000;
@@ -114,4 +110,8 @@ body {
 }
 #footer nav ul#menu-footer-menu-2 li {
   margin-top:1em;
+}
+nav .top-bar-section,
+nav .top-bar-section li  {
+display:inline-block;
 }
