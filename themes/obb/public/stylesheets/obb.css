@@ -15,8 +15,11 @@ html, body {
   clear: both;
   position: relative;
   overflow: hidden;
+  height: 150px;
 }
-
+#footer > .container {
+  margin-top:20px;
+}
 #header {
   background: #e6e7e8;
   border-top: solid 2px #FFF;
@@ -26,7 +29,7 @@ html, body {
 }
 #footer {
   border-top: solid 6px #5fc9e5;
-  padding: 20px 0;
+  padding: 0 0;
   background-color: #000;
 }
 #footer::before, #footer::after {
