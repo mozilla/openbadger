@@ -40,13 +40,14 @@
   </div>
 
   <div>
-    <label for="url">URL (optional)</label>
+    <label for="url">URL</label>
     <input
        id="url"
        type="url"
        name="url"
        value="{{ issuer.url | default('') }}"
-       placeholder="http://example.org">
+       placeholder="http://example.org"
+       required>
   </div>
 
   <div>
