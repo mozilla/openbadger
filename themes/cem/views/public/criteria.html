@@ -19,6 +19,18 @@
           {% endif %}
         </dd>
       </dl>
+      {% for tag in badge.tags %}
+        <!-- Kind of a hacky way to look for the hours-x tag, but nunjucks doesn't seem to have any
+             regex functionality, and I didn't want to have to put this theme-specific logic anywhere in
+             openbadger itself.  A tag like fakehours-10 or hours-fake would break this, though. -->
+        {% if tag|length > tag|replace("hours-","")|length and break != true %}
+          <dl class="dl-horizontal narrow-dt">
+            <dt>Hours to Complete:</dt>
+            <dd>{{ tag|replace("hours-","") }}</dd>
+          </dl>
+          {% set break = true %}
+        {% endif %}
+      {% endfor %}
     </div>
   </div>
 {% endblock %}
