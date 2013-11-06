@@ -4,6 +4,7 @@ const Badge = require('../models/badge');
 const phrases = require('../lib/phrases');
 const logger = require('../lib/logger');
 const async = require('async');
+const _ = require('underscore');
 
 /*
  * Administrative Pages
@@ -15,7 +16,7 @@ exports.issuerIndex = function (req, res) {
     badges: req.badges,
     user: req.session.user,
     access: req.session.access,
-    csrf: req.session._csrf,
+    csrf: req.session._csrf
   });
 };
 
@@ -123,7 +124,13 @@ exports.badgeIndex = function (req, res) {
                 badge.issuedCount = count;
                 callback(err, badge);
               });
-            }, function (err, badges) {
+            },
+            function (err, badges) {
+              // get the total badge count
+              var badgeCount = _.reduce(req.badges,
+                                        function(memo, badge) {
+                                          return memo + badge.issuedCount;
+                                        }, 0);
               return res.render('admin/badge-index.html', {
                 page: 'home',
 
@@ -136,6 +143,7 @@ exports.badgeIndex = function (req, res) {
                 access: req.session.access,
                 csrf: req.session._csrf,
                 badges: req.badges,
+                badgeCount: badgeCount,
                 undoRecords: req.undoRecords,
                 behaviors: req.behaviors
               });
