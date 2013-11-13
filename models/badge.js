@@ -794,7 +794,7 @@ Badge.getRecommendations = function (opts, callback) {
         activityType: { '$ne': 'offline' },
       };
 
-      const exclude = { image: 0 };
+      const exclude = { image: 0, claimCodes: 0 };
 
       Badge.find(query, exclude)
         .populate('program')
@@ -847,8 +847,6 @@ Badge.getRecommendations = function (opts, callback) {
 
 Badge.prototype.getSimilar = function (email, callback) {
   const defer = global.setImmediate || process.nextTick;
-  const wrap = util.objWrap;
-  const thisShortname = this.shortname;
   const categories = this.categories;
 
   if (typeof email == 'function')
@@ -862,37 +860,26 @@ Badge.prototype.getSimilar = function (email, callback) {
     });
   }
 
-  // This builds up an array of objects that looks something like
-  // this: [{categories: 'science'}, {categories: 'math'}].
-  const query = { '$or': categories.map(wrap('categories')) };
+  var excludedIds = [this._id];
 
-  Badge.find(query, function (err, badges) {
-    if (err) return callback(err);
+  // Get all of the badge instances for the email address that was
+  // passed in and remove any badge classes that the user already has
+  // so we don't recommend them redundant badges.
+  BadgeInstance.find({user: email})
+    .exec(function (err, instances) {
+      if (err) return callback(err);
 
-    badges = badges.filter(function (badge) {
-      return !(badge.shortname == thisShortname);
-    });
+      excludedIds = excludedIds.concat(instances.map(function (inst) {
+        return (inst.badge);
+      }).filter(Boolean));
 
-    if (!email)
-      return callback(null, badges);
-
-    // Get all of the badge instances for the email address that was
-    // passed in and remove any badge classes that the user already has
-    // so we don't recommend them redundant badges.
-    BadgeInstance.find({user: email})
-      .populate('badge')
-      .exec(function (err, instances) {
+      const query = { categories: { '$in': categories }, _id: { '$nin': excludedIds } };
+      const projection = { image: 0, claimCodes: 0 };
+      Badge.find(query, projection, function (err, badges) {
         if (err) return callback(err);
 
-        const earned = instances.map(function (inst) {
-          return (inst.badge && inst.badge.shortname);
-        }).filter(Boolean);
-
-        callback(null, badges.filter(function (badge) {
-          return !(_.contains(earned, badge.shortname));
-        }));
+        callback(null, badges);
       });
-  });
-
+    });
 };
 module.exports = Badge;
