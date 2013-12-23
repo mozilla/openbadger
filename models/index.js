@@ -7,7 +7,7 @@ const mongohq = process.env['MONGOHQ_URL'];
 
 const authOpts = {};
 
-if (!opts)
+if (!opts && !mongohq)
   throw new Error("mongodb environment variables not found");
 
 if (opts.pass){
