@@ -10,11 +10,13 @@ const authOpts = {};
 if (!opts && !mongohq)
   throw new Error("mongodb environment variables not found");
 
-if (opts.pass){
-  authOpts.pass = opts.pass;
-}
-if (opts.user){
-  authOpts.user = opts.user;
+if (opts) {
+  if (opts.pass){
+    authOpts.pass = opts.pass;
+  }
+  if (opts.user){
+    authOpts.user = opts.user;
+  }
 }
 
 if (mongohq) {
