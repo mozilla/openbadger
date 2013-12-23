@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const mongoose = require('mongoose');
 const opts = env.get('mongo');
 const util = require('../lib/util');
+const mongohq = process.env['MONGOHQ_URL'];
 
 const authOpts = {};
 
@@ -15,9 +16,17 @@ if (opts.pass){
 if (opts.user){
   authOpts.user = opts.user;
 }
-const connection = module.exports = Object.create(
-  mongoose.createConnection(opts.host, opts.db, opts.port, authOpts)
-);
+
+if (mongohq) {
+  var connection = module.exports = Object.create(
+    mongoose.createConnection(mongohq)
+  );
+} else {
+  var connection = module.exports = Object.create(
+    mongoose.createConnection(opts.host, opts.db, opts.port, authOpts)
+  );
+};
+
 connection.generateId = generateId;
 connection.healthCheck = function(meta, cb) {
   var Issuer = require('./issuer');
