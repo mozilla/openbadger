@@ -50,6 +50,13 @@ this at `config.env`, do:
 ```bash
 $ source config.env
 ```
+## New Relic
+
+If you're using New Relic, you'll need to include three additional environment variables.
+
+```NEWRELIC_APPNAME=[the app name you defined in New Relic]
+NEWRELIC_LICENSE=[Your license key]
+NEW_RELIC_ENABLED=true```
 
 ## Adding sample data
 
